@@ -8,7 +8,7 @@ set cpoptions&vim
 
 function lsc#Lsc()
 	set cmdheight=10
-	echo s:GetCwd()
+	" echo s:GetCwd()
 	" let g:ch = s:StartImpl('npx typescript-language-server --stdio', s:GetCwd())
 	let g:ch = s:StartImpl('npx vscode-json-languageserver --stdio', s:GetCwd())
 	" echo ch_info(l:ch)
@@ -60,9 +60,9 @@ endfunction
 
 function s:callbackhandler(channel, msg)
 	" let l:buf = bufnr(join(a:cmd), v:true)
-	echo a:channel
-	echo a:msg
-	call ch_log(a:channel)
+	" echo a:channel
+	" echo a:msg
+	" call ch_log(a:channel)
 	call ch_log(a:msg)
 endfunction
 
