@@ -69,10 +69,10 @@ function s:InitializeParams(params, initializationOptions, workspaceFolders)
 endfunction
 
 function s:WorkspaceFolder()
-	let l:workspaceFolder = {
+	" let l:workspaceFolder = {
 		" 'uri'
 		" 'name'
-	}
+	" }
 endfunction
 
 function s:ClientCapabilities()
@@ -139,7 +139,7 @@ function s:WorkspaceSymbolClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['symbolKind'] = {}
-	let l:params['tagSupport']['valueSet'] = []
+	let l:params['symbolKind']['valueSet'] = []
 	let l:params['tagSupport'] = {}
 	let l:params['tagSupport']['valueSet'] = []
 	return l:params
@@ -207,7 +207,7 @@ function s:ShowDocumentClientCapabilities()
 	return l:params
 endfunction
 
-function RegularExpressionsClientCapabilities()
+function s:RegularExpressionsClientCapabilities()
 	let l:params = {}
 	let l:params['engine'] = ""
 	let l:params['version'] = "0.0"
@@ -222,90 +222,83 @@ function s:MarkdownClientCapabilities()
 endfunction
 
 function s:TextDocumentSyncClientCapabilities()
-let l:TextDocumentSyncClientCapabilities = {
-	" 'dynamicRegistration'
-	" 'willSave'
-	" 'willSaveWaitUntil'
-	" 'didSave'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['willSave'] = v:false
+	let l:params['willSaveWaitUntil'] = v:false
+	let l:params['didSave'] = v:false
+	return l:params
 endfunction
 
 function s:CompletionClientCapabilities()
-let l:CompletionClientCapabilities = {
-	" 'dynamicRegistration'	
-	" 'completionItem':{
-	" 	'snippetSupport'
-	" 	'commitCharactersSupport'
-	" 	'documentationFormat'
-	" 	'deprecatedSupport'
-	" 	'preselectSupport'
-	" 	'tagSupport':{
-	" 		'valueSet'
-	" 	}
-	" 	'insertReplaceSupport'
-	" 	'resolveSupport':{
-	" 		'properties'
-	" 	}
-	" 	'insertTextModeSupport':{
-	" 		'valueSet'
-	" 	}
-	" 	'labelDetailsSupport'
-	" }
-	" 'completionItemKind':{
-	" 	'valueSet'
-	" }
-	" 'contextSupport'
-	" 'insertTextMode'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['completionItem'] = {}
+	let l:params['completionItem']['snippetSupport'] = v:false
+	let l:params['completionItem']['commitCharactersSupport'] = v:false
+	let l:params['completionItem']['documentationFormat'] = ['plaintext']
+	let l:params['completionItem']['deprecatedSupport'] = v:false
+	let l:params['completionItem']['preselectSupport'] = v:false
+	let l:params['completionItem']['tagSupport'] = {}
+	let l:params['completionItem']['tagSupport']['valueSet'] = [1]
+	let l:params['completionItem']['insertReplaceSupport'] = v:false
+	let l:params['completionItem']['resolveSupport'] = {}
+	let l:params['completionItem']['resolveSupport']['properties'] = ['']
+	let l:params['completionItem']['insertTextModeSupport'] = {}
+	let l:params['completionItem']['insertTextModeSupport']['valueSet'] = [1]
+	let l:params['completionItem']['labelDetailsSupport'] = v:false
+	let l:params['completionItemKind'] = {}
+	let l:params['completionItemKind']['valueSet'] = []
+	let l:params['contextSupport'] = v:false
+	let l:params['insertTextMode'] = 1
+	return l:params
 endfunction
 
 function s:HoverClientCapabilities()
-let l:HoverClientCapabilities = {
-	" 'dynamicRegistration'	
-	" 'contentFormat'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['contentFormat'] = ['plaintext']
+	return l:params
 endfunction
 
 function s:SignatureHelpClientCapabilities()
-let l:SignatureHelpClientCapabilities = {
-	" 'dynamicRegistration'	
-	" 'signatureInformation':{
-	" 	'documentationFormat'
-	" 	'parameterInformation':{
-	" 		'labelOffsetSupport'
-	" 	}
-	" 	'activeParameterSupport'
-	" }
-	" 'contextSupport'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['signatureInformation'] = {}
+	let l:params['signatureInformation']['documentationFormat'] = ['plaintext']
+	let l:params['signatureInformation']['parameterInformation'] = {}
+	let l:params['signatureInformation']['parameterInformation']['labelOffsetSupport'] = v:false
+	let l:params['signatureInformation']['activeParameterSupport'] = v:false
+	let l:params['contextSupport'] = v:false
+	return l:params
 endfunction
 
 function s:DeclarationClientCapabilities()
-let l:DeclarationClientCapabilities = {
-	" 'dynamicRegistration'
-	" 'linkSupport'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['linkSupport'] = v:false
+	return l:params
 endfunction
 
 function s:DefinitionClientCapabilities()
-let l:DefinitionClientCapabilities = {
-	" 'dynamicRegistration'
-	" 'linkSupport'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['linkSupport'] = v:false
+	return l:params
 endfunction
 
 function s:TypeDefinitionClientCapabilities()
-let l:TypeDefinitionClientCapabilities = {
-	" 'dynamicRegistration'
-	" 'linkSupport'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['linkSupport'] = v:false
+	return l:params
 endfunction
 
 function s:ImplementationClientCapabilities()
-let l:ImplementationClientCapabilities = {
-	" 'dynamicRegistration'
-	" 'linkSupport'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['linkSupport'] = v:false
+	return l:params
 endfunction
 
 function s:ReferenceClientCapabilities()
@@ -321,35 +314,30 @@ function s:DocumentHighlightClientCapabilities()
 endfunction
 
 function s:DocumentSymbolClientCapabilities()
-let l:DocumentSymbolClientCapabilities = {
-	" 'dynamicRegistration'
-	" 'symbolKind':{
-	" 	'valueSet'
-	" }
-	" 'hierarchicalDocumentSymbolSupport'
-	" 'tagSupport'{
-	" 	'valueSet'
-	" }
-	" 'labelSupport'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['symbolKind'] = {}
+	let l:params['symbolKind']['valueSet'] = []
+	let l:params['hierarchicalDocumentSymbolSupport'] = v:false
+	let l:params['tagSupport'] = {}
+	let l:params['tagSupport']['valueSet'] = [1]
+	let l:params['labelSupport'] = v:false
+	return l:params
 endfunction
 
 function s:CodeActionClientCapabilities()
-let l:CodeActionClientCapabilities = {
-	" 'dynamicRegistration'
-	" 'codeActionLiteralSupport':{
-	" 	'codeActionKind':{
-	" 		'valueSet'
-	" 	}
-	" }
-	" 'isPreferredSupport'
-	" 'disabledSupport'
-	" 'dataSupport'
-	" 'resolveSupport':{
-	" 	'properties'
-	" }
-	" 'honorsChangeAnnotations'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['codeActionLiteralSupport'] = {}
+	let l:params['codeActionLiteralSupport']['codeActionKind'] = {}
+	let l:params['codeActionLiteralSupport']['codeActionKind']['valueSet'] = ['']
+	let l:params['isPreferredSupport'] = v:false
+	let l:params['disabledSupport'] = v:false
+	let l:params['dataSupport'] = v:false
+	let l:params['resolveSupport'] = {}
+	let l:params['resolveSupport']['properties'] = ['']
+	let l:params['honorsChangeAnnotations'] = v:false
+	return l:params
 endfunction
 
 function s:CodeLensClientCapabilities()
@@ -359,10 +347,10 @@ function s:CodeLensClientCapabilities()
 endfunction
 
 function s:DocumentLinkClientCapabilities()
-let l:DocumentLinkClientCapabilities = {
-	" 'dynamicRegistration'
-	" 'tooltipSupport'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['tooltipSupport'] = v:false
+	return l:params
 endfunction
 
 function s:DocumentColorClientCapabilities()
@@ -390,32 +378,31 @@ function s:DocumentOnTypeFormattingClientCapabilities()
 endfunction
 
 function s:RenameClientCapabilities()
-let l:RenameClientCapabilities = {
-	" 'dynamicRegistration'
-	" 'prepareSupport'
-	" 'prepareSupportDefaultBehavior'
-	" 'honorsChangeAnnotations'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['prepareSupport'] = v:false
+	let l:params['prepareSupportDefaultBehavior'] = 1
+	let l:params['honorsChangeAnnotations'] = v:false
+	return l:params
 endfunction
 
 function s:PublishDiagnosticsClientCapabilities()
-let l:PublishDiagnosticsClientCapabilities = {
-	" 'relatedInformation'
-	" 'tagSupport':{
-	" 	'valueSet'
-	" }
-	" 'versionSupport'
-	" 'codeDescriptionSupport'
-	" 'dataSupport'
-}
+	let l:params = {}
+	let l:params['relatedInformation'] = v:false
+	let l:params['tagSupport'] = {}
+	let l:params['tagSupport']['valueSet'] = [1]
+	let l:params['versionSupport'] = v:false
+	let l:params['codeDescriptionSupport'] = v:false
+	let l:params['dataSupport'] = v:false
+	return l:params
 endfunction
 
 function s:FoldingRangeClientCapabilities()
-let l:FoldingRangeClientCapabilities = {
-	" 'dynamicRegistration'
-	" 'rangeLimit'
-	" 'lineFoldingOnly'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['rangeLimit'] = 0
+	let l:params['lineFoldingOnly'] = v:true
+	return l:params
 endfunction
 
 function s:SelectionRangeClientCapabilities()
@@ -437,18 +424,17 @@ function s:CallHierarchyClientCapabilities()
 endfunction
 
 function s:SemanticTokensClientCapabilities()
-let l:SemanticTokensClientCapabilities = {
-	" 'dynamicRegistration'
-	" 'requests':{
-	" 	'range'
-	" 	'full'
-	" }
-	" 'tokenTypes'
-	" 'tokenModifiers'
-	" 'formats'
-	" 'overlappingTokenSupport'
-	" 'multilineTokenSupport'
-}
+	let l:params = {}
+	let l:params['dynamicRegistration'] = v:false
+	let l:params['requests'] = {}
+	let l:params['requests']['range'] = v:false
+	let l:params['requests']['full'] = v:false
+	let l:params['tokenTypes'] = ['']
+	let l:params['tokenModifiers'] = ['']
+	let l:params['formats'] = ['relative']
+	let l:params['overlappingTokenSupport'] = v:false
+	let l:params['multilineTokenSupport'] = v:false
+	return l:params
 endfunction
 
 function s:MonikerClientCapabilities()
@@ -458,13 +444,13 @@ function s:MonikerClientCapabilities()
 endfunction
 
 function s:PrepareSupportDefaultBehavior()
-let l:prepareSupportDefaultBehavior = {
-	" 'Identifier'
-}
+	let l:params = {}
+	let l:params['Identifier'] = 1
+	return l:params
 endfunction
 
 function s:WorkDoneProgressParams(params, progressToken)
-	let a:params['workDoneToken'] = a:porkDoneToken
+	let a:params['workDoneToken'] = a:progressToken
 	return a:params
 endfunction
 
