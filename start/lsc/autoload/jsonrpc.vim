@@ -13,32 +13,47 @@ set cpoptions&vim
 " let s:content_length = "Content-Length"
 " let s:content_type = "Content-Type"
 
-function jsonrpc#parse_header(message)
+function jsonrpc#parse_message(message)
+	let l:result = {}
 	let l:parts = split(a:message, "\r\n\r\n")
-	let l:headers = {}
 	if !empty(l:parts)
 		for l:part in l:parts
-			let l:fields = split(l:part, "\r\n")
-			if !empty(l:fields)
-				for l:field in l:fields
-					" let l:first = get(l:field, 0, '')
-					if stridx(l:field, 'Content-Length') == 0
-						let l:header= split(l:field, ": ")
-						let l:headers[l:header[0]] = l:header[1]
-					endif
-					if stridx(l:field, 'Content-Type') == 0
-						let l:header= split(l:field, ": ")
-						let l:headers[l:header[0]] = l:header[1]
-					endif
-				endfor
+			if stridx(l:part, 'Content-Length') == 0 || stridx(l:part, 'Content-Type') == 0
+				let l:result['header'] = s:parse_header(l:part)
+			else
+				try
+					let l:result['content'] = s:parse_content(l:part)
+				catch
+					let l:result['catch'] = v:exception
+					let l:result['error'] = l:part
+				endtry
+			endif
+		endfor
+	endif
+	return l:result
+endfunction
+
+function s:parse_header(part)
+	let l:headers = {}
+	let l:fields = split(a:part, "\r\n")
+	if !empty(l:fields)
+		for l:field in l:fields
+			if stridx(l:field, 'Content-Length') == 0
+				let l:header = split(l:field, ": ")
+				let l:headers[l:header[0]] = l:header[1]
+			elseif stridx(l:field, 'Content-Type') == 0
+				let l:header = split(l:field, ": ")
+				let l:headers[l:header[0]] = l:header[1]
 			endif
 		endfor
 	endif
 	return l:headers
 endfunction
 
-
-
+function s:parse_content(part)
+	let l:content = json_decode(a:part)
+	return l:content
+endfunction
 
 
 let &cpoptions = s:save_cpoptions

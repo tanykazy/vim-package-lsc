@@ -7,22 +7,12 @@ let s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
 function client#Callback(channel, msg)
-    " echo a:channel
-    call ch_log('---------- debug ----------')
-    call ch_log(string(jsonrpc#parse_header(a:msg)))
-    echo split(a:msg, "\r\n\r\n")
-    " echo json_decode(a:msg)
-    " echo '---' . a:msg . '---'
-    " try
-    " endtry
-    " return s:matrix[s:state][s:event].fn(event, data)
-endfunction
 
-function client#ErrorCallback(channel, msg)
-    " echo a:channel
-    echo a:msg
-    " try
-    " endtry
+    call ch_log('===== debug =====' . string(a:msg))
+
+    " if has_key(l:message, 'content')
+
+    " endif
     " return s:matrix[s:state][s:event].fn(event, data)
 endfunction
 

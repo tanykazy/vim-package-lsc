@@ -40,20 +40,28 @@ function channel#Close(channel)
 endfunction
 
 function s:OutCallbackhandler(channel, msg)
-	" call ch_log(a:channel)
-	" call ch_log('===' . a:msg . '===')
-    call ch_log(string(split(a:msg, "\r\n\r\n")))
-	if has_key(s:channel_info[a:channel], 'out_cb')
-		call s:channel_info[a:channel]['out_cb'](a:channel, a:msg)
+	let l:info = s:GetChannelInfo(a:channel)
+	let l:message = jsonrpc#parse_message(a:msg)
+	if !has_key(l:info, 'message')
+		let l:info['message'] = {}
+	endif
+	if has_key(l:message, 'header')
+		call extend(l:info['message'], l:message)
+	endif
+	if has_key(l:message, 'content')
+		call extend(l:info['message'], l:message)
+	endif
+	if has_key(l:info['message'], 'header') && has_key(l:info['message'], 'content')
+		if has_key(s:channel_info[a:channel], 'callback')
+			let l:message = remove(l:info, 'message')
+			call s:channel_info[a:channel]['callback'](a:channel, l:message)
+		endif
 	endif
 endfunction
 
 function s:ErrCallbackhandler(channel, msg)
-	" call ch_log(a:channel)
-	" call ch_log(a:msg)
-	if has_key(s:channel_info[a:channel], 'err_cb')
-		call s:channel_info[a:channel]['err_cb'](a:channel, a:msg)
-	endif
+	call ch_log(a:channel)
+	call ch_log(a:msg)
 endfunction
 
 function s:ChannelInfo(channel, options)
@@ -102,11 +110,6 @@ endfunction
 
 function s:JobGetchannel(job)
 	return job_getchannel(a:job)
-endfunction
-
-
-function s:GetCwd()
-	return getcwd(bufwinnr(bufnr("#")))
 endfunction
 
 
