@@ -8,6 +8,7 @@ set cpoptions&vim
 
 function client#Callback(channel, msg)
     " echo a:channel
+    call ch_log('---------- debug ----------')
     call ch_log(string(jsonrpc#parse_header(a:msg)))
     echo split(a:msg, "\r\n\r\n")
     " echo json_decode(a:msg)
