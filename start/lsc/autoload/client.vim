@@ -24,7 +24,6 @@ function client#Start(lang, path)
 endfunction
 
 function client#Callback(channel, message)
-    " call ch_log('===== debug =====' . string(a:msg))
     let l:content = a:message['content']
     if lsp#isRequest(l:content)
         let s:event = s:eventRequest
@@ -33,6 +32,7 @@ function client#Callback(channel, message)
     elseif lsp#isNotification(l:content)
         let s:event = s:eventNotification
     else
+        call ch_log(string(a:message))
         throw 'Event undetected.'
     endif
     let l:server = s:server_info[a:channel]
