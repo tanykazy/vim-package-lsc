@@ -22,13 +22,13 @@ function channel#Open(command, cwd, callback)
 	let l:job = s:JobStart(a:command, l:opt)
 	let l:channel = s:JobGetchannel(l:job)
     let l:info = s:AddChannelInfo(l:channel)
-	ret l:info['callback'] = a:callback
+	let l:info['callback'] = a:callback
 	return l:channel
 endfunction
 
 function channel#Send(channel, data)
 	let l:info = s:GetChannelInfo(a:channel)
-	call s:ChSendraw(l:info['channel'], a:data, {})
+	return s:ChSendraw(l:info['channel'], a:data, {})
 endfunction
 
 function channel#Close(channel)

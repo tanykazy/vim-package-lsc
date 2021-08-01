@@ -9,9 +9,34 @@ set cpoptions&vim
 
 let s:rn = "\r\n"
 
-function lsp#initialize()
+function lsp#isMessage(message)
+	return has_key(a:message, 'jsonrpc')
+endfunction
+
+function lsp#isRequest(message)
+	if lsp#isMessage(a:message)
+		return has_key(a:message, 'id') && has_key(a:message, 'method')
+	endif
+	return v:false
+endfunction
+
+function lsp#isResponse(message)
+	if lsp#isMessage(a:message)
+		return has_key(a:message, 'id') && !has_key(a:message, 'method')
+	endif
+	return v:false
+endfunction
+
+function lsp#isNotification(message)
+	if lsp#isMessage(a:message)
+		return !has_key(a:message, 'id') && has_key(a:message, 'method')
+	endif
+	return v:false
+endfunction
+
+function lsp#initialize(id)
 	let l:params = s:InitializeParams({}, v:null, v:null)
-	return s:BuildMessage(1, 'initialize', l:params)
+	return s:BuildMessage(a:id, 'initialize', l:params)
 endfunction
 
 function s:BuildMessage(id, method, params)

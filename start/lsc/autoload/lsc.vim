@@ -7,16 +7,10 @@ let s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
 function lsc#Lsc()
-	set cmdheight=10
-	let l:callback = {}
-	let l:callback['callback'] = function('client#Callback')
-	let g:ch = channel#Open('npx vscode-json-languageserver --stdio', s:GetCwd(), l:callback)
-	call lsc#Test()
-endfunction
-
-function lsc#Test()
-	let l:result = lsp#initialize()
-	let l:b = channel#Send(g:ch, l:result)
+	" set cmdheight=10
+	let l:ch = client#Start('npx vscode-json-languageserver --stdio', s:GetCwd())
+	" let l:result = lsp#initialize()
+	" let l:b = channel#Send(l:ch, l:result)
 endfunction
 
 

@@ -8,9 +8,7 @@ set cpoptions&vim
 
 
 function server#Create(server, cwd, receiver)
-	let l:callback = {}
-	let l:callback['callback'] = function('client#Callback')
-	let l:channel = channel#Open('npx vscode-json-languageserver --stdio', s:GetCwd(), l:callback)
+	let l:channel = channel#Open('npx vscode-json-languageserver --stdio', a:cwd, a:receiver)
     return l:channel
 endfunction
 
