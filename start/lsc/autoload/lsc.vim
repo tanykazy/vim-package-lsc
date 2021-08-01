@@ -8,18 +8,16 @@ set cpoptions&vim
 
 function lsc#Lsc()
 	set cmdheight=10
-	" echo s:GetCwd()
-	" let g:ch = s:StartImpl('npx typescript-language-server --stdio', s:GetCwd())
-	let g:ch = s:StartImpl('npx vscode-json-languageserver --stdio', s:GetCwd())
-	" echo ch_info(l:ch)
-	" echo ch_status(l:ch)
-	" echo l:result
+	let l:callback = {}
+	let l:callback['out_cb'] = function('client#Callback')
+	let l:callback['err_cb'] = function('client#ErrorCallback')
+	let g:ch = channel#Open('npx vscode-json-languageserver --stdio', s:GetCwd(), l:callback)
 	call lsc#Test()
 endfunction
 
 function lsc#Test()
 	let l:result = lsp#initialize()
-	let l:b = ch_sendraw(g:ch, l:result)
+	let l:b = channel#Send(g:ch, l:result)
 endfunction
 
 

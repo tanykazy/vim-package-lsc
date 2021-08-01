@@ -10,8 +10,8 @@ set cpoptions&vim
 let s:rn = "\r\n"
 
 function lsp#initialize()
-	let l:init = s:InitializeParams({}, v:null, v:null)
-	return s:BuildMessage(1, 'initialize', l:init)
+	let l:params = s:InitializeParams({}, v:null, v:null)
+	return s:BuildMessage(1, 'initialize', l:params)
 endfunction
 
 function s:BuildMessage(id, method, params)
@@ -26,7 +26,7 @@ function s:BuildHeader(content)
 	return 'Content-Length: ' . len(a:content) . s:rn
 endfunction
 
-function s:BuildContent()
+function s:BuildContent(params)
 endfunction
 
 function s:Message(message)
