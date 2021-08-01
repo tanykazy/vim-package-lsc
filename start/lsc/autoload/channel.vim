@@ -10,7 +10,7 @@ call ch_logfile('logfile', 'w')
 
 let s:channel_info = {}
 
-function channel#Open(command, cwd, options)
+function channel#Open(command, cwd, callback)
     let l:opt = {}
     let l:opt['mode'] = 'raw'
     " let l:opt['in_io'] = 'pipe'
@@ -21,7 +21,8 @@ function channel#Open(command, cwd, options)
     let l:opt['cwd'] = a:cwd
 	let l:job = s:JobStart(a:command, l:opt)
 	let l:channel = s:JobGetchannel(l:job)
-    let l:info = s:AddChannelInfo(l:channel, a:options)
+    let l:info = s:AddChannelInfo(l:channel)
+	ret l:info['callback'] = a:callback
 	return l:channel
 endfunction
 
@@ -64,15 +65,15 @@ function s:ErrCallbackhandler(channel, msg)
 	call ch_log(a:msg)
 endfunction
 
-function s:ChannelInfo(channel, options)
-	let l:info = extend({}, a:options, 'error')
+function s:ChannelInfo(channel)
+	let l:info = {}
 	let l:info['channel'] = a:channel
 	return l:info
 endfunction
 
-function s:AddChannelInfo(channel, options)
+function s:AddChannelInfo(channel)
 	if !has_key(s:channel_info, a:channel)
-		let s:channel_info[a:channel] = s:ChannelInfo(a:channel, a:options)
+		let s:channel_info[a:channel] = s:ChannelInfo(a:channel)
 	endif
     return s:channel_info[a:channel]
 endfunction

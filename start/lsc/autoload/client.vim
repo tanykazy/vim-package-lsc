@@ -6,8 +6,8 @@ let g:loaded_client= 1
 let s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
-function client#Callback(channel, msg)
 
+function client#Callback(channel, msg)
     call ch_log('===== debug =====' . string(a:msg))
 
     " if has_key(l:message, 'content')
@@ -17,9 +17,9 @@ function client#Callback(channel, msg)
 endfunction
 
 let s:stateIdle = 0
-let s:stateInitialized = 1
-let s:stateShutdown = 2
+let s:stateActive = 1
 
+" tbd
 let s:eventRequest = 0
 let s:eventResponse = 1
 let s:eventNotification = 2
@@ -29,14 +29,10 @@ let s:matrix[s:stateIdle] = {}
 let s:matrix[s:stateIdle][s:eventRequest] = {}
 let s:matrix[s:stateIdle][s:eventResponse] = {}
 let s:matrix[s:stateIdle][s:eventNotification] = {}
-let s:matrix[s:stateInitialized] = {}
-let s:matrix[s:stateInitialized][s:eventRequest] = {}
-let s:matrix[s:stateInitialized][s:eventResponse] = {}
-let s:matrix[s:stateInitialized][s:eventNotification] = {}
-let s:matrix[s:stateShutdown] = {}
-let s:matrix[s:stateShutdown][s:eventRequest] = {}
-let s:matrix[s:stateShutdown][s:eventResponse] = {}
-let s:matrix[s:stateShutdown][s:eventNotification] = {}
+let s:matrix[s:stateActive] = {}
+let s:matrix[s:stateActive][s:eventRequest] = {}
+let s:matrix[s:stateActive][s:eventResponse] = {}
+let s:matrix[s:stateActive][s:eventNotification] = {}
 
 let s:state = s:stateIdle
 let s:event = s:eventRequest
@@ -50,22 +46,13 @@ endfunction
 function s:matrix[s:stateIdle][s:eventNotification].fn(event, data) dict
 endfunction
 
-function s:matrix[s:stateInitialized][s:eventRequest].fn(event, data) dict
+function s:matrix[s:stateActive][s:eventRequest].fn(event, data) dict
 endfunction
 
-function s:matrix[s:stateInitialized][s:eventResponse].fn(event, data) dict
+function s:matrix[s:stateActive][s:eventResponse].fn(event, data) dict
 endfunction
 
-function s:matrix[s:stateInitialized][s:eventNotification].fn(event, data) dict
-endfunction
-
-function s:matrix[s:stateShutdown][s:eventRequest].fn(event, data) dict
-endfunction
-
-function s:matrix[s:stateShutdown][s:eventResponse].fn(event, data) dict
-endfunction
-
-function s:matrix[s:stateShutdown][s:eventNotification].fn(event, data) dict
+function s:matrix[s:stateActive][s:eventNotification].fn(event, data) dict
 endfunction
 
 
