@@ -58,15 +58,48 @@ function s:parse_content(part)
 	return l:content
 endfunction
 
-function s:BuildHeader(content)
+function jsonrpc#build_header(content)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return 'Content-Length: ' . len(a:content) . s:rn
+	let l:header = []
+	call add(l:header, 'Content-Length: ' . len(a:content))
+	call add(l:header, 'Content-Type: application/vscode-jsonrpc; charset=utf-8')
+	return join(l:header, "\r\n") . "\r\n"
 endfunction
 
-function s:BuildContent(params)
+function jsonrpc#serialize_content(params)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	let l:content = json_encode(a:params)
+	return l:content
 endfunction
 
+function jsonrpc#isMessage(message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	return has_key(a:message, 'jsonrpc')
+endfunction
+
+function jsonrpc#isRequest(message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	if jsonrpc#isMessage(a:message)
+		return has_key(a:message, 'id') && has_key(a:message, 'method')
+	endif
+	return v:false
+endfunction
+
+function jsonrpc#isResponse(message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	if jsonrpc#isMessage(a:message)
+		return has_key(a:message, 'id') && !has_key(a:message, 'method')
+	endif
+	return v:false
+endfunction
+
+function jsonrpc#isNotification(message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	if jsonrpc#isMessage(a:message)
+		return !has_key(a:message, 'id') && has_key(a:message, 'method')
+	endif
+	return v:false
+endfunction
 
 let &cpoptions = s:save_cpoptions
 unlet s:save_cpoptions

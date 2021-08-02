@@ -19,8 +19,8 @@ function channel#Open(command, cwd, callback)
     let l:opt['out_cb'] = function('s:OutCallbackhandler')
     let l:opt['err_cb'] = function('s:ErrCallbackhandler')
     let l:opt['cwd'] = a:cwd
-	let l:job = s:JobStart(a:command, l:opt)
-	let l:channel = s:JobGetchannel(l:job)
+	let l:job = job_start(a:command, l:opt)
+	let l:channel = job_getchannel(l:job)
     let l:info = s:AddChannelInfo(l:channel)
 	let l:info['callback'] = a:callback
 	return l:channel
@@ -35,10 +35,12 @@ endfunction
 function channel#Close(channel)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:info = s:GetChannelInfo(a:channel)
-	let l:job = s:ChGetjob(a:channel)	
-	call s:JobStop(l:job)
-	call s:ChClose(a:channel)
-	call s:DelChannel(a:channel)
+	let l:job = ch_getjob(a:channel)	
+	call job_stop(l:job, 'term')
+	" if job_status(l:job) == 'run'
+	" endif
+	call ch_chlose(a:channel)
+	call s:DelChannelInfo(a:channel)
 	return a:channel
 endfunction
 
@@ -50,12 +52,6 @@ function s:OutCallbackhandler(channel, msg)
 		let l:info['message'] = {}
 	endif
 	call extend(l:info['message'], l:message)
-	" if has_key(l:message, 'header')
-	" 	call extend(l:info['message'], l:message)
-	" endif
-	" if has_key(l:message, 'content')
-	" 	call extend(l:info['message'], l:message)
-	" endif
 	if has_key(l:info['message'], 'header') && has_key(l:info['message'], 'content')
 		if has_key(s:channel_info[a:channel], 'callback')
 			let l:message = remove(l:info, 'message')
@@ -66,8 +62,7 @@ endfunction
 
 function s:ErrCallbackhandler(channel, msg)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call ch_log(a:channel)
-	call ch_log(a:msg)
+	call log#log_debug(a:channel . a:msg)
 endfunction
 
 function s:ChannelInfo(channel)
@@ -101,31 +96,6 @@ endfunction
 function s:ChSendraw(handle, expr, options)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return ch_sendraw(a:handle, a:expr, a:options)
-endfunction
-
-function s:ChClose(handle)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return ch_chlose(a:handle)
-endfunction
-
-function s:ChGetjob(channel)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return ch_getjob(a:channel)
-endfunction
-
-function s:JobStart(command, options)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return job_start(a:command, a:options)
-endfunction
-
-function s:JobStop(job, how)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return job_stop(a:job, a:how)
-endfunction
-
-function s:JobGetchannel(job)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return job_getchannel(a:job)
 endfunction
 
 

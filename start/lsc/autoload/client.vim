@@ -27,17 +27,18 @@ endfunction
 function client#Callback(channel, message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:content = a:message['content']
-    if lsp#isRequest(l:content)
+    if jsonrpc#isRequest(l:content)
         let s:event = s:eventRequest
-    elseif lsp#isResponse(l:content)
+    elseif jsonrpc#isResponse(l:content)
         let s:event = s:eventResponse
-    elseif lsp#isNotification(l:content)
+    elseif jsonrpc#isNotification(l:content)
         let s:event = s:eventNotification
     else
-        call ch_log(string(a:message))
+        call log#log_error(string(a:message))
         throw 'Event undetected.'
     endif
     let l:server = s:server_info[a:channel]
+	call log#log_trace('State: ' . s:state . ', Event: ' . s:event)
     return s:matrix[s:state][s:event].fn(l:server, l:content)
 endfunction
 
@@ -68,8 +69,6 @@ endfunction
 
 function s:matrix[s:stateIdle][s:eventResponse].fn(server, content) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call ch_log('=== debug === ' . string(a:content))
-    call ch_log('=== debug === ' . string(a:server))
     let l:id = a:content['id']
     if has_key(a:server, l:id)
         let l:method = a:server[l:id]['message']['content']['method']

@@ -9,35 +9,6 @@ set cpoptions&vim
 
 let s:rn = "\r\n"
 
-function lsp#isMessage(message)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return has_key(a:message, 'jsonrpc')
-endfunction
-
-function lsp#isRequest(message)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	if lsp#isMessage(a:message)
-		return has_key(a:message, 'id') && has_key(a:message, 'method')
-	endif
-	return v:false
-endfunction
-
-function lsp#isResponse(message)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	if lsp#isMessage(a:message)
-		return has_key(a:message, 'id') && !has_key(a:message, 'method')
-	endif
-	return v:false
-endfunction
-
-function lsp#isNotification(message)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	if lsp#isMessage(a:message)
-		return !has_key(a:message, 'id') && has_key(a:message, 'method')
-	endif
-	return v:false
-endfunction
-
 function lsp#initialize(id)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:params = s:InitializeParams({}, v:null, v:null)
@@ -55,7 +26,14 @@ endfunction
 
 function s:BuildHeader(content)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return 'Content-Length: ' . len(a:content) . s:rn
+	" return 'Content-Length: ' . len(a:content) . s:rn
+	" call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	let l:header = []
+	call add(l:header, 'Content-Length: ' . len(a:content))
+	call add(l:header, 'Content-Type: application/vscode-jsonrpc; charset=utf-8')
+	" let l:header[0] = 'Content-Length: ' . len(a:content)
+	" let l:header[1] = 'Content-Type: application/vscode-jsonrpc; charset=utf-8'
+	return join(l:header, "\r\n") . "\r\n"
 endfunction
 
 function s:BuildContent(params)
