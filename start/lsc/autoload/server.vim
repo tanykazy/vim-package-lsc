@@ -8,6 +8,7 @@ set cpoptions&vim
 
 
 function server#Create(server, cwd, receiver)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:channel = channel#Open('npx vscode-json-languageserver --stdio', a:cwd, a:receiver)
     return l:channel
 endfunction

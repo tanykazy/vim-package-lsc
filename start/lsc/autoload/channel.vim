@@ -6,11 +6,11 @@ let g:loaded_channel = 1
 let s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
-call ch_logfile('logfile', 'w')
 
 let s:channel_info = {}
 
 function channel#Open(command, cwd, callback)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:opt = {}
     let l:opt['mode'] = 'raw'
     " let l:opt['in_io'] = 'pipe'
@@ -27,11 +27,13 @@ function channel#Open(command, cwd, callback)
 endfunction
 
 function channel#Send(channel, data)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:info = s:GetChannelInfo(a:channel)
 	return s:ChSendraw(l:info['channel'], a:data, {})
 endfunction
 
 function channel#Close(channel)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:info = s:GetChannelInfo(a:channel)
 	let l:job = s:ChGetjob(a:channel)	
 	call s:JobStop(l:job)
@@ -41,6 +43,7 @@ function channel#Close(channel)
 endfunction
 
 function s:OutCallbackhandler(channel, msg)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:info = s:GetChannelInfo(a:channel)
 	let l:message = jsonrpc#parse_message(a:msg)
 	if !has_key(l:info, 'message')
@@ -62,17 +65,20 @@ function s:OutCallbackhandler(channel, msg)
 endfunction
 
 function s:ErrCallbackhandler(channel, msg)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	call ch_log(a:channel)
 	call ch_log(a:msg)
 endfunction
 
 function s:ChannelInfo(channel)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:info = {}
 	let l:info['channel'] = a:channel
 	return l:info
 endfunction
 
 function s:AddChannelInfo(channel)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	if !has_key(s:channel_info, a:channel)
 		let s:channel_info[a:channel] = s:ChannelInfo(a:channel)
 	endif
@@ -80,6 +86,7 @@ function s:AddChannelInfo(channel)
 endfunction
 
 function s:GetChannelInfo(channel)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	if has_key(s:channel_info, a:channel)
 		return get(s:channel_info, a:channel, v:null)
 	endif
@@ -87,30 +94,37 @@ function s:GetChannelInfo(channel)
 endfunction
 
 function s:DelChannelInfo(channel)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return remove(s:channel_info, a:channel)
 endfunction
 
 function s:ChSendraw(handle, expr, options)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return ch_sendraw(a:handle, a:expr, a:options)
 endfunction
 
 function s:ChClose(handle)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return ch_chlose(a:handle)
 endfunction
 
 function s:ChGetjob(channel)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return ch_getjob(a:channel)
 endfunction
 
 function s:JobStart(command, options)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return job_start(a:command, a:options)
 endfunction
 
 function s:JobStop(job, how)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return job_stop(a:job, a:how)
 endfunction
 
 function s:JobGetchannel(job)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return job_getchannel(a:job)
 endfunction
 

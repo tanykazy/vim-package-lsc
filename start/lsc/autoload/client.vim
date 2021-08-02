@@ -10,6 +10,7 @@ set cpoptions&vim
 let s:server_info = {}
 
 function client#Start(lang, path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:server = server#Create(a:lang, a:path, function('client#Callback'))
     let s:server_info[l:server] = {}
     let s:server_info[l:server]['server'] = l:server
@@ -24,6 +25,7 @@ function client#Start(lang, path)
 endfunction
 
 function client#Callback(channel, message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:content = a:message['content']
     if lsp#isRequest(l:content)
         let s:event = s:eventRequest
@@ -61,9 +63,11 @@ let s:state = s:stateIdle
 let s:event = s:eventRequest
 
 function s:matrix[s:stateIdle][s:eventRequest].fn(server, content) dict
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 endfunction
 
 function s:matrix[s:stateIdle][s:eventResponse].fn(server, content) dict
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call ch_log('=== debug === ' . string(a:content))
     call ch_log('=== debug === ' . string(a:server))
     let l:id = a:content['id']
@@ -77,19 +81,24 @@ function s:matrix[s:stateIdle][s:eventResponse].fn(server, content) dict
 endfunction
 
 function s:matrix[s:stateIdle][s:eventNotification].fn(server, content) dict
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 endfunction
 
 function s:matrix[s:stateActive][s:eventRequest].fn(server, content) dict
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 endfunction
 
 function s:matrix[s:stateActive][s:eventResponse].fn(server, content) dict
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 endfunction
 
 function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 endfunction
 
 
 function s:unique(server)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:num = a:server['unique'] + 1
     if l:num > pow(2, 31) - 1
         let l:num = 1

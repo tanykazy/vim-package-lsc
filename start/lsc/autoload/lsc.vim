@@ -7,6 +7,7 @@ let s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
 function lsc#Lsc()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	" set cmdheight=10
 	let l:ch = client#Start('npx vscode-json-languageserver --stdio', s:GetCwd())
 	" let l:result = lsp#initialize()
@@ -92,6 +93,7 @@ function s:GetLine(start, end)
 endfunction
 
 function s:GetCwd()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return getcwd(bufwinnr(bufnr("#")))
 endfunction
 

@@ -14,6 +14,7 @@ set cpoptions&vim
 " let s:content_type = "Content-Type"
 
 function jsonrpc#parse_message(message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:result = {}
 	let l:parts = split(a:message, "\r\n\r\n")
 	if !empty(l:parts)
@@ -34,6 +35,7 @@ function jsonrpc#parse_message(message)
 endfunction
 
 function s:parse_header(part)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:headers = {}
 	let l:fields = split(a:part, "\r\n")
 	if !empty(l:fields)
@@ -51,15 +53,18 @@ function s:parse_header(part)
 endfunction
 
 function s:parse_content(part)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:content = json_decode(a:part)
 	return l:content
 endfunction
 
 function s:BuildHeader(content)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return 'Content-Length: ' . len(a:content) . s:rn
 endfunction
 
 function s:BuildContent(params)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 endfunction
 
 

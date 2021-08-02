@@ -10,10 +10,12 @@ set cpoptions&vim
 let s:rn = "\r\n"
 
 function lsp#isMessage(message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return has_key(a:message, 'jsonrpc')
 endfunction
 
 function lsp#isRequest(message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	if lsp#isMessage(a:message)
 		return has_key(a:message, 'id') && has_key(a:message, 'method')
 	endif
@@ -21,6 +23,7 @@ function lsp#isRequest(message)
 endfunction
 
 function lsp#isResponse(message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	if lsp#isMessage(a:message)
 		return has_key(a:message, 'id') && !has_key(a:message, 'method')
 	endif
@@ -28,6 +31,7 @@ function lsp#isResponse(message)
 endfunction
 
 function lsp#isNotification(message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	if lsp#isMessage(a:message)
 		return !has_key(a:message, 'id') && has_key(a:message, 'method')
 	endif
@@ -35,11 +39,13 @@ function lsp#isNotification(message)
 endfunction
 
 function lsp#initialize(id)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:params = s:InitializeParams({}, v:null, v:null)
 	return s:BuildMessage(a:id, 'initialize', l:params)
 endfunction
 
 function s:BuildMessage(id, method, params)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:message = s:Message({})
 	let l:message = s:RequestMessage(l:message, a:id, a:method, a:params)	
 	let l:content = json_encode(l:message)
@@ -48,10 +54,12 @@ function s:BuildMessage(id, method, params)
 endfunction
 
 function s:BuildHeader(content)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return 'Content-Length: ' . len(a:content) . s:rn
 endfunction
 
 function s:BuildContent(params)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 endfunction
 
 function s:Message(message)
