@@ -55,6 +55,13 @@ function s:parse_content(part)
 	return l:content
 endfunction
 
+function s:BuildHeader(content)
+	return 'Content-Length: ' . len(a:content) . s:rn
+endfunction
+
+function s:BuildContent(params)
+endfunction
+
 
 let &cpoptions = s:save_cpoptions
 unlet s:save_cpoptions

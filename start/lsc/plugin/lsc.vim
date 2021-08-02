@@ -9,3 +9,12 @@ call lsc#Lsc()
 " echo len(l)
 " echo l[1]
 
+function s:default(a, b = 'b')
+    call ch_log(a:a)
+    call ch_log(a:b)
+endfunction
+
+call ch_log('###############################')
+call s:default('aa', 'bb')
+call s:default('aa')
+

@@ -64,9 +64,15 @@ function s:matrix[s:stateIdle][s:eventRequest].fn(server, content) dict
 endfunction
 
 function s:matrix[s:stateIdle][s:eventResponse].fn(server, content) dict
+    call ch_log('=== debug === ' . string(a:content))
+    call ch_log('=== debug === ' . string(a:server))
     let l:id = a:content['id']
     if has_key(a:server, l:id)
-        " a:server[l:id]['method']
+        let l:method = a:server[l:id]['message']['content']['method']
+        if l:method == 'initialize'
+            call ch_log('--- debug response ---' . l:method)
+        else
+        endif
     endif
 endfunction
 

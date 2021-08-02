@@ -46,12 +46,13 @@ function s:OutCallbackhandler(channel, msg)
 	if !has_key(l:info, 'message')
 		let l:info['message'] = {}
 	endif
-	if has_key(l:message, 'header')
-		call extend(l:info['message'], l:message)
-	endif
-	if has_key(l:message, 'content')
-		call extend(l:info['message'], l:message)
-	endif
+	call extend(l:info['message'], l:message)
+	" if has_key(l:message, 'header')
+	" 	call extend(l:info['message'], l:message)
+	" endif
+	" if has_key(l:message, 'content')
+	" 	call extend(l:info['message'], l:message)
+	" endif
 	if has_key(l:info['message'], 'header') && has_key(l:info['message'], 'content')
 		if has_key(s:channel_info[a:channel], 'callback')
 			let l:message = remove(l:info, 'message')
