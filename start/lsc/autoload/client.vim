@@ -11,20 +11,22 @@ let s:server_info = {}
 
 function client#Start(lang, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:cmd = server#load_setting(a:lang)
-	let l:channel = channel#Open(l:cmd, a:path, function('client#Callback'))
-    let l:server = {}
-    let l:server['id'] = l:channel['id']
-    let l:server['channel'] = l:channel
-    let l:server['lang'] = a:lang
-    let l:server['path'] = a:path
-    let l:server['unique'] = 0
-    let l:unique = s:unique(l:server)
-    let l:message = jsonrpc#request_message(l:unique, 'initialize', lsp#InitializeParams(v:null, v:null))
-    let l:server[l:unique] = {}
-    let l:server[l:unique]['message'] = l:message
-    let s:server_info[a:lang] = l:server
-	call channel#Send(l:server['channel'], l:message)
+    if !has_key(s:server_info, a:lang)
+        let l:cmd = server#load_setting(a:lang)
+        let l:channel = channel#Open(l:cmd, a:path, function('client#Callback'))
+        let l:server = {}
+        let l:server['id'] = l:channel['id']
+        let l:server['channel'] = l:channel
+        let l:server['lang'] = a:lang
+        let l:server['path'] = a:path
+        let l:server['unique'] = 0
+        let l:unique = s:unique(l:server)
+        let l:message = jsonrpc#request_message(l:unique, 'initialize', lsp#InitializeParams(v:null, v:null))
+        let l:server[l:unique] = {}
+        let l:server[l:unique]['message'] = l:message
+        let s:server_info[a:lang] = l:server
+        call channel#Send(l:server['channel'], l:message)
+    endif
 endfunction
 
 function client#Stop(lang)

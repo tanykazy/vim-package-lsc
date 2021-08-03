@@ -24,6 +24,7 @@ function channel#Open(command, cwd, callback)
 	let l:channel = job_getchannel(l:job)
     let l:info = s:AddChannelInfo(l:channel)
 	let l:info['callback'] = a:callback
+	let l:info['job'] = l:job
 	return l:info
 endfunction
 
@@ -36,17 +37,16 @@ endfunction
 
 function channel#Close(channel)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:job = ch_getjob(a:channel['handle'])	
-	call job_stop(l:job, 'term')
 	call ch_close(a:channel['handle'])
+	call job_stop(a:channel['job'], 'term')
 	call s:DelChannelInfo(a:channel)
 	return a:channel
 endfunction
 
 function s:OutCallbackhandler(channel, msg)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call log#log_debug('Receive data from[' . a:channel . ']:' . a:msg)
 	let l:info = s:GetChannelInfo(a:channel)
+	call log#log_debug('Receive data from[' . l:info['id'] . ']:' . a:msg)
 	let l:message = jsonrpc#parse_message(a:msg)
 	if !has_key(l:info, 'message')
 		let l:info['message'] = {}
