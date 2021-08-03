@@ -13,9 +13,9 @@ set cpoptions&vim
 " let s:content_length = "Content-Length"
 " let s:content_type = "Content-Type"
 
-function jsonrpc#message(version = '2.0')
+function jsonrpc#message()
 	let l:message = {}
-	let l:message['jsonrpc'] = a:version
+	let l:message['jsonrpc'] = '2.0'
 	return l:message
 endfunction
 

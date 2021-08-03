@@ -77,7 +77,6 @@ function s:AddChannelInfo(channel)
 	let l:id = ch_info(a:channel)['id']
 	if !has_key(s:channel_info, l:id)
 		let l:info = {}
-		let l:info['channel'] = a:channel
 		let l:info['handle'] = a:channel
 		let l:info['id'] = l:id
 		let s:channel_info[l:id] = l:info
