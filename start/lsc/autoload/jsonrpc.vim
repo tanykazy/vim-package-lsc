@@ -23,7 +23,7 @@ function jsonrpc#request_message(id, method, params)
 	let l:message = jsonrpc#message()
 	let l:message['id'] = a:id
 	let l:message['method'] = a:method
-	if has_key(a:, 'params')
+	if !util#isNone(a:params)
 		let l:message['params'] = a:params
 	endif
 	return l:message
@@ -32,10 +32,10 @@ endfunction
 function jsonrpc#response_message(id, result, error)
 	let l:message = jsonrpc#message()
 	let l:message['id'] = a:id
-	if has_key(a:, 'result')
+	if !util#isNone(a:result)
 		let l:message['result'] = a:result
 	endif
-	if has_key(a:, 'error')
+	if !util#isNone(a:error)
 		let l:message['error'] = a:error
 	endif
 	return l:message
@@ -44,8 +44,8 @@ endfunction
 function jsonrpc#notification_message(method, params)
 	let l:message = jsonrpc#message()
 	let l:message['method'] = a:method
-	if has_key(a:, 'params')
-		" let l:message['params'] = a:params
+	if !util#isNone(a:params)
+		let l:message['params'] = a:params
 	endif
 	return l:message
 endfunction

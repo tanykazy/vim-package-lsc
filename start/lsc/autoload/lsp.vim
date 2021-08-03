@@ -7,14 +7,6 @@ let s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
 
-let s:rn = "\r\n"
-
-function s:DocumentUri(scheme, authority, path, query, fragment)
-endfunction
-
-function s:Uri(scheme, authority, path, query, fragment)
-endfunction
-
 function lsp#InitializeParams(initializationOptions, workspaceFolders)
 	let l:params = {}
 	let l:params['processId'] = getpid()
@@ -34,6 +26,44 @@ endfunction
 function lsp#InitializedParams()
 	let l:params = {}
 	return l:params
+endfunction
+
+function lsp#DidOpenTextDocumentParams()
+	let l:params = {}
+	let l:params['textDocument'] = 
+	return l:params
+endfunction
+
+function s:TextDocumentItem()
+	let l:params = {}
+	let l:params['uri'] = 
+	let l:params['languageId'] = 
+	let l:params['version'] = 
+	let l:params['text'] = 
+	return l:params
+endfunction
+
+function s:DocumentUri(scheme, authority, path, query, fragment)
+	return s:Uri(a:scheme, a:authority, a:path, a:query, a:fragment)
+endfunction
+
+function s:Uri(scheme, authority, path, query, fragment)
+	let l:params = []
+	call add(l:params, a:scheme)
+	call add(l:params, '://')
+	if !util#isNone(a:authority)
+		call add(l:params, a:authority)
+	endif
+	call add(l:params, a:path)
+	if !util#isNone(a:query)
+		call add(l:params, '?')
+		call add(l:params, a:query)
+	endif
+	if !util#isNone(a:fragment)
+		call add(l:params, '#')
+		call add(l:params, a:fragment)
+	endif
+	return join(l:params, '')
 endfunction
 
 function s:WorkspaceFolder()
