@@ -9,3 +9,5 @@ call log#log_error('load: plugin/lsc.vim')
 
 call lsc#Lsc()
 
+" call log#log_error(string(server#Test()))
+" call log#log_error(server#Test()['test'])
