@@ -9,15 +9,12 @@ set cpoptions&vim
 
 function lsc#Lsc()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	" set cmdheight=10
-	let l:ch = client#Start('npx vscode-json-languageserver --stdio', s:GetCwd())
-	" let l:result = lsp#initialize()
-	" let l:b = channel#Send(l:ch, l:result)
+	call client#Start('typescript', s:GetCwd())
 endfunction
 
 function lsc#Test()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call client#Stop('npx vscode-json-languageserver --stdio')
+	call client#Stop('typescript')
 endfunction
 
 function s:GetCwd()

@@ -1,0 +1,5 @@
+{
+    "typescript": {
+        "cmd": "npx vscode-json-languageserver --stdio"
+    }
+}

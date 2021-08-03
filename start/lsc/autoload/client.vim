@@ -11,10 +11,11 @@ let s:server_info = {}
 
 function client#Start(lang, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:server = server#Create(a:lang, a:path, function('client#Callback'))
-    let l:id = l:server['id']
+    let l:cmd = server#load_setting(a:lang)
+	let l:channel = channel#Open(l:cmd, a:path, function('client#Callback'))
+    let l:id = l:channel['id']
     let s:server_info[l:id] = {}
-    let s:server_info[l:id]['server'] = l:server
+    let s:server_info[l:id]['server'] = l:channel
     let s:server_info[l:id]['lang'] = a:lang
     let s:server_info[l:id]['path'] = a:path
     let s:server_info[l:id]['unique'] = 0
@@ -22,7 +23,7 @@ function client#Start(lang, path)
     let l:message = jsonrpc#request_message(l:unique, 'initialize', lsp#InitializeParams(v:null, v:null))
     let s:server_info[l:id][l:unique] = {}
     let s:server_info[l:id][l:unique]['message'] = l:message
-	call channel#Send(l:server, l:message)
+	call channel#Send(l:channel, l:message)
 endfunction
 
 function client#Stop(lang)
@@ -56,7 +57,6 @@ endfunction
 let s:stateIdle = 0
 let s:stateActive = 1
 
-" tbd
 let s:eventRequest = 0
 let s:eventResponse = 1
 let s:eventNotification = 2
@@ -122,7 +122,6 @@ function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 endfunction
 
-
 function s:unique(server)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:num = a:server['unique'] + 1
@@ -131,9 +130,6 @@ function s:unique(server)
     endif
     let a:server['unique'] = l:num
     return l:num
-endfunction
-
-function client#Test()
 endfunction
 
 
