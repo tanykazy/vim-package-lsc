@@ -9,31 +9,31 @@ set cpoptions&vim
 
 let s:rn = "\r\n"
 
-function lsp#initialize()
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:params = s:InitializeParams({}, v:null, v:null)
-	return l:params
-endfunction
-
 function s:DocumentUri(scheme, authority, path, query, fragment)
 endfunction
 
 function s:Uri(scheme, authority, path, query, fragment)
 endfunction
 
-function s:InitializeParams(params, initializationOptions, workspaceFolders)
-	let a:params['processId'] = getpid()
-	let a:params['clientInfo'] = {}
-	let a:params['clientInfo']['name'] = "vim-package-lsp"
-	let a:params['clientInfo']['version'] = "0.0"
-	let a:params['locale'] = "en"
-	" let a:params['rootPath'] @deprecated
-	" let a:params['rootUri'] @deprecated
-	let a:params['initializationOptions'] = a:initializationOptions
-	let a:params['capabilities'] = s:ClientCapabilities()
-	let a:params['trace'] = "messages" " 'off' | 'messages' | 'verbose'
-	let a:params['workspaceFolders'] = a:workspaceFolders ? a:workspaceFolders : v:null
-	return a:params
+function lsp#InitializeParams(initializationOptions, workspaceFolders)
+	let l:params = {}
+	let l:params['processId'] = getpid()
+	let l:params['clientInfo'] = {}
+	let l:params['clientInfo']['name'] = "vim-package-lsp"
+	let l:params['clientInfo']['version'] = "0.0"
+	let l:params['locale'] = "en"
+	" let l:params['rootPath'] @deprecated
+	" let l:params['rootUri'] @deprecated
+	let l:params['initializationOptions'] = a:initializationOptions
+	let l:params['capabilities'] = s:ClientCapabilities()
+	let l:params['trace'] = "messages" " 'off' | 'messages' | 'verbose'
+	let l:params['workspaceFolders'] = a:workspaceFolders ? a:workspaceFolders : v:null
+	return l:params
+endfunction
+
+function lsp#InitializedParams()
+	let l:params = {}
+	return l:params
 endfunction
 
 function s:WorkspaceFolder()

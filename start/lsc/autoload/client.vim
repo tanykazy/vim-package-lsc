@@ -18,10 +18,10 @@ function client#Start(lang, path)
     let s:server_info[l:server]['path'] = a:path
     let s:server_info[l:server]['unique'] = 0
     let l:id = s:unique(s:server_info[l:server])
-    let l:message = jsonrpc#request_message(l:id, 'initialize', lsp#initialize())
+    let l:message = jsonrpc#request_message(l:id, 'initialize', lsp#InitializeParams(v:null, v:null))
     let s:server_info[l:server][l:id] = {}
     let s:server_info[l:server][l:id]['message'] = l:message
-	return channel#Send(l:server, l:message)
+	call channel#Send(l:server, l:message)
 endfunction
 
 function client#Callback(channel, content)
@@ -71,7 +71,8 @@ function s:matrix[s:stateIdle][s:eventResponse].fn(server, content) dict
     if has_key(a:server, l:id)
         let l:method = a:server[l:id]['message']['method']
         if l:method == 'initialize'
-            call ch_log('--- debug response ---' . l:method)
+            let l:message = jsonrpc#notification_message('initialized', lsp#InitializedParams())
+            call channel#Send(a:server['server'], l:message)
         else
         endif
     endif
