@@ -18,28 +18,26 @@ function client#Start(lang, path)
     let s:server_info[l:server]['path'] = a:path
     let s:server_info[l:server]['unique'] = 0
     let l:id = s:unique(s:server_info[l:server])
-	let l:initialize = lsp#initialize(l:id)
+    let l:message = jsonrpc#request_message(l:id, 'initialize', lsp#initialize())
     let s:server_info[l:server][l:id] = {}
-    let s:server_info[l:server][l:id]['message'] = l:initialize
-	return channel#Send(l:server, l:initialize)
+    let s:server_info[l:server][l:id]['message'] = l:message
+	return channel#Send(l:server, l:message)
 endfunction
 
-function client#Callback(channel, message)
+function client#Callback(channel, content)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:content = a:message['content']
-    if jsonrpc#isRequest(l:content)
+    if jsonrpc#isRequest(a:content)
         let s:event = s:eventRequest
-    elseif jsonrpc#isResponse(l:content)
+    elseif jsonrpc#isResponse(a:content)
         let s:event = s:eventResponse
-    elseif jsonrpc#isNotification(l:content)
+    elseif jsonrpc#isNotification(a:content)
         let s:event = s:eventNotification
     else
-        call log#log_error(string(a:message))
-        throw 'Event undetected.'
+        call log#log_error('Undetected event: ' string(a:message))
     endif
     let l:server = s:server_info[a:channel]
 	call log#log_trace('State: ' . s:state . ', Event: ' . s:event)
-    return s:matrix[s:state][s:event].fn(l:server, l:content)
+    return s:matrix[s:state][s:event].fn(l:server, a:content)
 endfunction
 
 let s:stateIdle = 0
@@ -71,7 +69,7 @@ function s:matrix[s:stateIdle][s:eventResponse].fn(server, content) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:id = a:content['id']
     if has_key(a:server, l:id)
-        let l:method = a:server[l:id]['message']['content']['method']
+        let l:method = a:server[l:id]['message']['method']
         if l:method == 'initialize'
             call ch_log('--- debug response ---' . l:method)
         else

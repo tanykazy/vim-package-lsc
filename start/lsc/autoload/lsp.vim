@@ -9,53 +9,10 @@ set cpoptions&vim
 
 let s:rn = "\r\n"
 
-function lsp#initialize(id)
+function lsp#initialize()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:params = s:InitializeParams({}, v:null, v:null)
-	return s:BuildMessage(a:id, 'initialize', l:params)
-endfunction
-
-function s:BuildMessage(id, method, params)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:message = s:Message({})
-	let l:message = s:RequestMessage(l:message, a:id, a:method, a:params)	
-	let l:content = json_encode(l:message)
-	let l:header = s:BuildHeader(l:content)
-	return l:header . s:rn . l:content
-endfunction
-
-function s:BuildHeader(content)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	" return 'Content-Length: ' . len(a:content) . s:rn
-	" call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:header = []
-	call add(l:header, 'Content-Length: ' . len(a:content))
-	call add(l:header, 'Content-Type: application/vscode-jsonrpc; charset=utf-8')
-	" let l:header[0] = 'Content-Length: ' . len(a:content)
-	" let l:header[1] = 'Content-Type: application/vscode-jsonrpc; charset=utf-8'
-	return join(l:header, "\r\n") . "\r\n"
-endfunction
-
-function s:BuildContent(params)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-endfunction
-
-function s:Message(message)
-	let a:message['jsonrpc'] = '2.0'
-	return a:message
-endfunction
-
-function s:RequestMessage(message, id, method, params)
-	let a:message['id'] = a:id
-	let a:message['method'] = a:method
-	let a:message['params'] = a:params
-	return a:message
-endfunction
-
-function s:NotificationMessage(message, method, params)
-	let a:message['method'] = a:method
-	let a:message['params'] = a:params
-	return a:message
+	return l:params
 endfunction
 
 function s:DocumentUri(scheme, authority, path, query, fragment)

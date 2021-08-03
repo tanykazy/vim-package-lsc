@@ -16,6 +16,7 @@ function channel#Open(command, cwd, callback)
     " let l:opt['in_io'] = 'pipe'
     " let l:opt['out_io'] = 'pipe'
     " let l:opt['err_io'] = 'pipe'
+    " let l:opt['out_mode'] = 'json'
     let l:opt['out_cb'] = function('s:OutCallbackhandler')
     let l:opt['err_cb'] = function('s:ErrCallbackhandler')
     let l:opt['cwd'] = a:cwd
@@ -29,7 +30,9 @@ endfunction
 function channel#Send(channel, data)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:info = s:GetChannelInfo(a:channel)
-	return s:ChSendraw(l:info['channel'], a:data, {})
+	let l:payload = jsonrpc#build_payload(a:data)
+	call log#log_debug('Send data to[' . a:channel . ']:' . l:payload)
+	return ch_sendraw(l:info['channel'], l:payload, {})
 endfunction
 
 function channel#Close(channel)
@@ -37,8 +40,6 @@ function channel#Close(channel)
 	let l:info = s:GetChannelInfo(a:channel)
 	let l:job = ch_getjob(a:channel)	
 	call job_stop(l:job, 'term')
-	" if job_status(l:job) == 'run'
-	" endif
 	call ch_chlose(a:channel)
 	call s:DelChannelInfo(a:channel)
 	return a:channel
@@ -46,16 +47,22 @@ endfunction
 
 function s:OutCallbackhandler(channel, msg)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	call log#log_debug('Receive data from[' . a:channel . ']:' . a:msg)
 	let l:info = s:GetChannelInfo(a:channel)
 	let l:message = jsonrpc#parse_message(a:msg)
 	if !has_key(l:info, 'message')
 		let l:info['message'] = {}
 	endif
-	call extend(l:info['message'], l:message)
+	if has_key(l:message, 'header')
+		let l:info['message']['header'] = l:message['header']
+	endif
+	if has_key(l:message, 'content')
+		let l:info['message']['content'] = l:message['content']
+	endif
 	if has_key(l:info['message'], 'header') && has_key(l:info['message'], 'content')
 		if has_key(s:channel_info[a:channel], 'callback')
 			let l:message = remove(l:info, 'message')
-			call s:channel_info[a:channel]['callback'](a:channel, l:message)
+			call s:channel_info[a:channel]['callback'](a:channel, l:message['content'])
 		endif
 	endif
 endfunction
@@ -65,17 +72,12 @@ function s:ErrCallbackhandler(channel, msg)
 	call log#log_debug(a:channel . a:msg)
 endfunction
 
-function s:ChannelInfo(channel)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:info = {}
-	let l:info['channel'] = a:channel
-	return l:info
-endfunction
-
 function s:AddChannelInfo(channel)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	if !has_key(s:channel_info, a:channel)
-		let s:channel_info[a:channel] = s:ChannelInfo(a:channel)
+		let l:info = {}
+		let l:info['channel'] = a:channel
+		let s:channel_info[a:channel] = l:info
 	endif
     return s:channel_info[a:channel]
 endfunction
@@ -91,11 +93,6 @@ endfunction
 function s:DelChannelInfo(channel)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return remove(s:channel_info, a:channel)
-endfunction
-
-function s:ChSendraw(handle, expr, options)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return ch_sendraw(a:handle, a:expr, a:options)
 endfunction
 
 
