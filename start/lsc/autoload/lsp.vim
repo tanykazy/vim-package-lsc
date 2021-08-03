@@ -26,7 +26,7 @@ function lsp#InitializeParams(initializationOptions, workspaceFolders)
 	" let l:params['rootUri'] @deprecated
 	let l:params['initializationOptions'] = a:initializationOptions
 	let l:params['capabilities'] = s:ClientCapabilities()
-	let l:params['trace'] = "messages" " 'off' | 'messages' | 'verbose'
+	let l:params['trace'] = "verbose" " 'off' | 'messages' | 'verbose'
 	let l:params['workspaceFolders'] = a:workspaceFolders ? a:workspaceFolders : v:null
 	return l:params
 endfunction

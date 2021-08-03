@@ -24,23 +24,21 @@ function channel#Open(command, cwd, callback)
 	let l:channel = job_getchannel(l:job)
     let l:info = s:AddChannelInfo(l:channel)
 	let l:info['callback'] = a:callback
-	return l:channel
+	return l:info
 endfunction
 
 function channel#Send(channel, data)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:info = s:GetChannelInfo(a:channel)
 	let l:payload = jsonrpc#build_payload(a:data)
-	call log#log_debug('Send data to[' . a:channel . ']:' . l:payload)
-	return ch_sendraw(l:info['channel'], l:payload, {})
+	call log#log_debug('Send data to[' . a:channel['id'] . ']:' . l:payload)
+	return ch_sendraw(a:channel['handle'], l:payload, {})
 endfunction
 
 function channel#Close(channel)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:info = s:GetChannelInfo(a:channel)
-	let l:job = ch_getjob(a:channel)	
+	let l:job = ch_getjob(a:channel['handle'])	
 	call job_stop(l:job, 'term')
-	call ch_chlose(a:channel)
+	call ch_close(a:channel['handle'])
 	call s:DelChannelInfo(a:channel)
 	return a:channel
 endfunction
@@ -60,9 +58,11 @@ function s:OutCallbackhandler(channel, msg)
 		let l:info['message']['content'] = l:message['content']
 	endif
 	if has_key(l:info['message'], 'header') && has_key(l:info['message'], 'content')
-		if has_key(s:channel_info[a:channel], 'callback')
-			let l:message = remove(l:info, 'message')
-			call s:channel_info[a:channel]['callback'](a:channel, l:message['content'])
+		if has_key(l:info, 'callback')
+			if ch_status(a:channel) == 'open'
+				let l:message = remove(l:info, 'message')
+				call l:info['callback'](l:info, l:message['content'])
+			endif
 		endif
 	endif
 endfunction
@@ -74,25 +74,32 @@ endfunction
 
 function s:AddChannelInfo(channel)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	if !has_key(s:channel_info, a:channel)
+	let l:id = ch_info(a:channel)['id']
+	if !has_key(s:channel_info, l:id)
 		let l:info = {}
 		let l:info['channel'] = a:channel
-		let s:channel_info[a:channel] = l:info
+		let l:info['handle'] = a:channel
+		let l:info['id'] = l:id
+		let s:channel_info[l:id] = l:info
 	endif
-    return s:channel_info[a:channel]
+    return s:channel_info[l:id]
 endfunction
 
 function s:GetChannelInfo(channel)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	if has_key(s:channel_info, a:channel)
-		return get(s:channel_info, a:channel, v:null)
+	let l:id = ch_info(a:channel)['id']
+	if has_key(s:channel_info, l:id)
+		return s:channel_info[l:id]
 	endif
 	return v:null
 endfunction
 
 function s:DelChannelInfo(channel)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return remove(s:channel_info, a:channel)
+	let l:id = a:channel['id']
+	if has_key(s:channel_info, l:id)
+		return remove(s:channel_info, l:id)
+	endif
 endfunction
 
 

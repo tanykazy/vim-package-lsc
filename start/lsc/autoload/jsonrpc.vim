@@ -45,7 +45,7 @@ function jsonrpc#notification_message(method, params)
 	let l:message = jsonrpc#message()
 	let l:message['method'] = a:method
 	if has_key(a:, 'params')
-		let l:message['params'] = a:params
+		" let l:message['params'] = a:params
 	endif
 	return l:message
 endfunction

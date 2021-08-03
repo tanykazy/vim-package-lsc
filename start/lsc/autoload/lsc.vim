@@ -14,6 +14,11 @@ function lsc#Lsc()
 	" let l:b = channel#Send(l:ch, l:result)
 endfunction
 
+function lsc#Test()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	call client#Stop('npx vscode-json-languageserver --stdio')
+endfunction
+
 
 
 function s:StartImpl(cmd, cwd)
