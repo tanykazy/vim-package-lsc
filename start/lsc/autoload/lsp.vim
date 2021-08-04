@@ -28,18 +28,18 @@ function lsp#InitializedParams()
 	return l:params
 endfunction
 
-function lsp#DidOpenTextDocumentParams()
+function lsp#DidOpenTextDocumentParams(path, languageId, version, text)
 	let l:params = {}
-	let l:params['textDocument'] = 
+	let l:params['textDocument'] = s:TextDocumentItem(a:path, a:languageId, a:version, a:text)
 	return l:params
 endfunction
 
-function s:TextDocumentItem()
+function s:TextDocumentItem(path, languageId, version, text)
 	let l:params = {}
-	let l:params['uri'] = 
-	let l:params['languageId'] = 
-	let l:params['version'] = 
-	let l:params['text'] = 
+	let l:params['uri'] = s:DocumentUri('file', v:none, a:path, v:none, v:none)
+	let l:params['languageId'] = a:languageId
+	let l:params['version'] = a:version
+	let l:params['text'] = a:text
 	return l:params
 endfunction
 

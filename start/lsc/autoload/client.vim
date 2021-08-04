@@ -81,6 +81,9 @@ let s:event = s:eventRequest
 
 function s:matrix[s:stateIdle][s:eventRequest].fn(server, content) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call log#log_error('Unimplemented function call')
+    call log#log_error(string(a:server))
+    call log#log_error(string(a:content))
 endfunction
 
 function s:matrix[s:stateIdle][s:eventResponse].fn(server, content) dict
@@ -91,8 +94,21 @@ function s:matrix[s:stateIdle][s:eventResponse].fn(server, content) dict
         if l:method == 'initialize'
             let l:message = jsonrpc#notification_message('initialized', lsp#InitializedParams())
             call channel#Send(a:server['channel'], l:message)
-            let s:state = s:stateActive
             call remove(a:server, l:id)
+            let s:state = s:stateActive
+
+            let l:buflist = util#loadedbuflist()
+            for l:buf in l:buflist
+                let l:bufnr = l:buf['bufnr']
+                let l:name = l:buf['name']
+                let l:changedtick = l:buf['changedtick']
+                let l:text = util#getbuftext(l:bufnr)
+
+                let l:message = jsonrpc#notification_message('textDocument/didOpen', lsp#DidOpenTextDocumentParams(l:name, &filetype, l:changedtick, l:text))
+
+                call channel#Send(a:server['channel'], l:message)
+            endfor
+
         else
         endif
     endif
@@ -100,10 +116,16 @@ endfunction
 
 function s:matrix[s:stateIdle][s:eventNotification].fn(server, content) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call log#log_error('Unimplemented function call')
+    call log#log_error(string(a:server))
+    call log#log_error(string(a:content))
 endfunction
 
 function s:matrix[s:stateActive][s:eventRequest].fn(server, content) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call log#log_error('Unimplemented function call')
+    call log#log_error(string(a:server))
+    call log#log_error(string(a:content))
 endfunction
 
 function s:matrix[s:stateActive][s:eventResponse].fn(server, content) dict
@@ -125,6 +147,28 @@ endfunction
 
 function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call log#log_error('Unimplemented function call')
+    call log#log_error(string(a:server))
+    call log#log_error(string(a:content))
+
+    if a:content['method'] == 'textDocument/publishDiagnostics'
+        for l:value in a:content['params']['diagnostics']
+            call log#log_debug(string(l:value))
+            let l:file = util#uri2path(a:content['params']['uri'])
+            call log#log_debug(l:file)
+            call setqflist([{
+                \ 'filename': l:file,
+                \ 'lnum': l:value['range']['start']['line'],
+                \ 'col': l:value['range']['start']['character'],
+                \ 'nr': l:value['code'],
+                \ 'type': l:value['severity'],
+                \ 'text': l:value['message']}], 'a')
+        endfor
+    endif
+
+
+
+
 endfunction
 
 function s:unique(server)
