@@ -147,23 +147,32 @@ endfunction
 
 function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_error('Unimplemented function call')
+    " call log#log_error('Unimplemented function call')
     call log#log_error(string(a:server))
     call log#log_error(string(a:content))
 
     if a:content['method'] == 'textDocument/publishDiagnostics'
+        let l:location = []
         for l:value in a:content['params']['diagnostics']
             call log#log_debug(string(l:value))
             let l:file = util#uri2path(a:content['params']['uri'])
-            call log#log_debug(l:file)
-            call setqflist([{
-                \ 'filename': l:file,
-                \ 'lnum': l:value['range']['start']['line'],
-                \ 'col': l:value['range']['start']['character'],
-                \ 'nr': l:value['code'],
-                \ 'type': l:value['severity'],
-                \ 'text': l:value['message']}], 'a')
+            " call log#log_debug(l:file)
+            let l:lnum = l:value['range']['start']['line']
+            let l:col = l:value['range']['start']['character']
+            let l:nr = l:value['code']
+            let l:text = l:value['message']
+            let l:type = l:value['severity']
+            call add(l:location, quickfix#location(l:file, l:lnum, l:col, l:nr, l:text, l:type))
+
+            let l:start = l:value['range']['start']
+            let l:end = l:value['range']['end']
+            call textprop#define_types()
+            call textprop#add(l:start, l:end, l:type)
+
+
+
         endfor
+        call quickfix#set_location(v:none, l:location, 'r')
     endif
 
 

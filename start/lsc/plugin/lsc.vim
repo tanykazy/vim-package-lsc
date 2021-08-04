@@ -7,4 +7,6 @@ call log#log_trace('load: plugin/lsc.vim')
 call log#log_debug('load: plugin/lsc.vim')
 call log#log_error('load: plugin/lsc.vim')
 
-call lsc#Lsc()
+" call lsc#Lsc()
+call lsc#define_autocmd()
+call highlight#define_highlight()

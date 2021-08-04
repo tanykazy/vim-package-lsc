@@ -8,6 +8,7 @@ set cpoptions&vim
 
 
 function util#uri2path(uri)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:tmp = split(a:uri, '://', 1)
 	let l:scheme = get(l:tmp, 0, '')
 	let l:path = get(l:tmp, 1, '')

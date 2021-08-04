@@ -7,6 +7,13 @@ let s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
 
+let lsp#DiagnosticSeverity = {}
+let lsp#DiagnosticSeverity['Error'] = 1
+let lsp#DiagnosticSeverity['Warning'] = 2
+let lsp#DiagnosticSeverity['Information'] = 3
+let lsp#DiagnosticSeverity['Hint'] = 4
+
+
 function lsp#InitializeParams(initializationOptions, workspaceFolders)
 	let l:params = {}
 	let l:params['processId'] = getpid()
