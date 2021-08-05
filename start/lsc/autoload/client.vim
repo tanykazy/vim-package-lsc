@@ -107,6 +107,9 @@ function s:matrix[s:stateIdle][s:eventResponse].fn(server, content) dict
                 let l:message = jsonrpc#notification_message('textDocument/didOpen', lsp#DidOpenTextDocumentParams(l:name, &filetype, l:changedtick, l:text))
 
                 call channel#Send(a:server['channel'], l:message)
+
+                " call listener_add(function('s:bufchange_listener'), l:bufnr)
+                call autocmd#add_event_listener()
             endfor
 
         else
@@ -147,16 +150,10 @@ endfunction
 
 function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    " call log#log_error('Unimplemented function call')
-    call log#log_error(string(a:server))
-    call log#log_error(string(a:content))
-
     if a:content['method'] == 'textDocument/publishDiagnostics'
         let l:location = []
         for l:value in a:content['params']['diagnostics']
-            call log#log_debug(string(l:value))
             let l:file = util#uri2path(a:content['params']['uri'])
-            " call log#log_debug(l:file)
             let l:lnum = l:value['range']['start']['line']
             let l:col = l:value['range']['start']['character']
             let l:nr = l:value['code']
@@ -166,18 +163,10 @@ function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
 
             let l:start = l:value['range']['start']
             let l:end = l:value['range']['end']
-            call textprop#define_types()
             call textprop#add(l:start, l:end, l:type)
-
-
-
         endfor
-        call quickfix#set_location(v:none, l:location, 'r')
+        call quickfix#set_quickfix(v:none, l:location, 'r')
     endif
-
-
-
-
 endfunction
 
 function s:unique(server)
@@ -188,6 +177,13 @@ function s:unique(server)
     endif
     let a:server['unique'] = l:num
     return l:num
+endfunction
+
+" function client#bufchange_listener(bufnr, start, end, added, changes)
+function client#bufchange_listener(bufnr)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	call log#log_error(expand('<sfile>') . ':' . expand('<sflnum>'))
+	call log#log_error(a:bufnr)
 endfunction
 
 

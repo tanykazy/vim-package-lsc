@@ -7,13 +7,18 @@ let s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
 
+function quickfix#set_quickfix(nr, list, action)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    return setqflist(a:list, a:action)
+endfunction
+
 function quickfix#set_location(nr, list, action)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    " call setloclist(a:nr, a:list, a:action)
-    call setqflist(a:list, a:action)
+    return setloclist(a:nr, a:list, a:action)
 endfunction
 
 function quickfix#location(filename, lnum, col, nr, text, type)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:location = {}
     " let l:location['bufnr']
     let l:location['filename'] = a:filename
