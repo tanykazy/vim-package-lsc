@@ -41,29 +41,29 @@ function lsp#DidOpenTextDocumentParams(path, languageId, version, text)
 	return l:params
 endfunction
 
-function lsp#DidChangeTextDocumentParams(uri, version, contentChanges)
+function lsp#DidChangeTextDocumentParams(path, version, contentChanges)
 	let l:params = {}
-	let l:params['textDocument'] = lsp#VersionedTextDocumentIdentifier(a:uri, a:version)
-	let l:params['contentChanges']
+	let l:params['textDocument'] = lsp#VersionedTextDocumentIdentifier(a:path, a:version)
+	let l:params['contentChanges'] = a:contentChanges
 	return l:params
 endfunction
 
-function lsp#VersionedTextDocumentIdentifier(uri, version)
-	let l:params = lsp#TextDocumentIdentifier(a:uri)
+function lsp#VersionedTextDocumentIdentifier(path, version)
+	let l:params = lsp#TextDocumentIdentifier(a:path)
 	let l:params['version'] = a:version
 	return l:params
 endfunction
 
-function lsp#TextDocumentIdentifier(uri)
+function lsp#TextDocumentIdentifier(path)
 	let l:params = {}
-	let l:params['uri'] = a:uri
+	let l:params['uri'] = lsp#DocumentUri('file', v:none, a:path, v:none, v:none)
 	return l:params
 endfunction
 
 function lsp#TextDocumentContentChangeEvent(range, text)
 	let l:params = {}
 	if !util#isNone(a:range)
-		let l:params['range'] = lsp#Range()
+		let l:params['range'] = a:range
 	endif
 	" let l:params['rangeLength'] @deprecated
 	let l:params['text'] = a:text
@@ -72,8 +72,8 @@ endfunction
 
 function lsp#Range(start, end)
 	let l:range = {}
-	let l:range['start'] = lsp#Position(a:start[0], a:start[1])
-	let l:range['end'] = lsp#Position(a:end[0], a:end[1])
+	let l:range['start'] = a:start
+	let l:range['end'] = a:end
 	return l:range
 endfunction
 

@@ -59,6 +59,12 @@ function client#Callback(channel, content)
     endfor
 endfunction
 
+function client#change_listener(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call s:send_textDocument_didChange(v:none, bufname(a:buf))
+endfunction
+
+
 let s:stateIdle = 0
 let s:stateActive = 1
 
@@ -152,6 +158,9 @@ function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if a:content['method'] == 'textDocument/publishDiagnostics'
         let l:location = []
+
+        call textprop#clear('%')
+
         for l:value in a:content['params']['diagnostics']
             let l:file = util#uri2path(a:content['params']['uri'])
             let l:lnum = l:value['range']['start']['line']
@@ -167,6 +176,22 @@ function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
         endfor
         call quickfix#set_quickfix(v:none, l:location, 'r')
     endif
+endfunction
+
+function s:send_textDocument_didChange(server, buf)
+	" call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    " call log#log_error(string(a:buf))
+    let l:bufinfo = getbufinfo(a:buf)
+    let l:path = l:bufinfo[0]['name']
+    let l:version = l:bufinfo[0]['changedtick']
+    let l:changes = []
+    call add(l:changes, lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf)))
+    let l:params = lsp#DidChangeTextDocumentParams(l:path, l:version, l:changes)
+    call log#log_debug(string(l:params))
+
+    let l:message = jsonrpc#notification_message('textDocument/didChange', l:params)
+
+    call channel#Send(s:server_info['typescript']['channel'], l:message)
 endfunction
 
 function s:unique(server)

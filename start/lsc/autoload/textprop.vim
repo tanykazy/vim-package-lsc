@@ -62,13 +62,21 @@ function textprop#add(startpos, endpos, severity)
     elseif a:severity == 4
         let l:props['type'] = 'Hint'
     endif
-    call prop_add(l:lnum, l:col, l:props)
+    return prop_add(l:lnum, l:col, l:props)
+endfunction
+
+function textprop#clear(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:bufinfo = getbufinfo(a:buf)
+    let l:props = {}
+    let l:props['bufnr'] = bufname(a:buf)
+    return prop_clear(1, l:bufinfo[0]['linecount'], l:props)
 endfunction
 
 function s:type_add(name, props)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if empty(prop_type_get(a:name, a:props))
-        call prop_type_add(a:name, a:props)
+        return prop_type_add(a:name, a:props)
     endif
 endfunction
 
