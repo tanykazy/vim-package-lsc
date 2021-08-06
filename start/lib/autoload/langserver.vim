@@ -1,15 +1,15 @@
-if exists("g:loaded_languageserver")
+if exists("g:loaded_langserver")
 	finish
 endif
-let g:loaded_languageserver= 1
+let g:loaded_langserver= 1
 
 let s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
-let s:ls_dir = expand('<sfile>:p:h:h')
+let s:langserver_dir = expand('<sfile>:p:h')
 
 
-function languageserver#GetPath()
+function langserver#getpath()
 	return simplify(s:ls_dir)
 endfunction
 
