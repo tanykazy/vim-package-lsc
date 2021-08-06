@@ -11,9 +11,10 @@ let s:server_info = {}
 
 function client#Start(lang, buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	call log#log_error(string(a:buf))
     if !has_key(s:server_info, a:lang)
         let l:cmd = server#load_setting(a:lang)
-        let l:channel = channel#Open(l:cmd, a:path, function('client#Callback'))
+        let l:channel = channel#Open(l:cmd, a:path, funcref('client#Callback'))
         let l:server = {}
         let l:server['id'] = l:channel['id']
         let l:server['channel'] = l:channel
@@ -21,7 +22,6 @@ function client#Start(lang, buf, path)
         call add(l:server['files'], getbufinfo(bufname(char2nr(a:buf)))[0]['name'])
         let l:server['lang'] = a:lang
         " let l:server['path'] = a:path
-        let l:server['unique'] = 0
         let l:unique = s:unique(l:server)
         let l:message = jsonrpc#request_message(l:unique, 'initialize', lsp#InitializeParams(v:null, v:null))
         let l:server[l:unique] = {}
@@ -61,9 +61,9 @@ function client#Callback(channel, content)
     endfor
 endfunction
 
-function client#change_listener(buf)
+function client#change_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call s:send_textDocument_didChange(v:none, bufname(a:buf))
+    call s:send_textDocument_didChange(v:none, bufname(a:buf), a:path)
 endfunction
 
 
@@ -116,7 +116,7 @@ function s:matrix[s:stateIdle][s:eventResponse].fn(server, content) dict
 
                 call channel#Send(a:server['channel'], l:message)
 
-                " call listener_add(function('s:bufchange_listener'), l:bufnr)
+                " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
                 call autocmd#add_event_listener()
             endfor
 
@@ -178,27 +178,35 @@ function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
     endif
 endfunction
 
-function s:send_textDocument_didChange(server, buf)
+function s:send_textDocument_didChange(server, buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    " call log#log_error(string(a:buf))
-    let l:bufinfo = getbufinfo(a:buf)
-    let l:path = l:bufinfo[0]['name']
-    let l:version = l:bufinfo[0]['changedtick']
-    let l:changes = []
-    call add(l:changes, lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf)))
-    let l:params = lsp#DidChangeTextDocumentParams(l:path, l:version, l:changes)
-    call log#log_debug(string(l:params))
-
-    let l:message = jsonrpc#notification_message('textDocument/didChange', l:params)
-
-    let l:server = s:buf2server(a:buf)
-    call log#log_debug(string(l:server))
-
-    call channel#Send(l:server['channel'], l:message)
+    " call log#log_error(string(getchangelist(a:buf)))
+    let l:servers = s:getservers(a:path)
+    if empty(l:servers)
+        call log#log_error('Not found server with open ' . a:path)
+    else
+        let l:bufinfos = getbufinfo(a:buf)
+        if empty(l:bufinfos)
+            call log#log_error('Not found buffer number ' . a:buf)
+        else
+            for l:bufinfo in l:bufinfos
+                let l:version = l:bufinfo['changedtick']
+                let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
+                let l:params = lsp#DidChangeTextDocumentParams(a:path, l:version, [l:change])
+                let l:message = jsonrpc#notification_message('textDocument/didChange', l:params)
+                for l:server in l:servers
+                    call channel#Send(l:server['channel'], l:message)
+                endfor
+            endfor
+        endif
+    endif
 endfunction
 
 function s:unique(server)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if !has_key(a:server, 'unique')
+        let a:server['unique'] = 0
+    endif
     let l:num = a:server['unique'] + 1
     if l:num > pow(2, 31) - 1
         let l:num = 1
@@ -207,28 +215,24 @@ function s:unique(server)
     return l:num
 endfunction
 
-function s:buf2server(buf)
+function s:getservers(path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:bufinfos = getbufinfo(a:buf)
-    " let l:results = []
-    for l:bufinfo in l:bufinfos
-        for l:server in values(s:server_info)
-            for l:file in l:server['files']
-                if l:bufinfo['name'] == l:file
-                    " call add(l:results, l:server)
-                    return l:server
-                endif
+    let l:servers = []
+    for l:server in values(s:server_info)
+        for l:file in l:server['files']
+            if l:file == a:path
+                call add(l:servers, l:server)
+            endif
         endfor
     endfor
-    " return l:results
+    return l:servers
 endfunction
 
 " function client#bufchange_listener(bufnr, start, end, added, changes)
-function client#bufchange_listener(bufnr)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call log#log_error(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call log#log_error(a:bufnr)
-endfunction
+" 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+" 	call log#log_error(expand('<sfile>') . ':' . expand('<sflnum>'))
+" 	call log#log_error(a:bufnr)
+" endfunction
 
 
 let &cpoptions = s:save_cpoptions

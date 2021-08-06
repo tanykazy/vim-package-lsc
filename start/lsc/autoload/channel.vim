@@ -17,14 +17,20 @@ function channel#Open(command, cwd, callback)
     " let l:opt['out_io'] = 'pipe'
     " let l:opt['err_io'] = 'pipe'
     " let l:opt['out_mode'] = 'json'
-    let l:opt['out_cb'] = function('s:OutCallbackhandler')
-    let l:opt['err_cb'] = function('s:ErrCallbackhandler')
+    let l:opt['out_cb'] = funcref('s:OutCallbackhandler')
+    let l:opt['err_cb'] = funcref('s:ErrCallbackhandler')
+    let l:opt['stoponexit'] = 'term'
+    let l:opt['noblock'] = 1
     let l:opt['cwd'] = a:cwd
 	let l:job = job_start(a:command, l:opt)
 	let l:channel = job_getchannel(l:job)
-    let l:info = s:AddChannelInfo(l:channel)
+	let l:id = ch_info(l:channel)['id']
+	let l:info = {}
+	let l:info['handle'] = l:channel
+	let l:info['id'] = l:id
 	let l:info['callback'] = a:callback
 	let l:info['job'] = l:job
+	let s:channel_info[l:id] = l:info
 	return l:info
 endfunction
 
@@ -37,9 +43,13 @@ endfunction
 
 function channel#Close(channel)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call ch_close(a:channel['handle'])
 	call job_stop(a:channel['job'], 'term')
-	call s:DelChannelInfo(a:channel)
+	" call log#log_error(job_status(a:channel['job']))
+	call ch_close(a:channel['handle'])
+	let l:id = a:channel['id']
+	if has_key(s:channel_info, l:id)
+		call remove(s:channel_info, l:id)
+	endif
 	return a:channel
 endfunction
 
@@ -72,18 +82,6 @@ function s:ErrCallbackhandler(channel, msg)
 	call log#log_debug(a:channel . a:msg)
 endfunction
 
-function s:AddChannelInfo(channel)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:id = ch_info(a:channel)['id']
-	if !has_key(s:channel_info, l:id)
-		let l:info = {}
-		let l:info['handle'] = a:channel
-		let l:info['id'] = l:id
-		let s:channel_info[l:id] = l:info
-	endif
-    return s:channel_info[l:id]
-endfunction
-
 function s:GetChannelInfo(channel)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:id = ch_info(a:channel)['id']
@@ -91,14 +89,6 @@ function s:GetChannelInfo(channel)
 		return s:channel_info[l:id]
 	endif
 	return v:null
-endfunction
-
-function s:DelChannelInfo(channel)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:id = a:channel['id']
-	if has_key(s:channel_info, l:id)
-		return remove(s:channel_info, l:id)
-	endif
 endfunction
 
 

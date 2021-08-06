@@ -19,47 +19,56 @@ endfunction
 function autocmd#add_event_listener()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	augroup vim_package_lsp
-		autocmd TextChanged * call s:textchanged_listener(expand('<abuf>'), expand('<afile>'))
-		" autocmd InsertCharPre * call s:insertcharpre_listener(expand('<abuf>'), expand('<afile>'))
-		" autocmd InsertChange * call s:insertchange_listener(expand('<abuf>'), expand('<afile>'))
-		autocmd InsertLeavePre * call s:insertleavepre_listener(expand('<abuf>'), expand('<afile>'))
-		" autocmd InsertLeave * call s:insertleave_listener(expand('<abuf>'), expand('<afile>'))
+		autocmd TextChanged * call s:textchanged_listener()
+		" autocmd InsertCharPre * call s:insertcharpre_listener()
+		" autocmd InsertChange * call s:insertchange_listener()
+		" autocmd InsertLeavePre * call s:insertleavepre_listener()
+		autocmd InsertLeave * call s:insertleave_listener()
 	augroup END
 endfunction
 
-function s:textchanged_listener(buf, file)
+function s:textchanged_listener()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	" call log#log_error(a:buf)
-	" call log#log_error(a:file)
-	call client#change_listener(a:buf)
+	" call log#log_error(a:path)
+	let l:buf = expand('<abuf>')
+	let l:path = expand('<afile>:p') 
+	call client#change_listener(l:buf, l:path)
 endfunction
 
-function s:insertcharpre_listener(buf, file)
+function s:insertcharpre_listener()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	" call log#log_error(a:buf)
-	" call log#log_error(a:file)
-	call client#change_listener(a:buf)
+	" call log#log_error(a:path)
+	let l:buf = expand('<abuf>')
+	let l:path = expand('<afile>:p') 
+	call client#change_listener(l:buf, l:path)
 endfunction
 
-function s:insertchange_listener(buf, file)
+function s:insertchange_listener()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	" call log#log_error(a:buf)
-	" call log#log_error(a:file)
-	call client#change_listener(a:buf)
+	" call log#log_error(a:path)
+	let l:buf = expand('<abuf>')
+	let l:path = expand('<afile>:p') 
+	call client#change_listener(l:buf, l:path)
 endfunction
 
-function s:insertleavepre_listener(buf, file)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	" call log#log_error(a:buf)
-	" call log#log_error(a:file)
-	call client#change_listener(a:buf)
-endfunction
+" function s:insertleavepre_listener()
+" 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+" 	call log#log_error(a:buf)
+" 	call log#log_error(a:path)
+	" let l:buf = expand('<abuf>')
+	" let l:path = expand('<afile>:p') 
+" 	call client#change_listener(l:buf, l:path)
+" endfunction
 
-function s:insertleave_listener(buf, file)
+function s:insertleave_listener()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	" call log#log_error(a:buf)
-	" call log#log_error(a:file)
-	call client#change_listener(a:buf)
+	" call log#log_error(expand('<abuf>') . expand('<afile>:p'))
+	let l:buf = expand('<abuf>')
+	let l:path = expand('<afile>:p') 
+	call client#change_listener(l:buf, l:path)
 endfunction
 
 

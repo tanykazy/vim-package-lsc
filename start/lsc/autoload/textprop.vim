@@ -7,40 +7,44 @@ let s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
 
+let s:error= {}
+" let s:error['bufnr'] = bufnr('%')
+let s:error['highlight'] = 'ErrorMsg'
+let s:error['priority'] = 4
+let s:error['combine'] = v:true
+let s:error['start_incl'] = v:true
+let s:error['end_incl'] = v:true
+
+let s:warning = {}
+" let s:warning['bufnr'] = bufnr('%')
+let s:warning['highlight'] = 'WarningMsg'
+let s:warning['priority'] = 3
+let s:warning['combine'] = v:true
+let s:warning['start_incl'] = v:true
+let s:warning['end_incl'] = v:true
+
+let s:information = {}
+" let s:information['bufnr'] = bufnr('%')
+let s:information['highlight'] = 'Underlined'
+let s:information['priority'] = 2
+let s:information['combine'] = v:true
+let s:information['start_incl'] = v:true
+let s:information['end_incl'] = v:true
+
+let s:hint = {}
+" let s:hint['bufnr'] = bufnr('%')
+let s:hint['highlight'] = 'Diagnostic'
+let s:hint['priority'] = 1
+let s:hint['combine'] = v:true
+let s:hint['start_incl'] = v:true
+let s:hint['end_incl'] = v:true
+
 function textprop#setup_proptypes()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:error= {}
-    " let l:error['bufnr'] = bufnr('%')
-    let l:error['highlight'] = 'ErrorMsg'
-    let l:error['priority'] = 4
-    let l:error['combine'] = v:true
-    let l:error['start_incl'] = v:true
-    let l:error['end_incl'] = v:true
-    call s:type_add('Error', l:error)
-    let l:warning = {}
-    " let l:warning['bufnr'] = bufnr('%')
-    let l:warning['highlight'] = 'WarningMsg'
-    let l:warning['priority'] = 3
-    let l:warning['combine'] = v:true
-    let l:warning['start_incl'] = v:true
-    let l:warning['end_incl'] = v:true
-    call s:type_add('Warning', l:warning)
-    let l:information = {}
-    " let l:information['bufnr'] = bufnr('%')
-    let l:information['highlight'] = 'Underlined'
-    let l:information['priority'] = 2
-    let l:information['combine'] = v:true
-    let l:information['start_incl'] = v:true
-    let l:information['end_incl'] = v:true
-    call s:type_add('Information', l:information)
-    let l:hint = {}
-    " let l:hint['bufnr'] = bufnr('%')
-    let l:hint['highlight'] = 'Diagnostic'
-    let l:hint['priority'] = 1
-    let l:hint['combine'] = v:true
-    let l:hint['start_incl'] = v:true
-    let l:hint['end_incl'] = v:true
-    call s:type_add('Hint', l:hint)
+    call s:type_add('Error', s:error)
+    call s:type_add('Warning', s:warning)
+    call s:type_add('Information', s:information)
+    call s:type_add('Hint', s:hint)
 endfunction
 
 function textprop#add(startpos, endpos, severity)
@@ -70,13 +74,17 @@ function textprop#clear(buf)
     let l:bufinfo = getbufinfo(a:buf)
     let l:props = {}
     let l:props['bufnr'] = bufname(a:buf)
-    return prop_clear(1, l:bufinfo[0]['linecount'], l:props)
+    " call log#log_error(string(l:bufinfo))
+    return prop_clear(1, line('$'), l:props)
+    " return prop_clear(1, l:bufinfo[0]['linecount'], l:props)
 endfunction
 
 function s:type_add(name, props)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if empty(prop_type_get(a:name, a:props))
         return prop_type_add(a:name, a:props)
+    else
+        call log#log_error('Property type ' . a:name . ' already defined')
     endif
 endfunction
 

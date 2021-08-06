@@ -10,7 +10,7 @@ set cpoptions&vim
 function lsc#Lsc()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	" call client#Start('typescript', s:GetCwd())
-	call client#Start('typescript', bufname('<abuf>'), util#getcwd())
+	call client#Start('typescript', bufname(expand('<abuf>')), util#getcwd())
 endfunction
 
 function lsc#Test()
