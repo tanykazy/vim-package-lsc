@@ -28,6 +28,11 @@ function util#getbuftext(buf)
 	return l:text
 endfunction
 
+function util#getcwd()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	return getcwd(bufwinnr(bufnr("#")))
+endfunction
+
 function util#isNone(none)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return (type(a:none) == v:t_none) && (string(a:none) == 'v:none')

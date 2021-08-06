@@ -20,10 +20,10 @@ function autocmd#add_event_listener()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	augroup vim_package_lsp
 		autocmd TextChanged * call s:textchanged_listener(expand('<abuf>'), expand('<afile>'))
-		autocmd InsertCharPre * call s:insertcharpre_listener(expand('<abuf>'), expand('<afile>'))
-		autocmd InsertChange * call s:insertchange_listener(expand('<abuf>'), expand('<afile>'))
+		" autocmd InsertCharPre * call s:insertcharpre_listener(expand('<abuf>'), expand('<afile>'))
+		" autocmd InsertChange * call s:insertchange_listener(expand('<abuf>'), expand('<afile>'))
 		autocmd InsertLeavePre * call s:insertleavepre_listener(expand('<abuf>'), expand('<afile>'))
-		autocmd InsertLeave * call s:insertleave_listener(expand('<abuf>'), expand('<afile>'))
+		" autocmd InsertLeave * call s:insertleave_listener(expand('<abuf>'), expand('<afile>'))
 	augroup END
 endfunction
 

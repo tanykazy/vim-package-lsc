@@ -9,7 +9,7 @@ set cpoptions&vim
 
 let s:server_info = {}
 
-function client#Start(lang, path)
+function client#Start(lang, buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !has_key(s:server_info, a:lang)
         let l:cmd = server#load_setting(a:lang)
@@ -17,8 +17,10 @@ function client#Start(lang, path)
         let l:server = {}
         let l:server['id'] = l:channel['id']
         let l:server['channel'] = l:channel
+        let l:server['files'] = []
+        call add(l:server['files'], getbufinfo(bufname(char2nr(a:buf)))[0]['name'])
         let l:server['lang'] = a:lang
-        let l:server['path'] = a:path
+        " let l:server['path'] = a:path
         let l:server['unique'] = 0
         let l:unique = s:unique(l:server)
         let l:message = jsonrpc#request_message(l:unique, 'initialize', lsp#InitializeParams(v:null, v:null))
@@ -158,9 +160,7 @@ function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if a:content['method'] == 'textDocument/publishDiagnostics'
         let l:location = []
-
         call textprop#clear('%')
-
         for l:value in a:content['params']['diagnostics']
             let l:file = util#uri2path(a:content['params']['uri'])
             let l:lnum = l:value['range']['start']['line']
@@ -179,7 +179,7 @@ function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
 endfunction
 
 function s:send_textDocument_didChange(server, buf)
-	" call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     " call log#log_error(string(a:buf))
     let l:bufinfo = getbufinfo(a:buf)
     let l:path = l:bufinfo[0]['name']
@@ -191,7 +191,10 @@ function s:send_textDocument_didChange(server, buf)
 
     let l:message = jsonrpc#notification_message('textDocument/didChange', l:params)
 
-    call channel#Send(s:server_info['typescript']['channel'], l:message)
+    let l:server = s:buf2server(a:buf)
+    call log#log_debug(string(l:server))
+
+    call channel#Send(l:server['channel'], l:message)
 endfunction
 
 function s:unique(server)
@@ -202,6 +205,22 @@ function s:unique(server)
     endif
     let a:server['unique'] = l:num
     return l:num
+endfunction
+
+function s:buf2server(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:bufinfos = getbufinfo(a:buf)
+    " let l:results = []
+    for l:bufinfo in l:bufinfos
+        for l:server in values(s:server_info)
+            for l:file in l:server['files']
+                if l:bufinfo['name'] == l:file
+                    " call add(l:results, l:server)
+                    return l:server
+                endif
+        endfor
+    endfor
+    " return l:results
 endfunction
 
 " function client#bufchange_listener(bufnr, start, end, added, changes)
