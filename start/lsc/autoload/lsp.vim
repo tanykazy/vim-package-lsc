@@ -24,7 +24,7 @@ function lsp#InitializeParams(initializationOptions, workspaceFolders)
 	" let l:params['rootPath'] @deprecated
 	" let l:params['rootUri'] @deprecated
 	let l:params['initializationOptions'] = a:initializationOptions
-	let l:params['capabilities'] = s:ClientCapabilities()
+	let l:params['capabilities'] = lsp#ClientCapabilities()
 	let l:params['trace'] = "verbose" " 'off' | 'messages' | 'verbose'
 	let l:params['workspaceFolders'] = a:workspaceFolders ? a:workspaceFolders : v:null
 	return l:params
@@ -37,24 +37,67 @@ endfunction
 
 function lsp#DidOpenTextDocumentParams(path, languageId, version, text)
 	let l:params = {}
-	let l:params['textDocument'] = s:TextDocumentItem(a:path, a:languageId, a:version, a:text)
+	let l:params['textDocument'] = lsp#TextDocumentItem(a:path, a:languageId, a:version, a:text)
 	return l:params
 endfunction
 
-function s:TextDocumentItem(path, languageId, version, text)
+function lsp#DidChangeTextDocumentParams(uri, version, contentChanges)
 	let l:params = {}
-	let l:params['uri'] = s:DocumentUri('file', v:none, a:path, v:none, v:none)
+	let l:params['textDocument'] = lsp#VersionedTextDocumentIdentifier(a:uri, a:version)
+	let l:params['contentChanges']
+	return l:params
+endfunction
+
+function lsp#VersionedTextDocumentIdentifier(uri, version)
+	let l:params = lsp#TextDocumentIdentifier(a:uri)
+	let l:params['version'] = a:version
+	return l:params
+endfunction
+
+function lsp#TextDocumentIdentifier(uri)
+	let l:params = {}
+	let l:params['uri'] = a:uri
+	return l:params
+endfunction
+
+function lsp#TextDocumentContentChangeEvent(range, text)
+	let l:params = {}
+	if !util#isNone(a:range)
+		let l:params['range'] = lsp#Range()
+	endif
+	" let l:params['rangeLength'] @deprecated
+	let l:params['text'] = a:text
+	return l:params
+endfunction
+
+function lsp#Range(start, end)
+	let l:range = {}
+	let l:range['start'] = lsp#Position(a:start[0], a:start[1])
+	let l:range['end'] = lsp#Position(a:end[0], a:end[1])
+	return l:range
+endfunction
+
+function lsp#Position(line, character)
+	let l:position = {}
+	let l:position['line'] = a:line
+	let l:position['character'] = a:character
+	return l:position
+endfunction
+
+function lsp#TextDocumentItem(path, languageId, version, text)
+	let l:params = {}
+	let l:params['uri'] = lsp#DocumentUri('file', v:none, a:path, v:none, v:none)
 	let l:params['languageId'] = a:languageId
 	let l:params['version'] = a:version
 	let l:params['text'] = a:text
 	return l:params
 endfunction
 
-function s:DocumentUri(scheme, authority, path, query, fragment)
-	return s:Uri(a:scheme, a:authority, a:path, a:query, a:fragment)
+function lsp#DocumentUri(scheme, authority, path, query, fragment)
+	return lsp#Uri(a:scheme, a:authority, a:path, a:query, a:fragment)
 endfunction
 
-function s:Uri(scheme, authority, path, query, fragment)
+function lsp#Uri(scheme, authority, path, query, fragment)
 	let l:params = []
 	call add(l:params, a:scheme)
 	call add(l:params, '://')
@@ -73,26 +116,26 @@ function s:Uri(scheme, authority, path, query, fragment)
 	return join(l:params, '')
 endfunction
 
-function s:WorkspaceFolder()
+function lsp#WorkspaceFolder()
 	" let l:workspaceFolder = {
 		" 'uri'
 		" 'name'
 	" }
 endfunction
 
-function s:ClientCapabilities()
+function lsp#ClientCapabilities()
 	let l:params = {}
 	let l:params['workspace'] = {}
 	let l:params['workspace']['applyEdit'] = v:false
-	let l:params['workspace']['workspaceEdit'] = s:WorkspaceEditClientCapabilities()
-	let l:params['workspace']['didChangeConfiguration'] = s:DidChangeConfigurationClientCapabilities()
-	let l:params['workspace']['didChangeWatchedFiles'] = s:DidChangeWatchedFilesClientCapabilities()
-	let l:params['workspace']['symbol'] = s:WorkspaceSymbolClientCapabilities()
-	let l:params['workspace']['executeCommand'] = s:ExecuteCommandClientCapabilities()
+	let l:params['workspace']['workspaceEdit'] = lsp#WorkspaceEditClientCapabilities()
+	let l:params['workspace']['didChangeConfiguration'] = lsp#DidChangeConfigurationClientCapabilities()
+	let l:params['workspace']['didChangeWatchedFiles'] = lsp#DidChangeWatchedFilesClientCapabilities()
+	let l:params['workspace']['symbol'] = lsp#WorkspaceSymbolClientCapabilities()
+	let l:params['workspace']['executeCommand'] = lsp#ExecuteCommandClientCapabilities()
 	let l:params['workspace']['workspaceFolders'] = v:false
 	let l:params['workspace']['configuration'] = v:false
-	let l:params['workspace']['semanticTokens'] = s:SemanticTokensWorkspaceClientCapabilities()
-	let l:params['workspace']['codeLens'] = s:CodeLensWorkspaceClientCapabilities()
+	let l:params['workspace']['semanticTokens'] = lsp#SemanticTokensWorkspaceClientCapabilities()
+	let l:params['workspace']['codeLens'] = lsp#CodeLensWorkspaceClientCapabilities()
 	let l:params['workspace']['fileOperations'] = {}
 	let l:params['workspace']['fileOperations']['dynamicRegistration'] = v:false
 	let l:params['workspace']['fileOperations']['didCreate'] = v:false
@@ -101,22 +144,22 @@ function s:ClientCapabilities()
 	let l:params['workspace']['fileOperations']['willRename'] = v:false
 	let l:params['workspace']['fileOperations']['didDelete'] = v:false
 	let l:params['workspace']['fileOperations']['willDelete'] = v:false
-	let l:params['textDocument'] = s:TextDocumentClientCapabilities()
+	let l:params['textDocument'] = lsp#TextDocumentClientCapabilities()
 	let l:params['window'] = {}
 	let l:params['window']['workDoneProgress'] = v:false
-	let l:params['window']['showMessage'] = s:ShowMessageRequestClientCapabilities()
-	let l:params['window']['showDocument'] = s:ShowDocumentClientCapabilities()
+	let l:params['window']['showMessage'] = lsp#ShowMessageRequestClientCapabilities()
+	let l:params['window']['showDocument'] = lsp#ShowDocumentClientCapabilities()
 	let l:params['general'] = {}
 	let l:params['general']['staleRequestSupport'] = {}
 	let l:params['general']['staleRequestSupport']['cancel'] = v:false
 	let l:params['general']['staleRequestSupport']['retryOnContentModified'] = [""]
-	let l:params['general']['regularExpressions'] = s:RegularExpressionsClientCapabilities()
-	let l:params['general']['markdown'] = s:MarkdownClientCapabilities()
+	let l:params['general']['regularExpressions'] = lsp#RegularExpressionsClientCapabilities()
+	let l:params['general']['markdown'] = lsp#MarkdownClientCapabilities()
 	let l:params['experimental'] = v:null
 	return l:params
 endfunction
 
-function s:WorkspaceEditClientCapabilities()
+function lsp#WorkspaceEditClientCapabilities()
 	let l:params = {}
 	let l:params['documentChanges'] = v:false
 	let l:params['resourceOperations'] = [] " ['create', 'rename', 'delete']
@@ -127,20 +170,20 @@ function s:WorkspaceEditClientCapabilities()
 	return l:params
 endfunction
 
-function s:DidChangeConfigurationClientCapabilities()
+function lsp#DidChangeConfigurationClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
-function s:DidChangeWatchedFilesClientCapabilities()
+function lsp#DidChangeWatchedFilesClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
 
-function s:WorkspaceSymbolClientCapabilities()
+function lsp#WorkspaceSymbolClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['symbolKind'] = {}
@@ -150,83 +193,83 @@ function s:WorkspaceSymbolClientCapabilities()
 	return l:params
 endfunction
 
-function s:ExecuteCommandClientCapabilities()
+function lsp#ExecuteCommandClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
-function s:SemanticTokensWorkspaceClientCapabilities()
+function lsp#SemanticTokensWorkspaceClientCapabilities()
 	let l:params = {}
 	let l:params['refreshSupport'] = v:false
 	return l:params
 endfunction
 
-function s:CodeLensWorkspaceClientCapabilities()
+function lsp#CodeLensWorkspaceClientCapabilities()
 	let l:params = {}
 	let l:params['refreshSupport'] = v:false
 	return l:params
 endfunction
 
-function s:TextDocumentClientCapabilities()
+function lsp#TextDocumentClientCapabilities()
 	let l:params = {}
-	let l:params['synchronization'] = s:TextDocumentSyncClientCapabilities()
-	let l:params['completion'] = s:CompletionClientCapabilities()
-	let l:params['hover'] = s:HoverClientCapabilities()
-	let l:params['signatureHelp'] = s:SignatureHelpClientCapabilities()
-	let l:params['declaration'] = s:DeclarationClientCapabilities()
-	let l:params['definition'] = s:DefinitionClientCapabilities()
-	let l:params['typeDefinition'] = s:TypeDefinitionClientCapabilities()
-	let l:params['implementation'] = s:ImplementationClientCapabilities()
-	let l:params['references'] = s:ReferenceClientCapabilities()
-	let l:params['documentHighlight'] = s:DocumentHighlightClientCapabilities()
-	let l:params['documentSymbol'] = s:DocumentSymbolClientCapabilities()
-	let l:params['codeAction'] = s:CodeActionClientCapabilities()
-	let l:params['codeLens'] = s:CodeLensClientCapabilities()
-	let l:params['documentLink'] = s:DocumentLinkClientCapabilities()
-	let l:params['colorProvider'] = s:DocumentColorClientCapabilities()
-	let l:params['formatting'] = s:DocumentFormattingClientCapabilities()
-	let l:params['rangeFormatting'] = s:DocumentRangeFormattingClientCapabilities()
-	let l:params['onTypeFormatting'] = s:DocumentOnTypeFormattingClientCapabilities()
-	let l:params['rename'] = s:RenameClientCapabilities()
-	let l:params['publishDiagnostics'] = s:PublishDiagnosticsClientCapabilities()
-	let l:params['foldingRange'] = s:FoldingRangeClientCapabilities()
-	let l:params['selectionRange'] = s:SelectionRangeClientCapabilities()
-	let l:params['linkedEditingRange'] = s:LinkedEditingRangeClientCapabilities()
-	let l:params['callHierarchy'] = s:CallHierarchyClientCapabilities()
-	let l:params['semanticTokens'] = s:SemanticTokensClientCapabilities()
-	let l:params['moniker'] = s:MonikerClientCapabilities()
+	let l:params['synchronization'] = lsp#TextDocumentSyncClientCapabilities()
+	let l:params['completion'] = lsp#CompletionClientCapabilities()
+	let l:params['hover'] = lsp#HoverClientCapabilities()
+	let l:params['signatureHelp'] = lsp#SignatureHelpClientCapabilities()
+	let l:params['declaration'] = lsp#DeclarationClientCapabilities()
+	let l:params['definition'] = lsp#DefinitionClientCapabilities()
+	let l:params['typeDefinition'] = lsp#TypeDefinitionClientCapabilities()
+	let l:params['implementation'] = lsp#ImplementationClientCapabilities()
+	let l:params['references'] = lsp#ReferenceClientCapabilities()
+	let l:params['documentHighlight'] = lsp#DocumentHighlightClientCapabilities()
+	let l:params['documentSymbol'] = lsp#DocumentSymbolClientCapabilities()
+	let l:params['codeAction'] = lsp#CodeActionClientCapabilities()
+	let l:params['codeLens'] = lsp#CodeLensClientCapabilities()
+	let l:params['documentLink'] = lsp#DocumentLinkClientCapabilities()
+	let l:params['colorProvider'] = lsp#DocumentColorClientCapabilities()
+	let l:params['formatting'] = lsp#DocumentFormattingClientCapabilities()
+	let l:params['rangeFormatting'] = lsp#DocumentRangeFormattingClientCapabilities()
+	let l:params['onTypeFormatting'] = lsp#DocumentOnTypeFormattingClientCapabilities()
+	let l:params['rename'] = lsp#RenameClientCapabilities()
+	let l:params['publishDiagnostics'] = lsp#PublishDiagnosticsClientCapabilities()
+	let l:params['foldingRange'] = lsp#FoldingRangeClientCapabilities()
+	let l:params['selectionRange'] = lsp#SelectionRangeClientCapabilities()
+	let l:params['linkedEditingRange'] = lsp#LinkedEditingRangeClientCapabilities()
+	let l:params['callHierarchy'] = lsp#CallHierarchyClientCapabilities()
+	let l:params['semanticTokens'] = lsp#SemanticTokensClientCapabilities()
+	let l:params['moniker'] = lsp#MonikerClientCapabilities()
 	return l:params
 endfunction
 
-function s:ShowMessageRequestClientCapabilities()
+function lsp#ShowMessageRequestClientCapabilities()
 	let l:params = {}
 	let l:params['messageActionItem'] = {}
 	let l:params['messageActionItem']['additionalPropertiesSupport'] = v:false
 	return l:params
 endfunction
 
-function s:ShowDocumentClientCapabilities()
+function lsp#ShowDocumentClientCapabilities()
 	let l:params = {}
 	let l:params['support'] = v:false
 	return l:params
 endfunction
 
-function s:RegularExpressionsClientCapabilities()
+function lsp#RegularExpressionsClientCapabilities()
 	let l:params = {}
 	let l:params['engine'] = ""
 	let l:params['version'] = "0.0"
 	return l:params
 endfunction
 
-function s:MarkdownClientCapabilities()
+function lsp#MarkdownClientCapabilities()
 	let l:params = {}
 	let l:params['parser'] = ""
 	let l:params['version'] = "0.0"
 	return l:params
 endfunction
 
-function s:TextDocumentSyncClientCapabilities()
+function lsp#TextDocumentSyncClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['willSave'] = v:false
@@ -235,7 +278,7 @@ function s:TextDocumentSyncClientCapabilities()
 	return l:params
 endfunction
 
-function s:CompletionClientCapabilities()
+function lsp#CompletionClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['completionItem'] = {}
@@ -259,14 +302,14 @@ function s:CompletionClientCapabilities()
 	return l:params
 endfunction
 
-function s:HoverClientCapabilities()
+function lsp#HoverClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['contentFormat'] = ['plaintext']
 	return l:params
 endfunction
 
-function s:SignatureHelpClientCapabilities()
+function lsp#SignatureHelpClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['signatureInformation'] = {}
@@ -278,47 +321,47 @@ function s:SignatureHelpClientCapabilities()
 	return l:params
 endfunction
 
-function s:DeclarationClientCapabilities()
+function lsp#DeclarationClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['linkSupport'] = v:false
 	return l:params
 endfunction
 
-function s:DefinitionClientCapabilities()
+function lsp#DefinitionClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['linkSupport'] = v:false
 	return l:params
 endfunction
 
-function s:TypeDefinitionClientCapabilities()
+function lsp#TypeDefinitionClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['linkSupport'] = v:false
 	return l:params
 endfunction
 
-function s:ImplementationClientCapabilities()
+function lsp#ImplementationClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['linkSupport'] = v:false
 	return l:params
 endfunction
 
-function s:ReferenceClientCapabilities()
+function lsp#ReferenceClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
-function s:DocumentHighlightClientCapabilities()
+function lsp#DocumentHighlightClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
-function s:DocumentSymbolClientCapabilities()
+function lsp#DocumentSymbolClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['symbolKind'] = {}
@@ -330,7 +373,7 @@ function s:DocumentSymbolClientCapabilities()
 	return l:params
 endfunction
 
-function s:CodeActionClientCapabilities()
+function lsp#CodeActionClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['codeActionLiteralSupport'] = {}
@@ -345,44 +388,44 @@ function s:CodeActionClientCapabilities()
 	return l:params
 endfunction
 
-function s:CodeLensClientCapabilities()
+function lsp#CodeLensClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
-function s:DocumentLinkClientCapabilities()
+function lsp#DocumentLinkClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['tooltipSupport'] = v:false
 	return l:params
 endfunction
 
-function s:DocumentColorClientCapabilities()
+function lsp#DocumentColorClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
-function s:DocumentFormattingClientCapabilities()
+function lsp#DocumentFormattingClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
-function s:DocumentRangeFormattingClientCapabilities()
+function lsp#DocumentRangeFormattingClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
-function s:DocumentOnTypeFormattingClientCapabilities()
+function lsp#DocumentOnTypeFormattingClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
-function s:RenameClientCapabilities()
+function lsp#RenameClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['prepareSupport'] = v:false
@@ -391,7 +434,7 @@ function s:RenameClientCapabilities()
 	return l:params
 endfunction
 
-function s:PublishDiagnosticsClientCapabilities()
+function lsp#PublishDiagnosticsClientCapabilities()
 	let l:params = {}
 	let l:params['relatedInformation'] = v:false
 	let l:params['tagSupport'] = {}
@@ -402,7 +445,7 @@ function s:PublishDiagnosticsClientCapabilities()
 	return l:params
 endfunction
 
-function s:FoldingRangeClientCapabilities()
+function lsp#FoldingRangeClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['rangeLimit'] = 0
@@ -410,25 +453,25 @@ function s:FoldingRangeClientCapabilities()
 	return l:params
 endfunction
 
-function s:SelectionRangeClientCapabilities()
+function lsp#SelectionRangeClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
-function s:LinkedEditingRangeClientCapabilities()
+function lsp#LinkedEditingRangeClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
-function s:CallHierarchyClientCapabilities()
+function lsp#CallHierarchyClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
-function s:SemanticTokensClientCapabilities()
+function lsp#SemanticTokensClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['requests'] = {}
@@ -442,19 +485,19 @@ function s:SemanticTokensClientCapabilities()
 	return l:params
 endfunction
 
-function s:MonikerClientCapabilities()
+function lsp#MonikerClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
 
-function s:PrepareSupportDefaultBehavior()
+function lsp#PrepareSupportDefaultBehavior()
 	let l:params = {}
 	let l:params['Identifier'] = 1
 	return l:params
 endfunction
 
-function s:WorkDoneProgressParams(params, progressToken)
+function lsp#WorkDoneProgressParams(params, progressToken)
 	let a:params['workDoneToken'] = a:progressToken
 	return a:params
 endfunction
