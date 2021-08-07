@@ -19,6 +19,7 @@ function channel#Open(command, cwd, callback)
     " let l:opt['out_mode'] = 'json'
     let l:opt['out_cb'] = funcref('s:OutCallbackhandler')
     let l:opt['err_cb'] = funcref('s:ErrCallbackhandler')
+	let l:opt['exit_cb'] = funcref('s:ExitCallbackhandler')
     let l:opt['stoponexit'] = 'term'
     let l:opt['noblock'] = 1
     let l:opt['cwd'] = a:cwd
@@ -80,6 +81,12 @@ endfunction
 function s:ErrCallbackhandler(channel, msg)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	call log#log_debug(a:channel . a:msg)
+endfunction
+
+function s:ExitCallbackhandler(job, status)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	call log#log_debug(a:job. a:status)
+	call log#log_error(a:job. a:status)
 endfunction
 
 function s:GetChannelInfo(channel)
