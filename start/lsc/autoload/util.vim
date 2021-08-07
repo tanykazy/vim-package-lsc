@@ -15,12 +15,6 @@ function util#uri2path(uri)
 	return l:path
 endfunction
 
-function util#loadedbuflist()
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:bufinfolist = getbufinfo({'bufloaded': 1})
-	return l:bufinfolist
-endfunction
-
 function util#getbuftext(buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:lines = getbufline(a:buf, 1, '$')
@@ -28,9 +22,42 @@ function util#getbuftext(buf)
 	return l:text
 endfunction
 
-function util#getcwd()
+function util#buf2path(buf)
+	let l:bufinfolist = util#getbufinfolist(a:buf)
+	let l:bufinfo = get(l:bufinfolist, 0, {})
+	return l:bufinfo['name']
+endfunction
+
+function util#getchangedtick(buf)
+	let l:bufinfolist = util#getbufinfolist(a:buf)
+	let l:bufinfo = get(l:bufinfolist, 0, {})
+	return l:bufinfo['changedtick']
+endfunction
+
+function util#loadedbufinfolist()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return getcwd(bufwinnr(bufnr("#")))
+	let l:bufinfolist = getbufinfo({'bufloaded': 1})
+	if empty(l:bufinfolist)
+        call log#log_error('Not found loaded buffer')
+	endif
+	return l:bufinfolist
+endfunction
+
+function util#getbufinfolist(buf)
+	let l:bufinfolist = getbufinfo(a:buf)
+	if empty(l:bufinfolist)
+        call log#log_error('Not found buffer ' . a:buf)
+	endif
+	return l:bufinfolist
+endfunction
+
+function util#getcwd(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	return getcwd(bufwinnr(a:buf))
+endfunction
+
+function util#isContain(list, value)
+	return !(index(a:list, a:value) == -1)
 endfunction
 
 function util#isNone(none)

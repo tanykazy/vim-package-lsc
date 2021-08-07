@@ -48,6 +48,12 @@ function lsp#DidChangeTextDocumentParams(path, version, contentChanges)
 	return l:params
 endfunction
 
+function lsp#DidCloseTextDocumentParams(path)
+	let l:params = {}
+	let l:params['textDocument'] = lsp#TextDocumentIdentifier(a:path)
+	return l:params
+endfunction
+
 function lsp#VersionedTextDocumentIdentifier(path, version)
 	let l:params = lsp#TextDocumentIdentifier(a:path)
 	let l:params['version'] = a:version

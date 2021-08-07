@@ -9,38 +9,70 @@ set cpoptions&vim
 
 let s:server_info = {}
 
-function client#Start(lang, buf, path)
+function client#Start(lang, buf, cwd)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call log#log_error(string(a:buf))
-    if !has_key(s:server_info, a:lang)
-        let l:cmd = server#load_setting(a:lang)
-        let l:channel = channel#Open(l:cmd, a:path, funcref('client#Callback'))
-        let l:server = {}
-        let l:server['id'] = l:channel['id']
-        let l:server['channel'] = l:channel
-        let l:server['files'] = []
-        call add(l:server['files'], getbufinfo(bufname(char2nr(a:buf)))[0]['name'])
-        let l:server['lang'] = a:lang
-        " let l:server['path'] = a:path
-        let l:unique = s:unique(l:server)
-        let l:message = jsonrpc#request_message(l:unique, 'initialize', lsp#InitializeParams(v:null, v:null))
-        let l:server[l:unique] = {}
-        let l:server[l:unique]['message'] = l:message
-        let s:server_info[a:lang] = l:server
-        call channel#Send(l:server['channel'], l:message)
+    if has_key(s:server_info, a:lang)
+        let l:server = s:server_info[a:lang]
+        if !util#isContain(l:server['files'], a:path)
+            call s:send_textDocument_didOpen(l:server, a:buf, a:path)
+        endif
+    else
+        let l:server = s:start_server(a:lang, a:cwd)
+        let l:params = lsp#InitializeParams(v:null, v:null)
+        call s:send_request(l:server, 'initialize', l:params)
     endif
 endfunction
 
 function client#Stop(lang)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if util#isNone(a:lang)
+        for l:server in values(s:server_info)
+            call s:send_request(l:server, 'shutdown', v:none)
+        endfor
+    else
+        if has_key(s:server_info, a:lang)
+            let l:server = s:server_info[a:lang]
+            call s:send_request(l:server, 'shutdown', v:none)
+        endif
+    endif
+endfunction
+
+function client#Openfile(lang, buf, path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if has_key(s:server_info, a:lang)
         let l:server = s:server_info[a:lang]
-        let l:unique = s:unique(l:server)
-        let l:message = jsonrpc#request_message(l:unique, 'shutdown', v:none)
-        let l:server[l:unique] = {}
-        let l:server[l:unique]['message'] = l:message
-        call channel#Send(l:server['channel'], l:message)
+        if !util#isContain(l:server['files'], a:path)
+            call s:send_textDocument_didOpen(l:server, a:buf, a:path)
+        endif
+    else
+        let l:server = s:start_server(a:lang, util#getcwd(a:buf))
+        let l:params = lsp#InitializeParams(v:null, v:null)
+        call s:send_request(l:server, 'initialize', l:params)
     endif
+endfunction
+
+function client#Closefile(buf, path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:serverlist = s:getserverlist(a:path)
+    " if empty(l:serverlist)
+        " call log#log_debug('Not found server with open ' . a:path)
+    " else
+        for l:server in l:serverlist
+            call s:send_textDocument_didClose(l:server, a:buf, a:path)
+        endfor
+    " endif
+endfunction
+
+function client#Changefile(buf, path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:serverlist = s:getserverlist(a:path)
+    " if empty(l:serverlist)
+        " call log#log_error('Not found server with open ' . a:path)
+    " else
+        for l:server in l:serverlist
+            call s:send_textDocument_didChange(l:server, a:buf, a:path)
+        endfor
+    " endif
 endfunction
 
 function client#Callback(channel, content)
@@ -59,11 +91,6 @@ function client#Callback(channel, content)
             return s:matrix[s:state][s:event].fn(l:server, a:content)
         endif
     endfor
-endfunction
-
-function client#change_listener(buf, path)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call s:send_textDocument_didChange(v:none, bufname(a:buf), a:path)
 endfunction
 
 
@@ -100,21 +127,15 @@ function s:matrix[s:stateIdle][s:eventResponse].fn(server, content) dict
     if has_key(a:server, l:id)
         let l:method = a:server[l:id]['message']['method']
         if l:method == 'initialize'
-            let l:message = jsonrpc#notification_message('initialized', lsp#InitializedParams())
-            call channel#Send(a:server['channel'], l:message)
+            let l:params = lsp#InitializedParams()
+            call s:send_notification(a:server, 'initialized', l:params)
+
             call remove(a:server, l:id)
             let s:state = s:stateActive
 
-            let l:buflist = util#loadedbuflist()
-            for l:buf in l:buflist
-                let l:bufnr = l:buf['bufnr']
-                let l:name = l:buf['name']
-                let l:changedtick = l:buf['changedtick']
-                let l:text = util#getbuftext(l:bufnr)
-
-                let l:message = jsonrpc#notification_message('textDocument/didOpen', lsp#DidOpenTextDocumentParams(l:name, &filetype, l:changedtick, l:text))
-
-                call channel#Send(a:server['channel'], l:message)
+            let l:bufinfolist = util#loadedbufinfolist()
+            for l:bufinfo in l:bufinfolist
+                call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:bufinfo['name'])
 
                 " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
                 call autocmd#add_event_listener()
@@ -145,8 +166,7 @@ function s:matrix[s:stateActive][s:eventResponse].fn(server, content) dict
     if has_key(a:server, l:id)
         let l:method = a:server[l:id]['message']['method']
         if l:method == 'shutdown'
-            let l:message = jsonrpc#notification_message('exit', v:none)
-            call channel#Send(a:server['channel'], l:message)
+            call s:send_notification(a:server, 'exit', v:none)
             call remove(a:server, l:id)
             call channel#Close(a:server['channel'])
             call remove(s:server_info, a:server['lang'])
@@ -178,28 +198,60 @@ function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
     endif
 endfunction
 
+function s:send_textDocument_didOpen(server, buf, path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:text = util#getbuftext(a:buf)
+    let l:changedtick = util#getchangedtick(a:buf)
+    let l:params = lsp#DidOpenTextDocumentParams(a:path, &filetype, l:changedtick, l:text)
+    call add(a:server['files'], a:path)
+    call s:send_notification(a:server, 'textDocument/didOpen', l:params)
+endfunction
+
+function s:send_textDocument_didClose(server, buf, path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:params = lsp#DidCloseTextDocumentParams(a:path)
+    call s:send_notification(a:server, 'textDocument/didClose', l:params)
+endfunction
+
 function s:send_textDocument_didChange(server, buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    " call log#log_error(string(getchangelist(a:buf)))
-    let l:servers = s:getservers(a:path)
-    if empty(l:servers)
-        call log#log_error('Not found server with open ' . a:path)
-    else
-        let l:bufinfos = getbufinfo(a:buf)
-        if empty(l:bufinfos)
-            call log#log_error('Not found buffer number ' . a:buf)
-        else
-            for l:bufinfo in l:bufinfos
-                let l:version = l:bufinfo['changedtick']
-                let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
-                let l:params = lsp#DidChangeTextDocumentParams(a:path, l:version, [l:change])
-                let l:message = jsonrpc#notification_message('textDocument/didChange', l:params)
-                for l:server in l:servers
-                    call channel#Send(l:server['channel'], l:message)
-                endfor
-            endfor
-        endif
-    endif
+    let l:version = util#getchangedtick(a:buf)
+    let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
+    let l:params = lsp#DidChangeTextDocumentParams(a:path, l:version, [l:change])
+    return s:send_notification(a:server, 'textDocument/didChange', l:params)
+endfunction
+
+function s:send_request(server, method, params)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:unique = s:unique(a:server)
+    let l:message = jsonrpc#request_message(l:unique, a:method, a:params)
+    let a:server[l:unique] = {}
+    let a:server[l:unique]['message'] = l:message
+    return channel#Send(a:server['channel'], l:message)
+endfunction
+
+function s:send_response(server, message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    return channel#Send(a:server['channel'], a:message)
+endfunction
+
+function s:send_notification(server, method, params)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:message = jsonrpc#notification_message(a:method, a:params)
+    return channel#Send(a:server['channel'], l:message)
+endfunction
+
+function s:start_server(lang, cwd)
+    let l:cmd = server#load_setting(a:lang)
+    let l:channel = channel#Open(l:cmd, a:cwd, funcref('client#Callback'))
+    let l:server = {}
+    let l:server['id'] = l:channel['id']
+    let l:server['channel'] = l:channel
+    let l:server['files'] = []
+    let l:server['lang'] = a:lang
+    let l:server['cwd'] = a:cwd
+    let s:server_info[a:lang] = l:server
+    return l:server
 endfunction
 
 function s:unique(server)
@@ -215,17 +267,15 @@ function s:unique(server)
     return l:num
 endfunction
 
-function s:getservers(path)
+function s:getserverlist(path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:servers = []
+    let l:serverlist = []
     for l:server in values(s:server_info)
-        for l:file in l:server['files']
-            if l:file == a:path
-                call add(l:servers, l:server)
-            endif
-        endfor
+        if util#isContain(l:server['files'], a:path)
+            call add(l:serverlist, l:server)
+        endif
     endfor
-    return l:servers
+    return l:serverlist
 endfunction
 
 " function client#bufchange_listener(bufnr, start, end, added, changes)
