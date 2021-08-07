@@ -15,6 +15,7 @@ function autocmd#setup_autocmd()
 		autocmd BufRead * call s:bufread_listener()
 		autocmd VimLeavePre * call s:vimleavepre_listener()
 		autocmd BufDelete * call s:bufdelete_listener()
+		autocmd BufWrite * call s:bufwrite_listener()
 	augroup END
 endfunction
 
@@ -57,6 +58,13 @@ function s:bufdelete_listener()
 	let l:buf = str2nr(expand('<abuf>'))
 	let l:path = expand('<afile>:p') 
 	call client#Closefile(l:buf, l:path)
+endfunction
+
+function s:bufwrite_listener()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	let l:buf = str2nr(expand('<abuf>'))
+	let l:path = expand('<afile>:p') 
+	call client#Savefile(l:buf, l:path)
 endfunction
 
 function s:openfile_listener()

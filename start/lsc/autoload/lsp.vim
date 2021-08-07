@@ -54,6 +54,28 @@ function lsp#DidCloseTextDocumentParams(path)
 	return l:params
 endfunction
 
+function lsp#DidSaveTextDocumentParams(path, text)
+	let l:params = {}
+	let l:params['textDocument'] = lsp#TextDocumentIdentifier(a:path)
+	if !util#isNone(a:text)
+		let l:params['text'] = a:text
+	endif
+	return l:params
+endfunction
+
+function lsp#HoverParams(position, token)
+	let l:hoverParams = {}
+	call extend(l:hoverParams, lsp#TextDocumentPositionParams(a:position))
+	call extend(l:hoverParams, lsp#WorkDoneProgressParams(a:token))
+	return l:hoverParams
+endfunction
+
+function lsp#TextDocumentPositionParams(position)
+	let l:params = lsp#TextDocumentIdentifier(a:path)
+	let l:params['position'] = a:position
+	return l:params
+endfunction
+
 function lsp#VersionedTextDocumentIdentifier(path, version)
 	let l:params = lsp#TextDocumentIdentifier(a:path)
 	let l:params['version'] = a:version
@@ -280,7 +302,7 @@ function lsp#TextDocumentSyncClientCapabilities()
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['willSave'] = v:false
 	let l:params['willSaveWaitUntil'] = v:false
-	let l:params['didSave'] = v:false
+	let l:params['didSave'] = v:true
 	return l:params
 endfunction
 
@@ -503,9 +525,12 @@ function lsp#PrepareSupportDefaultBehavior()
 	return l:params
 endfunction
 
-function lsp#WorkDoneProgressParams(params, progressToken)
-	let a:params['workDoneToken'] = a:progressToken
-	return a:params
+function lsp#WorkDoneProgressParams(workDoneToken)
+	let l:workDoneProgressParams = {}
+	if !util#isNone(a:workDoneToken)
+		let a:workDoneProgressParams['workDoneToken'] = a:workDoneToken
+	endif
+	return a:workDoneProgressParams
 endfunction
 
 

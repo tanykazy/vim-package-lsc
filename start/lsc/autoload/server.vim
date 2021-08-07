@@ -14,6 +14,7 @@ function server#load_setting(lang)
 	let l:server_table = util#parse_json_file(s:server_file)
 	if !has_key(l:server_table, a:lang)
 		call log#log_error('Not found setting ' . a:lang . ' in ' . s:server_file)
+		throw 'Not found Language Server settings'
 	endif
 	let l:setting = get(l:server_table, a:lang, '')
 	let l:cmd = get(l:setting, 'cmd', '')

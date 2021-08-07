@@ -11,12 +11,7 @@ let s:server_info = {}
 
 function client#Start(lang, buf, cwd)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if has_key(s:server_info, a:lang)
-        let l:server = s:server_info[a:lang]
-        if !util#isContain(l:server['files'], a:path)
-            call s:send_textDocument_didOpen(l:server, a:buf, a:path)
-        endif
-    else
+    if !has_key(s:server_info, a:lang)
         let l:server = s:start_server(a:lang, a:cwd)
         let l:params = lsp#InitializeParams(v:null, v:null)
         call s:send_request(l:server, 'initialize', l:params)
@@ -54,25 +49,25 @@ endfunction
 function client#Closefile(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:serverlist = s:getserverlist(a:path)
-    " if empty(l:serverlist)
-        " call log#log_debug('Not found server with open ' . a:path)
-    " else
-        for l:server in l:serverlist
-            call s:send_textDocument_didClose(l:server, a:buf, a:path)
-        endfor
-    " endif
+    for l:server in l:serverlist
+        call s:send_textDocument_didClose(l:server, a:buf, a:path)
+    endfor
 endfunction
 
 function client#Changefile(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:serverlist = s:getserverlist(a:path)
-    " if empty(l:serverlist)
-        " call log#log_error('Not found server with open ' . a:path)
-    " else
-        for l:server in l:serverlist
-            call s:send_textDocument_didChange(l:server, a:buf, a:path)
-        endfor
-    " endif
+    for l:server in l:serverlist
+        call s:send_textDocument_didChange(l:server, a:buf, a:path)
+    endfor
+endfunction
+
+function client#Savefile(buf, path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:serverlist = s:getserverlist(a:path)
+    for l:server in l:serverlist
+        call s:send_textDocument_didSave(l:server, a:buf, a:path)
+    endfor
 endfunction
 
 function client#Callback(channel, content)
@@ -127,16 +122,22 @@ function s:matrix[s:stateIdle][s:eventResponse].fn(server, content) dict
     if has_key(a:server, l:id)
         let l:method = a:server[l:id]['message']['method']
         if l:method == 'initialize'
+            call remove(a:server, l:id)
+            let a:server['capabilities'] = get(a:content['result'], 'capabilities', {})
+            let a:server['serverInfo'] = get(a:content['result'], 'serverInfo', {})
+            call log#log_debug('Update server info ' . string(a:server))
+
             let l:params = lsp#InitializedParams()
             call s:send_notification(a:server, 'initialized', l:params)
 
-            call remove(a:server, l:id)
             let s:state = s:stateActive
-
+            " let l:unopened = a:server['unopened']
+            " for l:file in l:unopened
+            "     call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:file)
+            " endfor
             let l:bufinfolist = util#loadedbufinfolist()
             for l:bufinfo in l:bufinfolist
                 call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:bufinfo['name'])
-
                 " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
                 call autocmd#add_event_listener()
             endfor
@@ -221,6 +222,13 @@ function s:send_textDocument_didChange(server, buf, path)
     return s:send_notification(a:server, 'textDocument/didChange', l:params)
 endfunction
 
+function s:send_textDocument_didSave(server, buf, path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:text = util#getbuftext(a:buf)
+    let l:params = lsp#DidSaveTextDocumentParams(a:path, l:text)
+    return s:send_notification(a:server, 'textDocument/didSave', l:params)
+endfunction
+
 function s:send_request(server, method, params)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:unique = s:unique(a:server)
@@ -248,6 +256,7 @@ function s:start_server(lang, cwd)
     let l:server['id'] = l:channel['id']
     let l:server['channel'] = l:channel
     let l:server['files'] = []
+    " let l:server['unopened'] = []
     let l:server['lang'] = a:lang
     let l:server['cwd'] = a:cwd
     let s:server_info[a:lang] = l:server
