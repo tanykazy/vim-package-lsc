@@ -25,11 +25,19 @@ function quickfix#location(filename, lnum, col, nr, text, type)
     " let l:location['module']
     let l:location['lnum'] = a:lnum + 1
     " let l:location['pattern']
-    let l:location['col'] = a:col + 1
+    if !util#isNone(a:col)
+        let l:location['col'] = a:col + 1
+    endif
     " let l:location['vcol']
-    let l:location['nr'] = a:nr
-    let l:location['text'] = a:text
-    let l:location['type'] = a:type
+    if !util#isNone(a:nr)
+        let l:location['nr'] = a:nr
+    endif
+    if !util#isNone(a:text)
+        let l:location['text'] = a:text
+    endif
+    if !util#isNone(a:type)
+        let l:location['type'] = a:type
+    endif
     " let l:location['valid']
     return l:location
 endfunction

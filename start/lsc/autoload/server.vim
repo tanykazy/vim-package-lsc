@@ -14,11 +14,22 @@ function server#load_setting(lang)
 	let l:server_table = util#parse_json_file(s:server_file)
 	if !has_key(l:server_table, a:lang)
 		call log#log_error('Not found setting ' . a:lang . ' in ' . s:server_file)
-		throw 'Not found Language Server settings'
 	endif
-	let l:setting = get(l:server_table, a:lang, '')
-	let l:cmd = get(l:setting, 'cmd', '')
-	return l:cmd
+	let l:setting = get(l:server_table, a:lang, {})
+	if has_key(l:setting, 'alternative')
+		let l:alternative = l:setting['alternative']
+		if !has_key(l:server_table, l:alternative)
+			call log#log_error('Not found setting ' . l:alternative . ' in ' . s:server_file)
+		endif
+		let l:setting = get(l:server_table, l:alternative, {})
+	endif
+	return l:setting
+endfunction
+
+function server#isSupport(lang)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	let l:server_table = util#parse_json_file(s:server_file)
+	return has_key(l:server_table, a:lang)
 endfunction
 
 

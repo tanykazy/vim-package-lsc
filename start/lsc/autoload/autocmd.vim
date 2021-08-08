@@ -11,113 +11,118 @@ function autocmd#setup_autocmd()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	" autocmd [group] {events} {file-pattern} [++nested] {command}
 	augroup vim_package_lsp
-		autocmd BufAdd * call s:bufadd_listener()
-		autocmd BufRead * call s:bufread_listener()
-		autocmd VimLeavePre * call s:vimleavepre_listener()
-		autocmd BufDelete * call s:bufdelete_listener()
-		autocmd BufWrite * call s:bufwrite_listener()
+		autocmd BufAdd * call s:bufadd_listener(expand('<abuf>'), expand('<afile>:p'))
+		autocmd BufRead * call s:bufread_listener(expand('<abuf>'), expand('<afile>:p'))
+		autocmd VimLeavePre * call s:vimleavepre_listener(expand('<abuf>'), expand('<afile>:p'))
+		" autocmd BufDelete * call s:bufdelete_listener(expand('<abuf>'), expand('<afile>:p'))
+		autocmd BufWrite * call s:bufwrite_listener(expand('<abuf>'), expand('<afile>:p'))
+		autocmd BufWinLeave * call s:bufwinleave_listener(expand('<abuf>'), expand('<afile>:p'))
 	augroup END
 endfunction
 
 function autocmd#add_event_listener()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	augroup vim_package_lsp
-		autocmd TextChanged * call s:textchanged_listener()
-		" autocmd InsertCharPre * call s:insertcharpre_listener()
-		" autocmd InsertChange * call s:insertchange_listener()
-		" autocmd InsertLeavePre * call s:insertleavepre_listener()
-		autocmd InsertLeave * call s:insertleave_listener()
-	augroup END
+	if !util#isSpecialbuffers(&buftype)
+		augroup vim_package_lsp
+			autocmd TextChanged * call s:textchanged_listener(expand('<abuf>'), expand('<afile>:p'))
+			" autocmd InsertCharPre * call s:insertcharpre_listener()
+			" autocmd InsertChange * call s:insertchange_listener()
+			" autocmd InsertLeavePre * call s:insertleavepre_listener()
+			autocmd InsertLeave * call s:insertleave_listener(expand('<abuf>'), expand('<afile>:p'))
+		augroup END
+	endif
 endfunction
 
-function s:bufadd_listener()
+function s:bufadd_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	" call log#log_debug(&filetype)
-	call log#log_debug('=== bufadd ===')
-	let l:buf = str2nr(expand('<abuf>'))
-	let l:path = expand('<afile>:p') 
-	call client#Openfile('typescript', l:buf, l:path)
+	" call log#log_error(&buftype)
+	" call log#log_error(&filetype)
+	if !util#isSpecialbuffers(&buftype)
+		call client#Openfile(&filetype, str2nr(a:buf), a:path)
+	endif
 endfunction
 
-function s:bufread_listener()
+function s:bufread_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call log#log_debug('=== bufread ===')
-	" call log#log_debug(&filetype)
-	let l:buf = str2nr(expand('<abuf>'))
-	let l:path = expand('<afile>:p') 
-	call client#Openfile('typescript', l:buf, l:path)
+	" call log#log_error(&buftype)
+	" call log#log_error(&filetype)
+	if !util#isSpecialbuffers(&buftype)
+		call client#Openfile(&filetype, str2nr(a:buf), a:path)
+	endif
 endfunction
 
-function s:vimleavepre_listener()
+function s:vimleavepre_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call client#Stop(v:none)
+	if !util#isSpecialbuffers(&buftype)
+		call client#Stop(v:none)
+	endif
 endfunction
 
-function s:bufdelete_listener()
+function s:bufdelete_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:buf = str2nr(expand('<abuf>'))
-	let l:path = expand('<afile>:p') 
-	call client#Closefile(l:buf, l:path)
+	call log#log_error('==== buf delete ====')
+	call log#log_error(&buftype)
+	call log#log_error(&filetype)
+	if !util#isSpecialbuffers(&buftype)
+		call client#Closefile(str2nr(a:buf), a:path)
+	endif
 endfunction
 
-function s:bufwrite_listener()
+function s:bufwinleave_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:buf = str2nr(expand('<abuf>'))
-	let l:path = expand('<afile>:p') 
-	call client#Savefile(l:buf, l:path)
+	call log#log_error('==== bufwinleave ====')
+	call log#log_error(&buftype)
+	call log#log_error(&filetype)
+	if !util#isSpecialbuffers(&buftype)
+		call client#Closefile(str2nr(a:buf), a:path)
+	endif
 endfunction
 
-function s:openfile_listener()
+function s:bufwrite_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:buf = str2nr(expand('<abuf>'))
-	let l:path = expand('<afile>:p') 
-	call client#Openfile('typescript', l:buf, l:path)
+	if !util#isSpecialbuffers(&buftype)
+		call client#Savefile(str2nr(a:buf), a:path)
+	endif
 endfunction
 
-function s:textchanged_listener()
+function s:openfile_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	" call log#log_error(a:buf)
-	" call log#log_error(a:path)
-	let l:buf = str2nr(expand('<abuf>'))
-	let l:path = expand('<afile>:p') 
-	call client#Changefile(l:buf, l:path)
+	if !util#isSpecialbuffers(&buftype)
+		call client#Openfile(&filetype, str2nr(a:buf), a:path)
+	endif
 endfunction
 
-function s:insertcharpre_listener()
+function s:textchanged_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	" call log#log_error(a:buf)
-	" call log#log_error(a:path)
-	let l:buf = str2nr(expand('<abuf>'))
-	let l:path = expand('<afile>:p') 
-	call client#Changefile(l:buf, l:path)
+	if !util#isSpecialbuffers(&buftype)
+		call client#Changefile(str2nr(a:buf), a:path)
+	endif
 endfunction
 
-function s:insertchange_listener()
+function s:insertcharpre_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	" call log#log_error(a:buf)
-	" call log#log_error(a:path)
-	let l:buf = str2nr(expand('<abuf>'))
-	let l:path = expand('<afile>:p') 
-	call client#Changefile(l:buf, l:path)
+	if !util#isSpecialbuffers(&buftype)
+		call client#Changefile(str2nr(a:buf), a:path)
+	endif
 endfunction
 
-" function s:insertleavepre_listener()
+function s:insertchange_listener(buf, path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	if !util#isSpecialbuffers(&buftype)
+		call client#Changefile(str2nr(a:buf), a:path)
+	endif
+endfunction
+
+" function s:insertleavepre_listener(buf, path)
 " 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-" 	call log#log_error(a:buf)
-" 	call log#log_error(a:path)
-	" let l:buf = str2nr(expand('<abuf>'))
-	" let l:path = expand('<afile>:p') 
-" 	call client#Changefile(l:buf, l:path)
+" 	call client#Changefile(str2nr(a:buf), a:path)
 " endfunction
 
-function s:insertleave_listener()
+function s:insertleave_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	" call log#log_error(expand('<abuf>') . expand('<afile>:p'))
-	let l:buf = str2nr(expand('<abuf>'))
-	let l:path = expand('<afile>:p') 
-	" call log#log_error(l:buf)
-	" call log#log_error(l:path)
-	call client#Changefile(l:buf, l:path)
+	if !util#isSpecialbuffers(&buftype)
+		call client#Changefile(str2nr(a:buf), a:path)
+	endif
 endfunction
 
 

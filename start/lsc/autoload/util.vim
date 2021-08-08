@@ -15,6 +15,11 @@ function util#uri2path(uri)
 	return l:path
 endfunction
 
+function util#isSpecialbuffers(buftype)
+	let l:specialbuffers = ['quickfix', 'help', 'terminal', 'directory', 'scratch', 'unlisted']
+	return util#isContain(l:specialbuffers, a:buftype)
+endfunction
+
 function util#getbuftext(buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:lines = getbufline(a:buf, 1, '$')

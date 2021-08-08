@@ -5,5 +5,39 @@
             "start": "npx vscode-json-languageserver --stdio"
         },
         "cmd": "npx vscode-json-languageserver --stdio"
+    },
+    "json": {
+        "alternative": "typescript"
+    },
+    "vim": {
+        "command": {
+            "install": "npm install vim-language-server",
+            "start": "npx vim-language-server --stdio"
+        },
+        "options": {
+            "isNeovim": false,
+            "iskeyword": "@,48-57,_,192-255,-#",
+            "vimruntime": "",
+            "runtimepath": "",
+            "diagnostic": {
+                "enable": true
+            },
+            "indexes": {
+                "runtimepath": true,
+                "gap": 100,
+                "count": 3,
+                "projectRootPatterns": [
+                    "strange-root-pattern",
+                    ".git",
+                    "autoload",
+                    "plugin"
+                ]
+            },
+            "suggest": {
+                "fromVimruntime": true,
+                "fromRuntimepath": false
+            }
+        },
+        "cmd": "npx vim-language-server --stdio"
     }
 }

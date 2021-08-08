@@ -23,10 +23,14 @@ function lsp#InitializeParams(initializationOptions, workspaceFolders)
 	let l:params['locale'] = "en"
 	" let l:params['rootPath'] @deprecated
 	" let l:params['rootUri'] @deprecated
-	let l:params['initializationOptions'] = a:initializationOptions
+	if !util#isNone(a:initializationOptions)
+		let l:params['initializationOptions'] = a:initializationOptions
+	endif
 	let l:params['capabilities'] = lsp#ClientCapabilities()
 	let l:params['trace'] = "verbose" " 'off' | 'messages' | 'verbose'
-	let l:params['workspaceFolders'] = a:workspaceFolders ? a:workspaceFolders : v:null
+	if !util#isNone(a:workspaceFolders)
+		let l:params['workspaceFolders'] = a:workspaceFolders
+	endif
 	return l:params
 endfunction
 
@@ -63,15 +67,16 @@ function lsp#DidSaveTextDocumentParams(path, text)
 	return l:params
 endfunction
 
-function lsp#HoverParams(position, token)
+function lsp#HoverParams(path, position, token)
 	let l:hoverParams = {}
-	call extend(l:hoverParams, lsp#TextDocumentPositionParams(a:position))
+	call extend(l:hoverParams, lsp#TextDocumentPositionParams(a:path, a:position))
 	call extend(l:hoverParams, lsp#WorkDoneProgressParams(a:token))
 	return l:hoverParams
 endfunction
 
-function lsp#TextDocumentPositionParams(position)
-	let l:params = lsp#TextDocumentIdentifier(a:path)
+function lsp#TextDocumentPositionParams(path, position)
+	let l:params = {}
+	let l:params['textDocument'] = lsp#TextDocumentIdentifier(a:path)
 	let l:params['position'] = a:position
 	return l:params
 endfunction
@@ -528,9 +533,9 @@ endfunction
 function lsp#WorkDoneProgressParams(workDoneToken)
 	let l:workDoneProgressParams = {}
 	if !util#isNone(a:workDoneToken)
-		let a:workDoneProgressParams['workDoneToken'] = a:workDoneToken
+		let l:workDoneProgressParams['workDoneToken'] = a:workDoneToken
 	endif
-	return a:workDoneProgressParams
+	return l:workDoneProgressParams
 endfunction
 
 

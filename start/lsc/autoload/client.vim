@@ -11,9 +11,9 @@ let s:server_info = {}
 
 function client#Start(lang, buf, cwd)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !has_key(s:server_info, a:lang)
+    if !has_key(s:server_info, a:lang) && server#isSupport(&filetype)
         let l:server = s:start_server(a:lang, a:cwd)
-        let l:params = lsp#InitializeParams(v:null, v:null)
+        let l:params = lsp#InitializeParams(l:server['options'], v:none)
         call s:send_request(l:server, 'initialize', l:params)
     endif
 endfunction
@@ -34,20 +34,26 @@ endfunction
 
 function client#Openfile(lang, buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if has_key(s:server_info, a:lang)
-        let l:server = s:server_info[a:lang]
-        if !util#isContain(l:server['files'], a:path)
-            call s:send_textDocument_didOpen(l:server, a:buf, a:path)
+    if !empty(a:path)
+        if has_key(s:server_info, a:lang)
+            let l:server = s:server_info[a:lang]
+            if !util#isContain(l:server['files'], a:path)
+                call s:send_textDocument_didOpen(l:server, a:buf, a:path)
+            endif
+        else
+            if server#isSupport(&filetype)
+                let l:server = s:start_server(a:lang, util#getcwd(a:buf))
+                let l:params = lsp#InitializeParams(l:server['options'], v:none)
+                call s:send_request(l:server, 'initialize', l:params)
+            endif
         endif
-    else
-        let l:server = s:start_server(a:lang, util#getcwd(a:buf))
-        let l:params = lsp#InitializeParams(v:null, v:null)
-        call s:send_request(l:server, 'initialize', l:params)
     endif
 endfunction
 
 function client#Closefile(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call log#log_error(a:buf)
+    call log#log_error(a:path)
     let l:serverlist = s:getserverlist(a:path)
     for l:server in l:serverlist
         call s:send_textDocument_didClose(l:server, a:buf, a:path)
@@ -70,6 +76,17 @@ function client#Savefile(buf, path)
     endfor
 endfunction
 
+function client#hover(buf, pos)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:path = util#buf2path(a:buf)
+    let l:lnum = a:pos[1]
+    let l:col = a:pos[2]
+    let l:serverlist = s:getserverlist(l:path)
+    let l:position = lsp#Position(l:lnum - 1, l:col - 1)
+    let l:params = lsp#HoverParams(l:path, l:position, v:none)
+    call s:send_request(l:serverlist[0], 'textDocument/hover', l:params)
+endfunction
+
 function client#Callback(channel, content)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if jsonrpc#isRequest(a:content)
@@ -79,7 +96,7 @@ function client#Callback(channel, content)
     elseif jsonrpc#isNotification(a:content)
         let s:event = s:eventNotification
     else
-        call log#log_error('Undetected event: ' string(a:message))
+        call log#log_error('Undetected event: ' . string(a:message))
     endif
     for l:server in values(s:server_info)
         if l:server['id'] == a:channel['id']
@@ -186,9 +203,9 @@ function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
             let l:file = util#uri2path(a:content['params']['uri'])
             let l:lnum = l:value['range']['start']['line']
             let l:col = l:value['range']['start']['character']
-            let l:nr = l:value['code']
+            let l:nr = get(l:value, 'code', v:none)
             let l:text = l:value['message']
-            let l:type = l:value['severity']
+            let l:type = get(l:value, 'severity', v:none)
             call add(l:location, quickfix#location(l:file, l:lnum, l:col, l:nr, l:text, l:type))
 
             let l:start = l:value['range']['start']
@@ -250,9 +267,11 @@ function s:send_notification(server, method, params)
 endfunction
 
 function s:start_server(lang, cwd)
-    let l:cmd = server#load_setting(a:lang)
-    let l:channel = channel#Open(l:cmd, a:cwd, funcref('client#Callback'))
+    " let l:cmd = server#load_setting(a:lang)
+    let l:setting = server#load_setting(a:lang)
+    let l:channel = channel#Open(l:setting['cmd'], a:cwd, funcref('client#Callback'))
     let l:server = {}
+    let l:server['options'] = get(l:setting, 'options', v:none)
     let l:server['id'] = l:channel['id']
     let l:server['channel'] = l:channel
     let l:server['files'] = []
