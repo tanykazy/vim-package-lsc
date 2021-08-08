@@ -16,13 +16,13 @@ function server#load_setting(lang)
 		call log#log_error('Not found setting ' . a:lang . ' in ' . s:server_file)
 	endif
 	let l:setting = get(l:server_table, a:lang, {})
-	if has_key(l:setting, 'alternative')
-		let l:alternative = l:setting['alternative']
-		if !has_key(l:server_table, l:alternative)
-			call log#log_error('Not found setting ' . l:alternative . ' in ' . s:server_file)
-		endif
-		let l:setting = get(l:server_table, l:alternative, {})
-	endif
+	" if has_key(l:setting, 'alternative')
+	" 	let l:alternative = l:setting['alternative']
+	" 	if !has_key(l:server_table, l:alternative)
+	" 		call log#log_error('Not found setting ' . l:alternative . ' in ' . s:server_file)
+	" 	endif
+	" 	let l:setting = get(l:server_table, l:alternative, {})
+	" endif
 	return l:setting
 endfunction
 

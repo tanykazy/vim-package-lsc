@@ -6,8 +6,8 @@ nmap <silent> <F3> :call client#hover(bufnr('%'), getpos('.'))<CR>
 
 
 
-let g:log_level = log#level_trace
-" let g:log_level = log#level_debug
+" let g:log_level = log#level_trace
+let g:log_level = log#level_debug
 call log#start_log()
 call log#log_trace('load: plugin/lsc.vim')
 call log#log_debug('load: plugin/lsc.vim')

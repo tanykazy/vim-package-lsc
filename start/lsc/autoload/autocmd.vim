@@ -14,9 +14,10 @@ function autocmd#setup_autocmd()
 		autocmd BufAdd * call s:bufadd_listener(expand('<abuf>'), expand('<afile>:p'))
 		autocmd BufRead * call s:bufread_listener(expand('<abuf>'), expand('<afile>:p'))
 		autocmd VimLeavePre * call s:vimleavepre_listener(expand('<abuf>'), expand('<afile>:p'))
-		" autocmd BufDelete * call s:bufdelete_listener(expand('<abuf>'), expand('<afile>:p'))
+		autocmd BufDelete * call s:bufdelete_listener(expand('<abuf>'), expand('<afile>:p'))
 		autocmd BufWrite * call s:bufwrite_listener(expand('<abuf>'), expand('<afile>:p'))
 		autocmd BufWinLeave * call s:bufwinleave_listener(expand('<abuf>'), expand('<afile>:p'))
+		autocmd BufUnload * call s:bufunload_listener(expand('<abuf>'), expand('<afile>:p'))
 	augroup END
 endfunction
 
@@ -35,8 +36,9 @@ endfunction
 
 function s:bufadd_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	" call log#log_error(&buftype)
-	" call log#log_error(&filetype)
+	call log#log_error('==== buf add ====')
+	call log#log_error(&buftype)
+	call log#log_error(&filetype)
 	if !util#isSpecialbuffers(&buftype)
 		call client#Openfile(&filetype, str2nr(a:buf), a:path)
 	endif
@@ -44,8 +46,9 @@ endfunction
 
 function s:bufread_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	" call log#log_error(&buftype)
-	" call log#log_error(&filetype)
+	call log#log_error('==== buf read ====')
+	call log#log_error(&buftype)
+	call log#log_error(&filetype)
 	if !util#isSpecialbuffers(&buftype)
 		call client#Openfile(&filetype, str2nr(a:buf), a:path)
 	endif
@@ -53,6 +56,7 @@ endfunction
 
 function s:vimleavepre_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	call log#log_error('==== vim leave pre ====')
 	if !util#isSpecialbuffers(&buftype)
 		call client#Stop(v:none)
 	endif
@@ -70,12 +74,22 @@ endfunction
 
 function s:bufwinleave_listener(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call log#log_error('==== bufwinleave ====')
+	call log#log_error('==== buf win leave ====')
 	call log#log_error(&buftype)
 	call log#log_error(&filetype)
-	if !util#isSpecialbuffers(&buftype)
-		call client#Closefile(str2nr(a:buf), a:path)
-	endif
+	" if !util#isSpecialbuffers(&buftype)
+	" 	call client#Closefile(str2nr(a:buf), a:path)
+	" endif
+endfunction
+
+function s:bufunload_listener(buf, path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	call log#log_error('==== buf unload ====')
+	call log#log_error(&buftype)
+	call log#log_error(&filetype)
+	" if !util#isSpecialbuffers(&buftype)
+	" 	call client#Closefile(str2nr(a:buf), a:path)
+	" endif
 endfunction
 
 function s:bufwrite_listener(buf, path)

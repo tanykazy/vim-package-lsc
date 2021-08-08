@@ -268,17 +268,27 @@ endfunction
 
 function s:start_server(lang, cwd)
     " let l:cmd = server#load_setting(a:lang)
-    let l:setting = server#load_setting(a:lang)
-    let l:channel = channel#Open(l:setting['cmd'], a:cwd, funcref('client#Callback'))
     let l:server = {}
+    let s:server_info[a:lang] = l:server
+    let l:setting = server#load_setting(a:lang)
+    if has_key(l:setting, 'alternative')
+        let l:alternative = l:setting['alternative']
+        let s:server_info[l:alternative] = l:server
+        let l:setting = server#load_setting(l:alternative)
+    endif
+
+    let l:channel = channel#Open(l:setting['cmd'], a:cwd, funcref('client#Callback'))
+
     let l:server['options'] = get(l:setting, 'options', v:none)
     let l:server['id'] = l:channel['id']
     let l:server['channel'] = l:channel
     let l:server['files'] = []
     " let l:server['unopened'] = []
-    let l:server['lang'] = a:lang
+    " let l:server['langs'] = [a:lang, l:alternative]
     let l:server['cwd'] = a:cwd
-    let s:server_info[a:lang] = l:server
+
+    call log#log_debug(string(s:server_info))
+
     return l:server
 endfunction
 

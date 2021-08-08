@@ -9,6 +9,9 @@
     "json": {
         "alternative": "typescript"
     },
+    "javascript": {
+        "alternative": "typescript"
+    },
     "vim": {
         "command": {
             "install": "npm install vim-language-server",
