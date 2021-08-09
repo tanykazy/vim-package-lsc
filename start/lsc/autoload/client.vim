@@ -1,11 +1,3 @@
-if exists("g:loaded_client")
-	finish
-endif
-let g:loaded_client= 1
-
-let s:save_cpoptions = &cpoptions
-set cpoptions&vim
-
 
 let s:server_info = {}
 
@@ -18,65 +10,69 @@ function client#start(lang, buf, cwd)
     endif
 endfunction
 
-function client#stop(lang)
+function client#stop(filetype)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if util#isNone(a:lang)
+    if util#isNone(a:filetype)
         for l:server in values(s:server_info)
             call s:send_request(l:server, 'shutdown', v:none)
         endfor
+    elseif has_key(s:server_info, a:filetype)
+        let l:server = s:server_info[a:filetype]
+        call s:send_request(l:server, 'shutdown', v:none)
+    endif
+endfunction
+
+function client#document_open(buf, path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:filetype = util#getfiletype(a:buf)
+    if has_key(s:server_info, l:filetype)
+        let l:server = s:server_info[l:filetype]
+        if !util#isContain(l:server['files'], a:path)
+            call s:send_textDocument_didOpen(l:server, a:buf, a:path)
+        endif
     else
-        if has_key(s:server_info, a:lang)
-            let l:server = s:server_info[a:lang]
-            call s:send_request(l:server, 'shutdown', v:none)
+        if server#isSupport(l:filetype)
+            let l:server = s:start_server(l:filetype, util#getcwd(a:buf))
+            let l:params = lsp#InitializeParams(l:server['options'], v:none)
+            call s:send_request(l:server, 'initialize', l:params)
         endif
     endif
 endfunction
 
-function client#openfile(lang, buf, path)
+function client#document_close(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !empty(a:path)
-        if has_key(s:server_info, a:lang)
-            let l:server = s:server_info[a:lang]
-            if !util#isContain(l:server['files'], a:path)
-                call s:send_textDocument_didOpen(l:server, a:buf, a:path)
-            endif
-        else
-            if server#isSupport(&filetype)
-                let l:server = s:start_server(a:lang, util#getcwd(a:buf))
-                let l:params = lsp#InitializeParams(l:server['options'], v:none)
-                call s:send_request(l:server, 'initialize', l:params)
-            endif
+    let l:filetype = util#getfiletype(a:buf)
+    if has_key(s:server_info, l:filetype)
+        let l:server = s:server_info[l:filetype]
+        if util#isContain(l:server['files'], a:path)
+            call s:send_textDocument_didClose(l:server, a:buf, a:path)
         endif
     endif
 endfunction
 
-function client#closefile(buf, path)
+function client#document_change(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_error(a:buf)
-    call log#log_error(a:path)
-    let l:serverlist = s:getserverlist(a:path)
-    for l:server in l:serverlist
-        call s:send_textDocument_didClose(l:server, a:buf, a:path)
-    endfor
+    let l:filetype = util#getfiletype(a:buf)
+    if has_key(s:server_info, l:filetype)
+        let l:server = s:server_info[l:filetype]
+        if util#isContain(l:server['files'], a:path)
+            call s:send_textDocument_didChange(l:server, a:buf, a:path)
+        endif
+    endif
 endfunction
 
-function client#changefile(buf, path)
+function client#document_save(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:serverlist = s:getserverlist(a:path)
-    for l:server in l:serverlist
-        call s:send_textDocument_didChange(l:server, a:buf, a:path)
-    endfor
+    let l:filetype = util#getfiletype(a:buf)
+    if has_key(s:server_info, l:filetype)
+        let l:server = s:server_info[l:filetype]
+        if util#isContain(l:server['files'], a:path)
+            call s:send_textDocument_didSave(l:server, a:buf, a:path)
+        endif
+    endif
 endfunction
 
-function client#savefile(buf, path)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:serverlist = s:getserverlist(a:path)
-    for l:server in l:serverlist
-        call s:send_textDocument_didSave(l:server, a:buf, a:path)
-    endfor
-endfunction
-
-function client#hover(buf, pos)
+function client#document_hover(buf, pos)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:path = util#buf2path(a:buf)
     let l:lnum = a:pos[1]
@@ -87,7 +83,7 @@ function client#hover(buf, pos)
     call s:send_request(l:serverlist[0], 'textDocument/hover', l:params)
 endfunction
 
-function client#Callback(channel, content)
+function client#callback(channel, content)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if jsonrpc#isRequest(a:content)
         let s:event = s:eventRequest
@@ -277,7 +273,7 @@ function s:start_server(lang, cwd)
         let l:setting = server#load_setting(l:alternative)
     endif
 
-    let l:channel = channel#Open(l:setting['cmd'], a:cwd, funcref('client#Callback'))
+    let l:channel = channel#Open(l:setting['cmd'], a:cwd, funcref('client#callback'))
 
     let l:server['options'] = get(l:setting, 'options', v:none)
     let l:server['id'] = l:channel['id']
@@ -321,7 +317,3 @@ endfunction
 " 	call log#log_error(expand('<sfile>') . ':' . expand('<sflnum>'))
 " 	call log#log_error(a:bufnr)
 " endfunction
-
-
-let &cpoptions = s:save_cpoptions
-unlet s:save_cpoptions

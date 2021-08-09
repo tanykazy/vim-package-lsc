@@ -1,12 +1,3 @@
-if exists("g:loaded_autocmd")
-	finish
-endif
-let g:loaded_autocmd = 1
-
-let s:save_cpoptions = &cpoptions
-set cpoptions&vim
-
-
 function autocmd#setup_autocmd()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	" autocmd [group] {events} {file-pattern} [++nested] {command}
@@ -138,7 +129,3 @@ function s:insertleave_listener(buf, path)
 		call client#Changefile(str2nr(a:buf), a:path)
 	endif
 endfunction
-
-
-let &cpoptions = s:save_cpoptions
-unlet s:save_cpoptions

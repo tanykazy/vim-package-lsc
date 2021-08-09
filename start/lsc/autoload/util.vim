@@ -20,6 +20,10 @@ function util#isSpecialbuffers(buftype)
 	return util#isContain(l:specialbuffers, a:buftype)
 endfunction
 
+function util#getfiletype(buf)
+	return getbufvar(a:buf, '&filetype')
+endfunction
+
 function util#getbuftext(buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:lines = getbufline(a:buf, 1, '$')
