@@ -7,7 +7,7 @@ let s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
 
-let s:server_file = expand('<sfile>:p:h') . '/language-server.json'
+let s:server_file = expand('<sfile>:p:h:h') . '/server.json'
 
 function server#load_setting(lang)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))

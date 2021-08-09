@@ -1,9 +1,0 @@
-{
-    "typescript": {
-        "command": {
-            "install": "npm install vscode-json-languageserver",
-            "start": "npx vscode-json-languageserver --stdio"
-        },
-        "cmd": "npx vscode-json-languageserver --stdio"
-    }
-}

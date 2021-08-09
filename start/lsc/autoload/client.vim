@@ -198,7 +198,7 @@ function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if a:content['method'] == 'textDocument/publishDiagnostics'
         let l:location = []
-        call textprop#clear('%')
+        " call textprop#clear('%')
         for l:value in a:content['params']['diagnostics']
             let l:file = util#uri2path(a:content['params']['uri'])
             let l:lnum = l:value['range']['start']['line']
@@ -206,13 +206,13 @@ function s:matrix[s:stateActive][s:eventNotification].fn(server, content) dict
             let l:nr = get(l:value, 'code', v:none)
             let l:text = l:value['message']
             let l:type = get(l:value, 'severity', v:none)
-            call add(l:location, quickfix#location(l:file, l:lnum, l:col, l:nr, l:text, l:type))
+            " call add(l:location, quickfix#location(l:file, l:lnum, l:col, l:nr, l:text, l:type))
 
             let l:start = l:value['range']['start']
             let l:end = l:value['range']['end']
-            call textprop#add(l:start, l:end, l:type)
+            " call textprop#add(l:start, l:end, l:type)
         endfor
-        call quickfix#set_quickfix(v:none, l:location, 'r')
+        " call quickfix#set_quickfix(v:none, l:location, 'r')
     endif
 endfunction
 
