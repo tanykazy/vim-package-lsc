@@ -9,7 +9,7 @@ set cpoptions&vim
 
 let s:server_info = {}
 
-function client#Start(lang, buf, cwd)
+function client#start(lang, buf, cwd)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !has_key(s:server_info, a:lang) && server#isSupport(&filetype)
         let l:server = s:start_server(a:lang, a:cwd)
@@ -18,7 +18,7 @@ function client#Start(lang, buf, cwd)
     endif
 endfunction
 
-function client#Stop(lang)
+function client#stop(lang)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if util#isNone(a:lang)
         for l:server in values(s:server_info)
@@ -32,7 +32,7 @@ function client#Stop(lang)
     endif
 endfunction
 
-function client#Openfile(lang, buf, path)
+function client#openfile(lang, buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !empty(a:path)
         if has_key(s:server_info, a:lang)
@@ -50,7 +50,7 @@ function client#Openfile(lang, buf, path)
     endif
 endfunction
 
-function client#Closefile(buf, path)
+function client#closefile(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_error(a:buf)
     call log#log_error(a:path)
@@ -60,7 +60,7 @@ function client#Closefile(buf, path)
     endfor
 endfunction
 
-function client#Changefile(buf, path)
+function client#changefile(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:serverlist = s:getserverlist(a:path)
     for l:server in l:serverlist
@@ -68,7 +68,7 @@ function client#Changefile(buf, path)
     endfor
 endfunction
 
-function client#Savefile(buf, path)
+function client#savefile(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:serverlist = s:getserverlist(a:path)
     for l:server in l:serverlist
@@ -156,7 +156,7 @@ function s:matrix[s:stateIdle][s:eventResponse].fn(server, content) dict
             for l:bufinfo in l:bufinfolist
                 call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:bufinfo['name'])
                 " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
-                call autocmd#add_event_listener()
+                " call autocmd#add_event_listener()
             endfor
 
         else

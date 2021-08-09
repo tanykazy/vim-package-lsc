@@ -51,7 +51,7 @@ function log#log_error(msg)
 endfunction
 
 function s:log(level, msg)
-    call ch_log(a:level . string(a:msg))
+    call ch_log(a:level . a:msg)
 endfunction
 
 
