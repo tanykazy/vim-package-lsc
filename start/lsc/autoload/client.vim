@@ -12,6 +12,7 @@ endfunction
 
 function client#stop(filetype)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call log#log_debug('Debug server info ' . string(s:server_info))
     if util#isNone(a:filetype)
         for l:server in values(s:server_info)
             call s:send_request(l:server, 'shutdown', v:none)
@@ -224,6 +225,7 @@ endfunction
 function s:send_textDocument_didClose(server, buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:params = lsp#DidCloseTextDocumentParams(a:path)
+    call filter(a:server['files'], {idx, val -> val != a:path})
     call s:send_notification(a:server, 'textDocument/didClose', l:params)
 endfunction
 
@@ -262,25 +264,29 @@ function s:send_notification(server, method, params)
     return channel#Send(a:server['channel'], l:message)
 endfunction
 
-function s:start_server(lang, cwd)
-    " let l:cmd = server#load_setting(a:lang)
+function s:start_server(filetype, cwd)
+    " let l:cmd = server#load_setting(a:filetype)
     let l:server = {}
-    let s:server_info[a:lang] = l:server
-    let l:setting = server#load_setting(a:lang)
+    let l:setting = server#load_setting(a:filetype)
+    let s:server_info[a:filetype] = l:server
     if has_key(l:setting, 'alternative')
         let l:alternative = l:setting['alternative']
-        let s:server_info[l:alternative] = l:server
         let l:setting = server#load_setting(l:alternative)
+        if has_key(s:server_info, l:alternative)
+            let s:server_info[a:filetype] = s:server_info[l:alternative]
+        else
+            let s:server_info[l:alternative] = l:server
+        endif
     endif
 
-    let l:channel = channel#Open(l:setting['cmd'], a:cwd, funcref('client#callback'))
 
+    let l:channel = channel#Open(l:setting['cmd'], a:cwd, funcref('client#callback'))
     let l:server['options'] = get(l:setting, 'options', v:none)
     let l:server['id'] = l:channel['id']
     let l:server['channel'] = l:channel
     let l:server['files'] = []
     " let l:server['unopened'] = []
-    " let l:server['langs'] = [a:lang, l:alternative]
+    " let l:server['langs'] = [a:filetype, l:alternative]
     let l:server['cwd'] = a:cwd
 
     call log#log_debug(string(s:server_info))
