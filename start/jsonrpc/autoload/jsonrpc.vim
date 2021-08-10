@@ -48,7 +48,7 @@ function jsonrpc#parse_message(message)
 	" if !empty(l:parts)
 		for l:part in l:parts
 			if stridx(l:part, 'Content-Length') == 0 || stridx(l:part, 'Content-Type') == 0
-				let l:result['header'] = s:parse_header(l:part)
+				let l:result['header'] = jsonrpc#parse_header(l:part)
 			else
 				let l:result['content'] = l:part
 				" try
@@ -100,47 +100,17 @@ function jsonrpc#isNotification(message)
 	return v:false
 endfunction
 
-function jsonrpc#parse_header(data)
+function jsonrpc#contain_header(data)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-
-	let l:result = {}
-
-	let l:parts = split(a:data, "\r\n\r\n")
-
-	if !empty(l:parts)
-		for l:part in l:parts
-			if stridx(l:part, 'Content-Length') == 0 || stridx(l:part, 'Content-Type') == 0
-				let l:result['header'] = s:parse_header(l:part)
-			else
-				try
-					let l:result['content'] = s:parse_content(l:part)
-				catch
-					let l:result['catch'] = v:exception
-					let l:result['error'] = l:part
-					call log#log_error('Failed decode: ' . string(l:result))
-				endtry
-			endif
-		endfor
-	endif
-	return l:result
-
-	let l:headers = {}
-	let l:fields = split(a:part, "\r\n")
-	if !empty(l:fields)
-		for l:field in l:fields
-			if stridx(l:field, 'Content-Length') == 0
-				let l:header = split(l:field, ": ")
-				let l:headers[l:header[0]] = l:header[1]
-			elseif stridx(l:field, 'Content-Type') == 0
-				let l:header = split(l:field, ": ")
-				let l:headers[l:header[0]] = l:header[1]
-			endif
-		endfor
-	endif
-	return l:headers
+	return stridx(a:data, "\r\n\r\n") != -1
 endfunction
 
-function s:parse_header(part)
+function jsonrpc#split_header(data)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	return util#split(a:data, "\r\n\r\n", 2)
+endfunction
+
+function jsonrpc#parse_header(part)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:headers = {}
 	let l:fields = split(a:part, "\r\n")

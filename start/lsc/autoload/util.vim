@@ -1,4 +1,14 @@
-function util#split(str)
+function util#split(str, pattern, max)
+	let l:list = split(a:str, a:pattern, v:true)
+	if !(len(l:list) > a:max) || a:max < 1
+		return l:list
+	endif
+	let l:first = l:list[0 : a:max - 1]
+	let l:second = l:list[a:max : -1]
+	if len(l:second) != 0
+		let l:first[-1] = join([l:first[-1], join(l:second, a:pattern)], a:pattern)
+	endif
+	return l:first
 endfunction
 
 function util#uri2path(uri)

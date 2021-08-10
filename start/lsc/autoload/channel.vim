@@ -35,17 +35,28 @@ let s:channel = {}
 function s:channel.out_cb(ch, msg) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	call log#log_debug('Receive data from[' . self.id . ']:' . a:msg)
-	let l:message = jsonrpc#parse_message(a:msg)
 	if !has_key(self, 'message')
 		let self.message = {}
 	endif
-	if has_key(l:message, 'header')
-		let self.message.header = l:message.header
+	if jsonrpc#contain_header(a:msg)
+		let l:msgs = jsonrpc#split_header(a:msg)
+		let l:header = jsonrpc#parse_header(l:msg[0])
+
+		call log#log_debug('== header == ' . string(l:header))
+
+		let self.message.header = l:header
+		let a:msg = l:msgs[1]
 	endif
-	if has_key(l:message, 'content')
-		let self.message.content = l:message.content
+	if !has_key(self.message, 'content')
+		let self.message.content = ''
 	endif
-	if has_key(self.message, 'header') && has_key(self.message, 'content')
+	let l:content = self.message.content . a:msg
+	let l:length = l:header['Content-Length']
+	if len(l:content) > l:length
+		let self.message.content = l:content[0 : l:length]
+		let a:msg = l:content[l:length : -1]
+	endif
+	if len(self.message.content) == l:length
 		if has_key(self, 'callback')
 			if ch_status(a:ch) == 'open'
 				let l:message = remove(self, 'message')

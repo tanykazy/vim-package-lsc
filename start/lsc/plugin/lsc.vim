@@ -32,10 +32,14 @@ call log#log_error('load: plugin/lsc.vim')
 function s:test(...)
 endfunction
 
-let s = server#create('typescript', funcref('s:test'))
-call s.start(funcref('s:test'))
-call s.recv('aa')
-let s2 = server#create('typescript', funcref('s:test'))
+" let s = server#create('typescript', funcref('s:test'))
+" call s.start(funcref('s:test'))
+" call s.recv('aa')
+" let s2 = server#create('typescript', funcref('s:test'))
+
+let str = 'The quick brown fox jumps over the lazy dog.'
+call log#log_debug(string(util#split(str, ' ', 2)))
+call log#log_debug(strpart(str, 0, 3))
 
 
 
