@@ -1,12 +1,3 @@
-if exists("g:loaded_jsonrpc")
-	finish
-endif
-let g:loaded_jsonrpc = 1
-
-let s:save_cpoptions = &cpoptions
-set cpoptions&vim
-
-
 " let s:field_separator = "\r\n"
 " let s:part_separator = "\r\n\r\n"
 " let s:name_value_separator = ": "
@@ -54,29 +45,30 @@ function jsonrpc#parse_message(message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:result = {}
 	let l:parts = split(a:message, "\r\n\r\n")
-	if !empty(l:parts)
+	" if !empty(l:parts)
 		for l:part in l:parts
 			if stridx(l:part, 'Content-Length') == 0 || stridx(l:part, 'Content-Type') == 0
 				let l:result['header'] = s:parse_header(l:part)
 			else
-				try
-					let l:result['content'] = s:parse_content(l:part)
-				catch
-					let l:result['catch'] = v:exception
-					let l:result['error'] = l:part
-					call log#log_error('Failed decode: ' . string(l:result))
-				endtry
+				let l:result['content'] = l:part
+				" try
+				" 	let l:result['content'] = s:parse_content(l:part)
+				" catch
+				" 	let l:result['catch'] = v:exception
+				" 	let l:result['error'] = l:part
+				" 	call log#log_error('Failed decode: ' . string(l:result))
+				" endtry
 			endif
 		endfor
-	endif
+	" endif
 	return l:result
 endfunction
 
 function jsonrpc#build_payload(content)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:body = s:serialize_content(a:content)
-	let l:header = s:make_header(l:body)
-	return l:header . "\r\n\r\n" . l:body
+	let l:body = iconv(s:serialize_content(a:content), &encoding, 'utf-8')
+	let l:header = iconv(s:make_header(l:body) . "\r\n\r\n", &encoding, 'latin1')
+	return l:header . l:body
 endfunction
 
 function jsonrpc#isMessage(message)
@@ -106,6 +98,46 @@ function jsonrpc#isNotification(message)
 		return !has_key(a:message, 'id') && has_key(a:message, 'method')
 	endif
 	return v:false
+endfunction
+
+function jsonrpc#parse_header(data)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+
+	let l:result = {}
+
+	let l:parts = split(a:data, "\r\n\r\n")
+
+	if !empty(l:parts)
+		for l:part in l:parts
+			if stridx(l:part, 'Content-Length') == 0 || stridx(l:part, 'Content-Type') == 0
+				let l:result['header'] = s:parse_header(l:part)
+			else
+				try
+					let l:result['content'] = s:parse_content(l:part)
+				catch
+					let l:result['catch'] = v:exception
+					let l:result['error'] = l:part
+					call log#log_error('Failed decode: ' . string(l:result))
+				endtry
+			endif
+		endfor
+	endif
+	return l:result
+
+	let l:headers = {}
+	let l:fields = split(a:part, "\r\n")
+	if !empty(l:fields)
+		for l:field in l:fields
+			if stridx(l:field, 'Content-Length') == 0
+				let l:header = split(l:field, ": ")
+				let l:headers[l:header[0]] = l:header[1]
+			elseif stridx(l:field, 'Content-Type') == 0
+				let l:header = split(l:field, ": ")
+				let l:headers[l:header[0]] = l:header[1]
+			endif
+		endfor
+	endif
+	return l:headers
 endfunction
 
 function s:parse_header(part)
@@ -144,7 +176,3 @@ function s:serialize_content(params)
 	let l:data = json_encode(a:params)
 	return l:data
 endfunction
-
-
-let &cpoptions = s:save_cpoptions
-unlet s:save_cpoptions

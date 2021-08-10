@@ -1,12 +1,3 @@
-if exists("g:loaded_lsp")
-	finish
-endif
-let g:loaded_lsp = 1
-
-let s:save_cpoptions = &cpoptions
-set cpoptions&vim
-
-
 let lsp#DiagnosticSeverity = {}
 let lsp#DiagnosticSeverity['Error'] = 1
 let lsp#DiagnosticSeverity['Warning'] = 2
@@ -537,7 +528,3 @@ function lsp#WorkDoneProgressParams(workDoneToken)
 	endif
 	return l:workDoneProgressParams
 endfunction
-
-
-let &cpoptions = s:save_cpoptions
-unlet s:save_cpoptions

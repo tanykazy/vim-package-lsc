@@ -1,11 +1,5 @@
-if exists("g:loaded_util")
-	finish
-endif
-let g:loaded_util = 1
-
-let s:save_cpoptions = &cpoptions
-set cpoptions&vim
-
+function util#split(str)
+endfunction
 
 function util#uri2path(uri)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
@@ -99,7 +93,3 @@ function util#parse_json_file(path)
 	endtry
 	return l:json
 endfunction
-
-
-let &cpoptions = s:save_cpoptions
-unlet s:save_cpoptions

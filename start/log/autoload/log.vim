@@ -1,12 +1,3 @@
-if exists("g:loaded_log")
-	finish
-endif
-let g:loaded_log = 1
-
-let s:save_cpoptions = &cpoptions
-set cpoptions&vim
-
-
 let s:log_name = 'vim-package-lsc.log'
 
 let s:log_level_trace = 0
@@ -53,7 +44,3 @@ endfunction
 function s:log(level, msg)
     call ch_log(a:level . a:msg)
 endfunction
-
-
-let &cpoptions = s:save_cpoptions
-unlet s:save_cpoptions

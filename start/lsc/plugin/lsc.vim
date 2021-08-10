@@ -1,3 +1,12 @@
+if exists("g:loaded_lsc")
+	finish
+endif
+let g:loaded_lsc = 1
+
+let s:save_cpoptions = &cpoptions
+set cpoptions&vim
+
+
 command -nargs=0 Lsc :call lsc#Lsc(<f-args>)
 command -nargs=0 Test :call lsc#Test(<f-args>)
 
@@ -19,3 +28,16 @@ call log#log_error('load: plugin/lsc.vim')
 " call autocmd#setup_autocmd()
 " call highlight#setup_highlight()
 " call textprop#setup_proptypes()
+
+function s:test(...)
+endfunction
+
+let s = server#create('typescript', funcref('s:test'))
+call s.start(funcref('s:test'))
+call s.recv('aa')
+let s2 = server#create('typescript', funcref('s:test'))
+
+
+
+let &cpoptions = s:save_cpoptions
+unlet s:save_cpoptions

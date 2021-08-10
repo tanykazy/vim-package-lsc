@@ -1,18 +1,22 @@
-
 let s:server_info = {}
 
 function client#start(lang, buf, cwd)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !has_key(s:server_info, a:lang) && server#isSupport(&filetype)
         let l:server = s:start_server(a:lang, a:cwd)
-        let l:params = lsp#InitializeParams(l:server['options'], v:none)
-        call s:send_request(l:server, 'initialize', l:params)
+        if !has_key(l:server, 'capabilities')
+            let l:params = lsp#InitializeParams(l:server['options'], v:none)
+            call s:send_request(l:server, 'initialize', l:params)
+        endif
     endif
 endfunction
 
 function client#stop(filetype)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_debug('Debug server info ' . string(s:server_info))
+    " call log#log_debug('Debug server info ' . string(s:server_info))
+
+
+
     if util#isNone(a:filetype)
         for l:server in values(s:server_info)
             call s:send_request(l:server, 'shutdown', v:none)
@@ -34,8 +38,10 @@ function client#document_open(buf, path)
     else
         if server#isSupport(l:filetype)
             let l:server = s:start_server(l:filetype, util#getcwd(a:buf))
-            let l:params = lsp#InitializeParams(l:server['options'], v:none)
-            call s:send_request(l:server, 'initialize', l:params)
+            if !has_key(l:server, 'capabilities')
+                let l:params = lsp#InitializeParams(l:server['options'], v:none)
+                call s:send_request(l:server, 'initialize', l:params)
+            endif
         endif
     endif
 endfunction
@@ -183,7 +189,7 @@ function s:matrix[s:stateActive][s:eventResponse].fn(server, content) dict
         if l:method == 'shutdown'
             call s:send_notification(a:server, 'exit', v:none)
             call remove(a:server, l:id)
-            call channel#Close(a:server['channel'])
+            call channel#close(a:server['channel'])
             call remove(s:server_info, a:server['lang'])
             let s:state = s:stateIdle
         else
@@ -250,47 +256,43 @@ function s:send_request(server, method, params)
     let l:message = jsonrpc#request_message(l:unique, a:method, a:params)
     let a:server[l:unique] = {}
     let a:server[l:unique]['message'] = l:message
-    return channel#Send(a:server['channel'], l:message)
+    return channel#send(a:server['channel'], l:message)
 endfunction
 
 function s:send_response(server, message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    return channel#Send(a:server['channel'], a:message)
+    return channel#send(a:server['channel'], a:message)
 endfunction
 
 function s:send_notification(server, method, params)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:message = jsonrpc#notification_message(a:method, a:params)
-    return channel#Send(a:server['channel'], l:message)
+    return channel#send(a:server['channel'], l:message)
 endfunction
 
 function s:start_server(filetype, cwd)
-    " let l:cmd = server#load_setting(a:filetype)
-    let l:server = {}
-    let l:setting = server#load_setting(a:filetype)
-    let s:server_info[a:filetype] = l:server
-    if has_key(l:setting, 'alternative')
-        let l:alternative = l:setting['alternative']
-        let l:setting = server#load_setting(l:alternative)
-        if has_key(s:server_info, l:alternative)
-            let s:server_info[a:filetype] = s:server_info[l:alternative]
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if has_key(s:server_info, a:filetype)
+        let l:server = s:server_info[a:filetype]
+    else
+        let l:setting = server#load_setting(a:filetype)
+        if has_key(l:setting, 'alternative')
+            let l:alternative = l:setting['alternative']
+            call log#log_debug('Alternative to ' . a:filetype . ' is ' . l:alternative)
+            let l:server = s:start_server(l:alternative, a:cwd)
         else
-            let s:server_info[l:alternative] = l:server
+            let l:channel = channel#open(l:setting['cmd'], a:cwd, funcref('client#callback'))
+            let l:server = {}
+            let l:server['options'] = get(l:setting, 'options', v:none)
+            let l:server['id'] = l:channel['id']
+            let l:server['channel'] = l:channel
+            let l:server['files'] = []
+            " let l:server['unopened'] = []
+            " let l:server['langs'] = [a:filetype, l:alternative]
+            let l:server['cwd'] = a:cwd
         endif
+        let s:server_info[a:filetype] = l:server
     endif
-
-
-    let l:channel = channel#Open(l:setting['cmd'], a:cwd, funcref('client#callback'))
-    let l:server['options'] = get(l:setting, 'options', v:none)
-    let l:server['id'] = l:channel['id']
-    let l:server['channel'] = l:channel
-    let l:server['files'] = []
-    " let l:server['unopened'] = []
-    " let l:server['langs'] = [a:filetype, l:alternative]
-    let l:server['cwd'] = a:cwd
-
-    call log#log_debug(string(s:server_info))
-
     return l:server
 endfunction
 
