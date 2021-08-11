@@ -7,9 +7,13 @@ function server#create(lang, callback)
         let s:server.cmd = l:setting.cmd
         let s:server.options = get(l:setting, 'options', v:none)
         let s:server.files = []
+
+        " let l:channel = channel#open(l:setting.cmd, s:server.recv)
+        " let s:server.channel = l:channel
+
         let s:servers[a:lang] = deepcopy(s:server)
     endif
-    call log#log_debug(string(s:servers))
+    " call log#log_debug(string(s:servers))
     return s:servers[a:lang]
 endfunction
 
@@ -17,16 +21,23 @@ let s:servers = {}
 
 let s:server = {}
 let s:server.id = 0
+let s:server.running = v:false
+let s:server.channel = v:none
 function s:server.start() dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+
+
+
     let l:channel = channel#open(self.cmd, self.recv)
-    let s:server.channel = l:channel
+    let self.channel = l:channel
+    let self.running = v:true
     return self
 endfunction
 
 function s:server.stop() dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call channel#close(self.channel)
+    self.running = v:false
     return self
 endfunction
 

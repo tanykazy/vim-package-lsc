@@ -8,7 +8,7 @@ function conf#load_server_setting(lang)
 	if !has_key(l:server_table, a:lang)
 		call log#log_error('Not found setting ' . a:lang . ' in ' . s:server_setting_file)
 	endif
-	return = get(l:server_table, a:lang, {})
+	return get(l:server_table, a:lang, {})
 endfunction
 
 function conf#resolve_alternative(lang)

@@ -2,13 +2,20 @@ let s:server_info = {}
 
 function client#start(lang, buf, cwd)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !has_key(s:server_info, a:lang) && server#isSupport(&filetype)
-        let l:server = s:start_server(a:lang, a:cwd)
-        if !has_key(l:server, 'capabilities')
-            let l:params = lsp#InitializeParams(l:server['options'], v:none)
-            call s:send_request(l:server, 'initialize', l:params)
-        endif
-    endif
+    let l:server = server#create(a:lang, funcref('client#callback'))
+    call l:server.start()
+
+    let l:params = lsp#InitializeParams(l:server['options'], v:none)
+    
+    call s:send_request(l:server, 'initialize', l:params)
+
+    " if !has_key(s:server_info, a:lang) && server#isSupport(&filetype)
+    "     let l:server = s:start_server(a:lang, a:cwd)
+    "     if !has_key(l:server, 'capabilities')
+    "         let l:params = lsp#InitializeParams(l:server['options'], v:none)
+    "         call s:send_request(l:server, 'initialize', l:params)
+    "     endif
+    " endif
 endfunction
 
 function client#stop(filetype)
@@ -29,21 +36,33 @@ endfunction
 
 function client#document_open(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+
     let l:filetype = util#getfiletype(a:buf)
-    if has_key(s:server_info, l:filetype)
-        let l:server = s:server_info[l:filetype]
-        if !util#isContain(l:server['files'], a:path)
-            call s:send_textDocument_didOpen(l:server, a:buf, a:path)
-        endif
-    else
-        if server#isSupport(l:filetype)
-            let l:server = s:start_server(l:filetype, util#getcwd(a:buf))
-            if !has_key(l:server, 'capabilities')
-                let l:params = lsp#InitializeParams(l:server['options'], v:none)
-                call s:send_request(l:server, 'initialize', l:params)
-            endif
-        endif
+
+    let l:server = server#create(l:filetype, funcref('client#callback'))
+
+    if !l:server.running
+        call l:server.start()
+        let l:params = lsp#InitializeParams(l:server['options'], v:none)
+    
+        call s:send_request(l:server, 'initialize', l:params)
     endif
+
+
+    " if has_key(s:server_info, l:filetype)
+    "     let l:server = s:server_info[l:filetype]
+    "     if !util#isContain(l:server['files'], a:path)
+    "         call s:send_textDocument_didOpen(l:server, a:buf, a:path)
+    "     endif
+    " else
+    "     if server#isSupport(l:filetype)
+    "         let l:server = s:start_server(l:filetype, util#getcwd(a:buf))
+    "         if !has_key(l:server, 'capabilities')
+    "             let l:params = lsp#InitializeParams(l:server['options'], v:none)
+    "             call s:send_request(l:server, 'initialize', l:params)
+    "         endif
+    "     endif
+    " endif
 endfunction
 
 function client#document_close(buf, path)
@@ -252,11 +271,11 @@ endfunction
 
 function s:send_request(server, method, params)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:unique = s:unique(a:server)
-    let l:message = jsonrpc#request_message(l:unique, a:method, a:params)
-    let a:server[l:unique] = {}
-    let a:server[l:unique]['message'] = l:message
-    return channel#send(a:server['channel'], l:message)
+    " let l:unique = s:unique(a:server)
+    let l:message = jsonrpc#request_message(a:server.id, a:method, a:params)
+    " let a:server[l:unique] = {}
+    " let a:server[l:unique]['message'] = l:message
+    return a:server.send(l:message)
 endfunction
 
 function s:send_response(server, message)

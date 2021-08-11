@@ -1,5 +1,5 @@
 function command#test(...)
-    call log#log_debug(a:000)
+    call log#log_debug(string(a:000))
 endfunction
 
 function command#start(...) abort

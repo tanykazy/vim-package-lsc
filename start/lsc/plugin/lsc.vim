@@ -29,17 +29,17 @@ call log#log_error('load: plugin/lsc.vim')
 " call highlight#setup_highlight()
 " call textprop#setup_proptypes()
 
-function s:test(...)
-endfunction
+" function s:test(...)
+" endfunction
 
 " let s = server#create('typescript', funcref('s:test'))
-" call s.start(funcref('s:test'))
+" call s.start()
 " call s.recv('aa')
 " let s2 = server#create('typescript', funcref('s:test'))
 
-let str = 'The quick brown fox jumps over the lazy dog.'
-call log#log_debug(string(util#split(str, ' ', 2)))
-call log#log_debug(strpart(str, 0, 3))
+" let str = 'The quick brown fox jumps over the lazy dog.'
+" call log#log_debug(string(util#split(str, ' ', 2)))
+" call log#log_debug(strpart(str, 0, 3))
 
 
 

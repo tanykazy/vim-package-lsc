@@ -22,6 +22,9 @@ endfunction
 
 function channel#send(channel, data)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	
+	call log#log_debug(string(a:channel))
+
 	call log#log_debug('Send data to[' . a:channel.id . ']:' . a:data)
 	return ch_sendraw(a:channel.handle, a:data, {})
 endfunction
@@ -43,11 +46,11 @@ function s:channel.out_cb(ch, msg) dict
 	endif
 
 
-	while jsonrpc#contain_header(a:msg)
+	" while jsonrpc#contain_header(a:msg)
 
-		let l:parts = jsonrpc#split_header(a:msg)
+	" 	let l:parts = jsonrpc#split_header(a:msg)
 
-	endwhile
+	" endwhile
 
 	if !has_key(self.message, 'content')
 		let self.message.content = ''
