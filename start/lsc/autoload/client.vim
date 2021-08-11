@@ -22,16 +22,21 @@ function client#stop(filetype)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     " call log#log_debug('Debug server info ' . string(s:server_info))
 
-
-
-    if util#isNone(a:filetype)
-        for l:server in values(s:server_info)
-            call s:send_request(l:server, 'shutdown', v:none)
-        endfor
-    elseif has_key(s:server_info, a:filetype)
-        let l:server = s:server_info[a:filetype]
+    let l:server = server#create(a:filetype, funcref('client#callback'))
+    " if l:server.running
         call s:send_request(l:server, 'shutdown', v:none)
-    endif
+        " call l:server.stop()
+    " endif
+
+
+    " if util#isNone(a:filetype)
+    "     for l:server in values(s:server_info)
+    "         call s:send_request(l:server, 'shutdown', v:none)
+    "     endfor
+    " elseif has_key(s:server_info, a:filetype)
+    "     let l:server = s:server_info[a:filetype]
+    "     call s:send_request(l:server, 'shutdown', v:none)
+    " endif
 endfunction
 
 function client#document_open(buf, path)
@@ -41,12 +46,12 @@ function client#document_open(buf, path)
 
     let l:server = server#create(l:filetype, funcref('client#callback'))
 
-    if !l:server.running
+    " if !l:server.running
         call l:server.start()
         let l:params = lsp#InitializeParams(l:server['options'], v:none)
     
         call s:send_request(l:server, 'initialize', l:params)
-    endif
+    " endif
 
 
     " if has_key(s:server_info, l:filetype)
