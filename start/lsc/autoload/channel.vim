@@ -38,19 +38,31 @@ function s:channel.out_cb(ch, msg) dict
 	if !has_key(self, 'message')
 		let self.message = {}
 	endif
-	if jsonrpc#contain_header(a:msg)
-		let l:msgs = jsonrpc#split_header(a:msg)
-		let l:header = jsonrpc#parse_header(l:msg[0])
-
-		call log#log_debug('== header == ' . string(l:header))
-
-		let self.message.header = l:header
-		let a:msg = l:msgs[1]
+	if !jsonrpc#contain_header(a:msg)
+		let self.message = self.message.content . a:msg
 	endif
+
+
+	while jsonrpc#contain_header(a:msg)
+
+		let l:parts = jsonrpc#split_header(a:msg)
+
+	endwhile
+
 	if !has_key(self.message, 'content')
 		let self.message.content = ''
 	endif
 	let l:content = self.message.content . a:msg
+
+
+
+	if jsonrpc#contain_header(a:msg)
+		call log#log_debug('== header == ' . string(l:parts[0]))
+		let self.message.header = l:parts[0]
+		let a:msg = l:parts[2]
+	else
+		let self.message.content
+	endif
 	let l:length = l:header['Content-Length']
 	if len(l:content) > l:length
 		let self.message.content = l:content[0 : l:length]
