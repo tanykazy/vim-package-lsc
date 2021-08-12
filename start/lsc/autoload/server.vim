@@ -56,6 +56,7 @@ function s:server.recv(data) dict
         for l:wait in self.wait_res
             if l:wait.id == l:content.id
                 let l:event = l:wait.method
+                " remove
             endif
         endfor
     elseif jsonrpc#isNotification(l:content)
