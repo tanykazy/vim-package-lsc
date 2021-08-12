@@ -60,8 +60,8 @@ endfunction
 function client#document_change(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
-    if has_key(s:server_info, l:filetype)
-        let l:server = s:server_info[l:filetype]
+    if has_key(s:server_list, l:filetype)
+        let l:server = s:server_list[l:filetype]
         if util#isContain(l:server['files'], a:path)
             call s:send_textDocument_didChange(l:server, a:buf, a:path)
         endif
@@ -71,8 +71,8 @@ endfunction
 function client#document_save(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
-    if has_key(s:server_info, l:filetype)
-        let l:server = s:server_info[l:filetype]
+    if has_key(s:server_list, l:filetype)
+        let l:server = s:server_list[l:filetype]
         if util#isContain(l:server['files'], a:path)
             call s:send_textDocument_didSave(l:server, a:buf, a:path)
         endif
