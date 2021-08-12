@@ -20,18 +20,20 @@ function s:server.create(lang, listener) dict
     let self.files = []
     let self.wait_res = []
     let self.id = 0
-    " let self.channel = channel#open(l:setting.cmd, self.recv)
+    let self.running = v:false
     return deepcopy(self)
 endfunction
 
 function s:server.start() dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let self.channel = channel#open(self.cmd, funcref('self.recv', self))
+    let self.running = v:true
 endfunction
 
 function s:server.stop() dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call self.channel.close()
+    let self.running = v:false
 endfunction
 
 function s:server.send(data) dict
@@ -50,23 +52,26 @@ endfunction
 function s:server.recv(data) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:content= jsonrpc#parse_content(a:data)
+    let l:event = 'unknown'
     if jsonrpc#isRequest(l:content)
         let l:event = l:content.method
     elseif jsonrpc#isResponse(l:content)
         for l:wait in self.wait_res
             if l:wait.id == l:content.id
                 let l:event = l:wait.method
-                " remove
+                call remove(self.wait_res, index(self.wait_res, l:wait))
             endif
         endfor
     elseif jsonrpc#isNotification(l:content)
         let l:event = l:content.method
     else
-        let l:event = 'Unknown'
         call log#log_error('Undetected event: ' . string(l:content))
     endif
-    call log#log_debug('===== EVENT ===== ' . l:event)
     if has_key(self.listener, l:event)
-        call self.listener[l:event](l:content)
+        call self.listener[l:event](self, l:content)
+    else
+        call log#log_debug('Unimplemented listener function call')
+        call log#log_debug(string(self))
+        call log#log_debug(string(a:data))
     endif
 endfunction

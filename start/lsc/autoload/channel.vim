@@ -10,9 +10,6 @@ function s:channel.open(cmd, cb) dict
 	let l:opt.mode = 'raw'
 	let l:opt.stoponexit = 'term'
 	let l:opt.noblock = 1
-	" let l:opt.out_cb = self.out_cb
-	" let l:opt.err_cb = self.err_cb
-	" let l:opt.exit_cb = self.exit_cb
 
 	let l:opt.out_cb = funcref('self.out_cb', self)
 	let l:opt.err_cb = funcref('self.err_cb', self)
@@ -51,17 +48,13 @@ function s:channel.out_cb(ch, msg) dict
 	call log#log_debug('Receive data from[' . self.id . ']:' . a:msg)
 	let self.buffer = self.buffer . a:msg
 	while jsonrpc#contain_header(self.buffer)
-		" call log#log_debug(self.buffer)
 		let l:parts = jsonrpc#split_header(self.buffer)
 		let l:header = jsonrpc#parse_header(l:parts[0])
 		let l:length = l:header['Content-Length']
 		let l:content = l:parts[1][0 : l:length]
-		" call log#log_debug(string(l:parts))
-		" call log#log_debug(l:content)
 		if len(l:content) == l:length
 			call self.callback(a:msg)
 			let self.buffer = l:parts[1][l:length : -1]
-			" call log#log_debug(self.buffer)
 		else
 			break
 		endif
