@@ -3,13 +3,15 @@ let s:server_list = {}
 function client#start(lang, buf, cwd)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !has_key(s:server_list, a:lang)
-        let l:server = server#create(a:lang, s:listener)
-        call l:server.start()
+        if conf#isSupport(a:lang)
+            let l:server = server#create(a:lang, s:listener)
+            call l:server.start()
 
-        let l:params = lsp#InitializeParams(l:server['options'], v:none)
-        call s:send_request(l:server, 'initialize', l:params)
+            let l:params = lsp#InitializeParams(l:server['options'], v:none)
+            call s:send_request(l:server, 'initialize', l:params)
 
-        let s:server_list[a:lang] = l:server
+            let s:server_list[a:lang] = l:server
+        endif
     endif
 endfunction
 
@@ -27,13 +29,15 @@ function client#document_open(buf, path)
     let l:filetype = util#getfiletype(a:buf)
 
     if !has_key(s:server_list, l:filetype)
-        let l:server = server#create(l:filetype, s:listener)
-        call l:server.start()
+        if conf#isSupport(l:filetype)
+            let l:server = server#create(l:filetype, s:listener)
+            call l:server.start()
 
-        let l:params = lsp#InitializeParams(l:server['options'], v:none)
-        call s:send_request(l:server, 'initialize', l:params)
+            let l:params = lsp#InitializeParams(l:server['options'], v:none)
+            call s:send_request(l:server, 'initialize', l:params)
 
-        let s:server_list[l:filetype] = l:server
+            let s:server_list[l:filetype] = l:server
+        endif
     else
         let l:server = s:server_list[l:filetype]
         if !util#isContain(l:server['files'], a:path)
