@@ -81,13 +81,19 @@ endfunction
 
 function client#document_hover(buf, pos)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:path = util#buf2path(a:buf)
-    let l:lnum = a:pos[1]
-    let l:col = a:pos[2]
-    let l:serverlist = s:getserverlist(l:path)
-    let l:position = lsp#Position(l:lnum - 1, l:col - 1)
-    let l:params = lsp#HoverParams(l:path, l:position, v:none)
-    call s:send_request(l:serverlist[0], 'textDocument/hover', l:params)
+    let l:filetype = util#getfiletype(a:buf)
+    if has_key(s:server_list, l:filetype)
+        let l:server = s:server_list[l:filetype]
+        let l:path = util#buf2path(a:buf)
+        if util#isContain(l:server['files'], l:path)
+            let l:lnum = a:pos[1]
+            let l:col = a:pos[2]
+
+            let l:position = lsp#Position(l:lnum - 1, l:col - 1)
+            let l:params = lsp#HoverParams(l:path, l:position, v:none)
+            call s:send_request(l:server, 'textDocument/hover', l:params)
+        endif
+    endif
 endfunction
 
 let s:fn = {}
