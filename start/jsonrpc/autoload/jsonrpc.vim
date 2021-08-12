@@ -128,9 +128,15 @@ function jsonrpc#parse_header(part)
 	return l:headers
 endfunction
 
-function s:parse_content(part)
+function jsonrpc#parse_content(part)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:content = json_decode(a:part)
+	let l:content = {}
+	try
+		let l:content = json_decode(a:part)
+	catch
+		call log#log_error('Failed decode: ' . a:part)
+		throw v:exception
+	endtry
 	return l:content
 endfunction
 

@@ -1,7 +1,21 @@
-let s:server_info = {}
+let s:listener = {}
+let s:listener['initialize'] = {}
+function s:listener['initialize'].fn()
+    call log#log_debug('initialize')
+endfunction
+let s:listener['shutdown'] = {}
+let s:listener['textDocument/publishDiagnostics'] = {}
+let s:listener['Unknown'] = {}
+
+
+
+
+
 
 function client#start(lang, buf, cwd)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+
+
     let l:server = server#create(a:lang, funcref('client#callback'))
     call l:server.start()
 
@@ -22,6 +36,7 @@ function client#stop(filetype)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     " call log#log_debug('Debug server info ' . string(s:server_info))
 
+    call log#log_debug(a:filetype)
     let l:server = server#create(a:filetype, funcref('client#callback'))
     " if l:server.running
         call s:send_request(l:server, 'shutdown', v:none)
@@ -42,6 +57,8 @@ endfunction
 function client#document_open(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 
+    " call s:listener['textDocument/didOpen']()
+
     let l:filetype = util#getfiletype(a:buf)
 
     let l:server = server#create(l:filetype, funcref('client#callback'))
@@ -49,7 +66,7 @@ function client#document_open(buf, path)
     " if !l:server.running
         call l:server.start()
         let l:params = lsp#InitializeParams(l:server['options'], v:none)
-    
+        call log#log_debug(string(l:server)) 
         call s:send_request(l:server, 'initialize', l:params)
     " endif
 
