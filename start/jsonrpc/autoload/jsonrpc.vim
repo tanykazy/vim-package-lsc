@@ -5,12 +5,14 @@ let s:content_type = "Content-Type"
 let s:encoding = 'utf-8'
 
 function jsonrpc#message()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:message = {}
 	let l:message['jsonrpc'] = '2.0'
 	return l:message
 endfunction
 
 function jsonrpc#request_message(id, method, params)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:message = jsonrpc#message()
 	let l:message['id'] = a:id
 	let l:message['method'] = a:method
@@ -21,6 +23,7 @@ function jsonrpc#request_message(id, method, params)
 endfunction
 
 function jsonrpc#response_message(id, result, error)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:message = jsonrpc#message()
 	let l:message['id'] = a:id
 	if !util#isNone(a:result)
@@ -33,6 +36,7 @@ function jsonrpc#response_message(id, result, error)
 endfunction
 
 function jsonrpc#notification_message(method, params)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:message = jsonrpc#message()
 	let l:message['method'] = a:method
 	if !util#isNone(a:params)

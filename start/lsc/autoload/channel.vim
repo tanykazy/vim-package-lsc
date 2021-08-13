@@ -1,4 +1,5 @@
 function channel#open(cmd, cb)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return s:channel.open(a:cmd, a:cb)
 endfunction
 
