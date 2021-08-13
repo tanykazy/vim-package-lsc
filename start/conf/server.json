@@ -1,10 +1,38 @@
 {
     "typescript": {
         "command": {
+            "install": "npm install typescript-language-server",
+            "start": "npx typescript-language-server --stdio"
+        },
+        "cmd": "npx typescript-language-server --stdio"
+    },
+    "javascript": {
+        "command": {
+            "install": "npm install typescript-language-server",
+            "start": "npx typescript-language-server --stdio"
+        },
+        "cmd": "npx typescript-language-server --stdio"
+    },
+    "json": {
+        "command": {
             "install": "npm install vscode-json-languageserver",
             "start": "npx vscode-json-languageserver --stdio"
         },
         "cmd": "npx vscode-json-languageserver --stdio"
+    },
+    "sh": {
+        "command": {
+            "install": "npm install bash-language-server",
+            "start": "npx bash-language-server start"
+        },
+        "cmd": "npx bash-language-server start"
+    },
+    "yaml": {
+        "command": {
+            "install": "npm install yaml-language-server",
+            "start": "npx yaml-language-server --stdio"
+        },
+        "cmd": "npx yaml-language-server --stdio"
     },
     "vim": {
         "command": {
