@@ -329,7 +329,7 @@ endfunction
 
 function lsp#HoverClientCapabilities()
 	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
+	let l:params['dynamicRegistration'] = v:true
 	let l:params['contentFormat'] = ['plaintext']
 	return l:params
 endfunction

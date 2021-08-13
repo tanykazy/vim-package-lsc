@@ -1,12 +1,3 @@
-if exists("g:loaded_quickfix")
-	finish
-endif
-let g:loaded_quickfix = 1
-
-let s:save_cpoptions = &cpoptions
-set cpoptions&vim
-
-
 function quickfix#set_quickfix(nr, list, action)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     return setqflist(a:list, a:action)
@@ -41,9 +32,3 @@ function quickfix#location(filename, lnum, col, nr, text, type)
     " let l:location['valid']
     return l:location
 endfunction
-
-
-
-
-let &cpoptions = s:save_cpoptions
-unlet s:save_cpoptions
