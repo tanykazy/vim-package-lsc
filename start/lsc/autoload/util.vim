@@ -1,4 +1,5 @@
 function util#split(str, pattern, max)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:list = split(a:str, a:pattern, v:true)
 	if !(len(l:list) > a:max) || a:max < 1
 		return l:list
@@ -20,11 +21,13 @@ function util#uri2path(uri)
 endfunction
 
 function util#isSpecialbuffers(buftype)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:specialbuffers = ['quickfix', 'help', 'terminal', 'directory', 'scratch', 'unlisted']
 	return util#isContain(l:specialbuffers, a:buftype)
 endfunction
 
 function util#getfiletype(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return getbufvar(a:buf, '&filetype')
 endfunction
 
@@ -36,12 +39,25 @@ function util#getbuftext(buf)
 endfunction
 
 function util#buf2path(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:bufinfolist = util#getbufinfolist(a:buf)
 	let l:bufinfo = get(l:bufinfolist, 0, {})
 	return l:bufinfo['name']
 endfunction
 
+function util#path2buf(path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	let l:bufinfolist = getbufinfo()
+	for l:bufinfo in l:bufinfolist
+		if a:path == l:bufinfo['name']
+			return l:bufinfo['bufnr']
+		endif
+	endfor
+	return v:none
+endfunction
+
 function util#getchangedtick(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:bufinfolist = util#getbufinfolist(a:buf)
 	let l:bufinfo = get(l:bufinfolist, 0, {})
 	return l:bufinfo['changedtick']
@@ -57,6 +73,7 @@ function util#loadedbufinfolist()
 endfunction
 
 function util#getbufinfolist(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:bufinfolist = getbufinfo(a:buf)
 	if empty(l:bufinfolist)
         call log#log_error('Not found buffer ' . a:buf)

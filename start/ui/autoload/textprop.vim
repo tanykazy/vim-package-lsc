@@ -1,12 +1,3 @@
-if exists("g:loaded_textprop")
-	finish
-endif
-let g:loaded_textprop = 1
-
-let s:save_cpoptions = &cpoptions
-set cpoptions&vim
-
-
 let s:error= {}
 " let s:error['bufnr'] = bufnr('%')
 let s:error['highlight'] = 'ErrorMsg'
@@ -87,7 +78,3 @@ function s:type_add(name, props)
         call log#log_error('Property type ' . a:name . ' already defined')
     endif
 endfunction
-
-
-let &cpoptions = s:save_cpoptions
-unlet s:save_cpoptions
