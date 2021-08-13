@@ -92,6 +92,14 @@ function jsonrpc#isResponse(message)
 	return v:false
 endfunction
 
+function jsonrpc#isResponseError(message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	if jsonrpc#isResponse(a:message)
+		return has_key(a:message, 'error')
+	endif
+	return v:false
+endfunction
+
 function jsonrpc#isNotification(message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	if jsonrpc#isMessage(a:message)

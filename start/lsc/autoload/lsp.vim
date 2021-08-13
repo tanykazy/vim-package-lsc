@@ -4,16 +4,34 @@ let lsp#DiagnosticSeverity['Warning'] = 2
 let lsp#DiagnosticSeverity['Information'] = 3
 let lsp#DiagnosticSeverity['Hint'] = 4
 
+let lsp#ErrorCodes = {}
+let lsp#ErrorCodes['ParseError'] = -32700
+let lsp#ErrorCodes['InvalidRequest'] = -32600
+let lsp#ErrorCodes['MethodNotFound'] = -32601
+let lsp#ErrorCodes['InvalidParams'] = -32602
+let lsp#ErrorCodes['InternalError'] = -32603
+let lsp#ErrorCodes['jsonrpcReservedErrorRangeStart'] = -32099
+let lsp#ErrorCodes['serverErrorStart'] = lsp#ErrorCodes['jsonrpcReservedErrorRangeStart']
+let lsp#ErrorCodes['ServerNotInitialized'] = -32002
+let lsp#ErrorCodes['UnknownErrorCode'] = -32001
+let lsp#ErrorCodes['jsonrpcReservedErrorRangeEnd'] = -32000
+let lsp#ErrorCodes['serverErrorEnd'] = lsp#ErrorCodes['jsonrpcReservedErrorRangeEnd']
+let lsp#ErrorCodes['lspReservedErrorRangeStart'] = -32899
+let lsp#ErrorCodes['ServerCancelled'] = -32802
+let lsp#ErrorCodes['ContentModified'] = -32801
+let lsp#ErrorCodes['RequestCancelled'] = -32800
+let lsp#ErrorCodes['lspReservedErrorRangeEnd'] = -32800
 
-function lsp#InitializeParams(initializationOptions, workspaceFolders)
+function lsp#InitializeParams(initializationOptions, workspaceFolders, token)
 	let l:params = {}
+	call extend(l:params, lsp#WorkDoneProgressParams(a:token))
 	let l:params['processId'] = getpid()
 	let l:params['clientInfo'] = {}
 	let l:params['clientInfo']['name'] = "vim-package-lsp"
 	let l:params['clientInfo']['version'] = "0.0"
 	let l:params['locale'] = "en"
-	" let l:params['rootPath'] @deprecated
-	" let l:params['rootUri'] @deprecated
+	" let l:params['rootPath'] = v:null " @deprecated
+	" let l:params['rootUri'] = v:null " @deprecated
 	if !util#isNone(a:initializationOptions)
 		let l:params['initializationOptions'] = a:initializationOptions
 	endif
@@ -90,7 +108,7 @@ function lsp#TextDocumentContentChangeEvent(range, text)
 	if !util#isNone(a:range)
 		let l:params['range'] = a:range
 	endif
-	" let l:params['rangeLength'] @deprecated
+	" let l:params['rangeLength'] = 0 " @deprecated
 	let l:params['text'] = a:text
 	return l:params
 endfunction
