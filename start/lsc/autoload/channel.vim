@@ -53,8 +53,8 @@ function s:channel.out_cb(ch, msg) dict
 		let l:length = l:header['Content-Length']
 		let l:content = l:parts[1][0 : l:length]
 		if len(l:content) == l:length
-			call self.callback(a:msg)
 			let self.buffer = l:parts[1][l:length : -1]
+			call self.callback(l:content)
 		else
 			break
 		endif

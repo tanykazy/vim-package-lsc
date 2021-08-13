@@ -73,7 +73,8 @@ function lsp#TextDocumentPositionParams(path, position)
 endfunction
 
 function lsp#VersionedTextDocumentIdentifier(path, version)
-	let l:params = lsp#TextDocumentIdentifier(a:path)
+	let l:params = {}
+	call extend(l:params, lsp#TextDocumentIdentifier(a:path))
 	let l:params['version'] = a:version
 	return l:params
 endfunction
@@ -140,11 +141,11 @@ function lsp#Uri(scheme, authority, path, query, fragment)
 	return join(l:params, '')
 endfunction
 
-function lsp#WorkspaceFolder()
-	" let l:workspaceFolder = {
-		" 'uri'
-		" 'name'
-	" }
+function lsp#WorkspaceFolder(path, name)
+	let l:params = {}
+	let l:params['uri'] = lsp#DocumentUri('file', v:none, a:path, v:none, v:none)
+	let l:params['name'] = a:name
+	return l:params
 endfunction
 
 function lsp#ClientCapabilities()
@@ -156,8 +157,8 @@ function lsp#ClientCapabilities()
 	let l:params['workspace']['didChangeWatchedFiles'] = lsp#DidChangeWatchedFilesClientCapabilities()
 	let l:params['workspace']['symbol'] = lsp#WorkspaceSymbolClientCapabilities()
 	let l:params['workspace']['executeCommand'] = lsp#ExecuteCommandClientCapabilities()
-	let l:params['workspace']['workspaceFolders'] = v:false
-	let l:params['workspace']['configuration'] = v:false
+	let l:params['workspace']['workspaceFolders'] = v:true
+	let l:params['workspace']['configuration'] = v:true
 	let l:params['workspace']['semanticTokens'] = lsp#SemanticTokensWorkspaceClientCapabilities()
 	let l:params['workspace']['codeLens'] = lsp#CodeLensWorkspaceClientCapabilities()
 	let l:params['workspace']['fileOperations'] = {}
@@ -170,7 +171,7 @@ function lsp#ClientCapabilities()
 	let l:params['workspace']['fileOperations']['willDelete'] = v:false
 	let l:params['textDocument'] = lsp#TextDocumentClientCapabilities()
 	let l:params['window'] = {}
-	let l:params['window']['workDoneProgress'] = v:false
+	let l:params['window']['workDoneProgress'] = v:true
 	let l:params['window']['showMessage'] = lsp#ShowMessageRequestClientCapabilities()
 	let l:params['window']['showDocument'] = lsp#ShowDocumentClientCapabilities()
 	let l:params['general'] = {}

@@ -7,7 +7,10 @@ function client#start(lang, buf, cwd)
             let l:server = server#create(a:lang, s:listener)
             call l:server.start()
 
-            let l:params = lsp#InitializeParams(l:server['options'], v:none)
+            let l:winid = bufwinid(a:buf)
+            let l:cwd = getcwd(l:winid)
+            let l:workspaceFolder = lsp#WorkspaceFolder(l:cwd, l:cwd)
+            let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder])
             call s:send_request(l:server, 'initialize', l:params)
 
             let s:server_list[a:lang] = l:server
@@ -33,7 +36,11 @@ function client#document_open(buf, path)
             let l:server = server#create(l:filetype, s:listener)
             call l:server.start()
 
-            let l:params = lsp#InitializeParams(l:server['options'], v:none)
+            let l:winid = bufwinid(a:buf)
+            let l:cwd = getcwd(l:winid)
+            let l:workspaceFolder = lsp#WorkspaceFolder(l:cwd, l:cwd)
+            let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder])
+            " let l:params = lsp#InitializeParams(l:server['options'], v:none)
             call s:send_request(l:server, 'initialize', l:params)
 
             let s:server_list[l:filetype] = l:server
@@ -142,6 +149,11 @@ function s:fn.textDocument_publishDiagnostics(server, message)
     " call quickfix#set_quickfix(v:none, l:location, 'r')
 endfunction
 
+function s:fn.textDocument_hover(server, message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call log#log_debug(string(a:message))
+endfunction
+
 function s:fn.unknown(server, message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_error('Unknown event listener function call')
@@ -153,6 +165,7 @@ let s:listener = {}
 let s:listener['initialize'] = funcref('s:fn.initialize')
 let s:listener['shutdown'] = funcref('s:fn.shutdown')
 let s:listener['textDocument/publishDiagnostics'] = funcref('s:fn.textDocument_publishDiagnostics')
+let s:listener['textDocument/hover'] = funcref('s:fn.textDocument_hover')
 let s:listener['unknown'] = funcref('s:fn.unknown')
 
 function s:send_textDocument_didOpen(server, buf, path)

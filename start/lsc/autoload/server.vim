@@ -40,6 +40,7 @@ function s:server.send(data) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if jsonrpc#isRequest(a:data)
         call add(self.wait_res, a:data)
+        call log#log_debug('Wait for a response to ' . string(a:data))
     endif
     call self.channel.send(a:data)
     let l:id = self.id + 1
@@ -72,6 +73,7 @@ function s:server.recv(data) dict
     else
         call log#log_debug('Unimplemented listener function call')
         call log#log_debug(string(self))
+        call log#log_debug(l:event)
         call log#log_debug(string(a:data))
     endif
 endfunction

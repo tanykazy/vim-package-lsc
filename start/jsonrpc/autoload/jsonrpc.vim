@@ -135,7 +135,7 @@ function jsonrpc#parse_content(part)
 		let l:content = json_decode(a:part)
 	catch
 		call log#log_error('Failed decode: ' . a:part)
-		throw v:exception
+		call log#log_error(v:exception)
 	endtry
 	return l:content
 endfunction
