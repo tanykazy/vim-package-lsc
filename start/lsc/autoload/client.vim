@@ -10,7 +10,7 @@ function client#start(lang, buf, cwd)
             let l:winid = bufwinid(a:buf)
             let l:cwd = getcwd(l:winid)
             let l:workspaceFolder = lsp#WorkspaceFolder(l:cwd, l:cwd)
-            let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder])
+            let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder], v:none)
             call s:send_request(l:server, 'initialize', l:params)
 
             let s:server_list[a:lang] = l:server
@@ -44,7 +44,7 @@ function client#document_open(buf, path)
             let l:winid = bufwinid(a:buf)
             let l:cwd = getcwd(l:winid)
             let l:workspaceFolder = lsp#WorkspaceFolder(l:cwd, l:cwd)
-            let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder])
+            let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder], v:none)
             call s:send_request(l:server, 'initialize', l:params)
 
             let s:server_list[l:filetype] = l:server
@@ -110,39 +110,46 @@ endfunction
 let s:fn = {}
 function s:fn.initialize(server, message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let a:server['capabilities'] = get(a:message['result'], 'capabilities', {})
-    let a:server['serverInfo'] = get(a:message['result'], 'serverInfo', {})
-    call log#log_debug('Update server info ' . string(a:server))
+    if has_key(a:message, 'error')
+        call s:print_error(a:message['error'])
+        call s:send_request(a:server, 'shutdown', v:none)
+    else
+        let a:server['capabilities'] = get(a:message['result'], 'capabilities', {})
+        let a:server['serverInfo'] = get(a:message['result'], 'serverInfo', {})
+        call log#log_debug('Update server info ' . string(a:server))
 
-    let l:params = lsp#InitializedParams()
-    call s:send_notification(a:server, 'initialized', l:params)
+        let l:params = lsp#InitializedParams()
+        call s:send_notification(a:server, 'initialized', l:params)
 
-    " let l:unopened = a:server['unopened']
-    " for l:file in l:unopened
-    "     call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:file)
-    " endfor
-    let l:bufinfolist = util#loadedbufinfolist()
-    for l:bufinfo in l:bufinfolist
-        call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:bufinfo['name'])
-        " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
-        " call autocmd#add_event_listener()
-    endfor
+        " let l:unopened = a:server['unopened']
+        " for l:file in l:unopened
+        "     call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:file)
+        " endfor
+        let l:bufinfolist = util#loadedbufinfolist()
+        for l:bufinfo in l:bufinfolist
+            call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:bufinfo['name'])
+            " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
+            " call autocmd#add_event_listener()
+        endfor
+    endif
 endfunction
 
 function s:fn.shutdown(server, message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call s:send_notification(a:server, 'exit', v:none)
+    call a:server.stop()
+    call remove(s:server_list, a:server.lang)
 endfunction
 
 function s:fn.textDocument_publishDiagnostics(server, message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 
-    " TODO mod to event target buffer with filename
-    " call textprop#clear('%')
-
     let l:file = util#uri2path(a:message['params']['uri'])
     let l:buf = util#path2buf(l:file)
     let l:winid = bufwinid(l:buf)
+
+    " TODO mod to event target buffer with filename
+    " call textprop#clear('%')
 
     let l:location = []
     for l:value in a:message['params']['diagnostics']
@@ -224,6 +231,14 @@ function s:send_notification(server, method, params)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:message = jsonrpc#notification_message(a:method, a:params)
     return a:server.send(l:message)
+endfunction
+
+function s:print_error(message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call dialog#error(a:message['message'])
+    if has_key(a:message, 'data')
+        call dialog#error(a:message['data'])
+    endif
 endfunction
 
 " function client#bufchange_listener(bufnr, start, end, added, changes)
