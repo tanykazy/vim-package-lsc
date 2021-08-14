@@ -22,6 +22,10 @@ call log#log_trace('load: plugin/lsc.vim')
 call log#log_debug('load: plugin/lsc.vim')
 call log#log_error('load: plugin/lsc.vim')
 
+
+" call conf#install('typescript')
+
+
 " call log#log_error(exists('?listener_add'))
 
 " call lsc#Lsc()
