@@ -4,7 +4,8 @@ let s:server_path = expand('<sfile>:p:h:h') . '/language-server'
 
 let conf#server_path = s:server_path
 function conf#get_server_path()
-	return s:server_path
+	" return s:server_path
+	return util#getcwd('%')
 endfunction
 
 function conf#load_server_setting(lang)

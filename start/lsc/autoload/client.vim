@@ -163,7 +163,13 @@ endfunction
 
 function s:fn.textDocument_hover(server, message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_debug(string(a:message))
+    if a:message.result != v:null
+        let l:contents = a:message.result.contents
+        if has_key(a:message.result, 'range')
+            let l:range = a:message.result.range
+        endif
+        call popup#atcursor(l:contents, v:none)
+    endif
 endfunction
 
 function s:fn.unknown(server, message)
