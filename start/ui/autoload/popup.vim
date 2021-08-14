@@ -1,6 +1,7 @@
 let s:has_popupwin = has('popupwin')
 
 function popup#atcursor(what, options)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !s:has_popupwin
         return
     endif
