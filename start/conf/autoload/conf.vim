@@ -1,8 +1,11 @@
 let s:server_setting_file = expand('<sfile>:p:h:h') . '/server.json'
 let s:client_setting_file = expand('<sfile>:p:h:h') . '/client.json'
-let s:server_path = expand('<sfile>:p:h:h') . '/language-server/'
+let s:server_path = expand('<sfile>:p:h:h') . '/language-server'
 
 let conf#server_path = s:server_path
+function conf#get_server_path()
+	return s:server_path
+endfunction
 
 function conf#load_server_setting(lang)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
@@ -29,17 +32,24 @@ function conf#install(lang)
 	let l:options = {}
 	let l:options.stoponexit = 'term'
 	let l:options.cwd = s:server_path
-	let l:options.term_name = 'Install language server: ' . a:lang
-	" let l:options.term_kill
-	" let l:options.term_finish
+	" let l:options.term_name = 'Install language server: ' . a:lang
+	let l:options.term_kill = 'term'
+	let l:options.term_finish = 'close'
+	let l:options.exit_cb = funcref('s:end')
 	let l:setting = conf#load_server_setting(a:lang)
 	let l:cmd = l:setting.command.install
 
 	" for debug
-
+	" terminal cd
 
 	let l:buf = term_start(l:cmd, l:options)
+	while term_getstatus(l:buf) != 'finished'
+		call term_wait(l:buf)
+	endwhile
 
 
+endfunction
 
+function s:end(...)
+	call dialog#error('end!!')
 endfunction

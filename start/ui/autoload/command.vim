@@ -31,9 +31,11 @@ function command#open(...) abort
     else
         let l:buffer = bufnr('%')
     endif
-    let l:path = expand('%:p')
-    if !empty(l:path)
-        call client#document_open(l:buffer, l:path)
+    if !util#isSpecialbuffers(&buftype)
+        let l:path = expand('%:p')
+        if !empty(l:path)
+            call client#document_open(l:buffer, l:path)
+        endif
     endif
 endfunction
 
@@ -44,9 +46,11 @@ function command#close(...) abort
     else
         let l:buffer = bufnr('%')
     endif
-    let l:path = expand('%:p')
-    if !empty(l:path)
-        call client#document_close(l:buffer, l:path)
+    if !util#isSpecialbuffers(&buftype)
+        let l:path = expand('%:p')
+        if !empty(l:path)
+            call client#document_close(l:buffer, l:path)
+        endif
     endif
 endfunction
 
@@ -57,9 +61,11 @@ function command#change(...) abort
     else
         let l:buffer = bufnr('%')
     endif
-    let l:path = expand('%:p')
-    if !empty(l:path)
-        call client#document_change(l:buffer, l:path)
+    if !util#isSpecialbuffers(&buftype)
+        let l:path = expand('%:p')
+        if !empty(l:path)
+            call client#document_change(l:buffer, l:path)
+        endif
     endif
 endfunction
 
@@ -70,8 +76,10 @@ function command#save(...) abort
     else
         let l:buffer = bufnr('%')
     endif
-    let l:path = expand('%:p')
-    if !empty(l:path)
-        call client#document_save(l:buffer, l:path)
+    if !util#isSpecialbuffers(&buftype)
+        let l:path = expand('%:p')
+        if !empty(l:path)
+            call client#document_save(l:buffer, l:path)
+        endif
     endif
 endfunction

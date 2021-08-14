@@ -1,4 +1,4 @@
-function dialog#choice(msg, ...) " choices, default, type
+function dialog#confirm(msg, ...) " choices, default, type
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:choices = get(a:, 1, v:none)
     let l:default = get(a:, 2, 1)
@@ -14,4 +14,9 @@ function dialog#error(...)
     echomsg join(a:000)
     " echohl None
     echohl Normal
+endfunction
+
+function dialog#get(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:result = input(join(a:000))
 endfunction

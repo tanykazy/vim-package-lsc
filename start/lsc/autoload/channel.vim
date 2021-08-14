@@ -11,9 +11,11 @@ function s:channel.open(cmd, cb) dict
 	let l:opt.mode = 'raw'
 	let l:opt.stoponexit = 'term'
 	let l:opt.noblock = 1
+	let l:opt.cwd = conf#get_server_path()
 
 	let l:opt.out_cb = funcref('self.out_cb', self)
 	let l:opt.err_cb = funcref('self.err_cb', self)
+	let l:opt.close_cb = funcref('self.close_cb', self)
 	let l:opt.exit_cb = funcref('self.exit_cb', self)
 
 	let self.job = job_start(a:cmd, l:opt)
@@ -65,6 +67,11 @@ endfunction
 function s:channel.err_cb(ch, msg) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	call log#log_debug(a:ch. a:msg)
+endfunction
+
+function s:channel.close_cb(ch) dict
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	call log#log_debug(a:ch)
 endfunction
 
 function s:channel.exit_cb(job, status) dict

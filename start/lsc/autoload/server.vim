@@ -15,7 +15,7 @@ function s:server.create(lang, listener) dict
     let l:setting = conf#load_server_setting(a:lang)
     let self.lang = a:lang
     let self.listener = a:listener
-    let self.cmd = l:setting.cmd
+    let self.cmd = l:setting.command.start
     let self.options = get(l:setting, 'options', v:none)
     let self.files = []
     let self.wait_res = []

@@ -4,16 +4,13 @@ function client#start(lang, buf, cwd)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !has_key(s:server_list, a:lang)
         if conf#isSupport(a:lang)
-            let l:server = server#create(a:lang, s:listener)
-            call l:server.start()
+            let l:server = s:start_server(a:lang)
 
             let l:winid = bufwinid(a:buf)
             let l:cwd = getcwd(l:winid)
             let l:workspaceFolder = lsp#WorkspaceFolder(l:cwd, l:cwd)
             let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder], v:none)
             call s:send_request(l:server, 'initialize', l:params)
-
-            let s:server_list[a:lang] = l:server
         endif
     endif
 endfunction
@@ -38,8 +35,7 @@ function client#document_open(buf, path)
 
     if !has_key(s:server_list, l:filetype)
         if conf#isSupport(l:filetype)
-            let l:server = server#create(l:filetype, s:listener)
-            call l:server.start()
+            let l:server = s:start_server(l:filetype)
 
             let l:winid = bufwinid(a:buf)
             let l:cwd = getcwd(l:winid)
@@ -47,7 +43,6 @@ function client#document_open(buf, path)
             let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder], v:none)
             call s:send_request(l:server, 'initialize', l:params)
 
-            let s:server_list[l:filetype] = l:server
         endif
     else
         let l:server = s:server_list[l:filetype]
@@ -239,6 +234,26 @@ function s:print_error(message)
     if has_key(a:message, 'data')
         call dialog#error(a:message['data'])
     endif
+endfunction
+
+function s:install_server(lang)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call conf#install(a:lang)
+endfunction
+
+function s:start_server(lang)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if !has_key(s:server_list, a:lang)
+        if conf#isSupport(a:lang)
+
+            " call s:install_server(a:lang)
+
+            let l:server = server#create(a:lang, s:listener)
+            call l:server.start()
+            let s:server_list[a:lang] = l:server
+        endif
+    endif
+    return s:server_list[a:lang]
 endfunction
 
 " function client#bufchange_listener(bufnr, start, end, added, changes)

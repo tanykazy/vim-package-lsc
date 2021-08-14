@@ -325,8 +325,8 @@ function lsp#CompletionClientCapabilities()
 	let l:params = {}
 	let l:params['dynamicRegistration'] = v:false
 	let l:params['completionItem'] = {}
-	let l:params['completionItem']['snippetSupport'] = v:false
-	let l:params['completionItem']['commitCharactersSupport'] = v:false
+	let l:params['completionItem']['snippetSupport'] = v:true
+	let l:params['completionItem']['commitCharactersSupport'] = v:true
 	let l:params['completionItem']['documentationFormat'] = ['plaintext']
 	let l:params['completionItem']['deprecatedSupport'] = v:false
 	let l:params['completionItem']['preselectSupport'] = v:false
@@ -337,10 +337,10 @@ function lsp#CompletionClientCapabilities()
 	let l:params['completionItem']['resolveSupport']['properties'] = ['']
 	let l:params['completionItem']['insertTextModeSupport'] = {}
 	let l:params['completionItem']['insertTextModeSupport']['valueSet'] = [1]
-	let l:params['completionItem']['labelDetailsSupport'] = v:false
+	let l:params['completionItem']['labelDetailsSupport'] = v:true
 	let l:params['completionItemKind'] = {}
 	let l:params['completionItemKind']['valueSet'] = []
-	let l:params['contextSupport'] = v:false
+	let l:params['contextSupport'] = v:true
 	let l:params['insertTextMode'] = 1
 	return l:params
 endfunction
