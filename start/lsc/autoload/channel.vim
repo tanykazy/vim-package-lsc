@@ -66,15 +66,15 @@ endfunction
 
 function s:channel.err_cb(ch, msg) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call log#log_debug(a:ch. a:msg)
+	call log#log_debug('error callback ' . a:ch . a:msg)
 endfunction
 
 function s:channel.close_cb(ch) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call log#log_debug(a:ch)
+	call log#log_debug('close callback ' . a:ch)
 endfunction
 
 function s:channel.exit_cb(job, status) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call log#log_debug(a:job . a:status)
+	call log#log_debug('exit callback ' . a:job . a:status)
 endfunction

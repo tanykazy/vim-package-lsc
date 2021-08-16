@@ -19,4 +19,5 @@ endfunction
 function dialog#get(...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:result = input(join(a:000))
+    return l:result
 endfunction

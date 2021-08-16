@@ -42,12 +42,13 @@ function client#document_open(buf, path)
             let l:workspaceFolder = lsp#WorkspaceFolder(l:cwd, l:cwd)
             let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder], v:none)
             call s:send_request(l:server, 'initialize', l:params)
-
         endif
     else
         let l:server = s:server_list[l:filetype]
         if !util#isContain(l:server['files'], a:path)
             call s:send_textDocument_didOpen(l:server, a:buf, a:path)
+
+            call ui#set_buffer_cmd()
         endif
     endif
 endfunction
@@ -125,6 +126,7 @@ function s:fn.initialize(server, message)
             call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:bufinfo['name'])
             " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
             " call autocmd#add_event_listener()
+            call ui#set_buffer_cmd()
         endfor
     endif
 endfunction
@@ -244,7 +246,7 @@ endfunction
 
 function s:install_server(lang)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call conf#install(a:lang)
+    call conf#install(a:lang, funcref('s:test_finish'))
 endfunction
 
 function s:start_server(lang)
@@ -261,6 +263,11 @@ function s:start_server(lang)
     endif
     return s:server_list[a:lang]
 endfunction
+
+function s:test_finish()
+    call log#log_error('test finish')
+endfunction
+
 
 " function client#bufchange_listener(bufnr, start, end, added, changes)
 " 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))

@@ -7,10 +7,9 @@ let s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
 
-command -nargs=0 Lsc :call lsc#Lsc(<f-args>)
-command -nargs=0 Test :call lsc#Test(<f-args>)
+" command -nargs=0 Lsc :call lsc#Lsc(<f-args>)
+" command -nargs=0 Test :call lsc#Test(<f-args>)
 
-nmap <silent> <F3> :call client#document_hover(bufnr('%'), getpos('.'))<CR>
 
 
 

@@ -1,3 +1,5 @@
+let s:has_textprop = has('textprop')
+
 let s:error= {}
 " let s:error['bufnr'] = bufnr('%')
 let s:error['highlight'] = 'ErrorMsg'
@@ -32,6 +34,9 @@ let s:hint['end_incl'] = v:true
 
 function textprop#setup_proptypes()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if !s:has_textprop
+        return
+    endif
     call s:type_add('Error', s:error)
     call s:type_add('Warning', s:warning)
     call s:type_add('Information', s:information)
@@ -40,6 +45,9 @@ endfunction
 
 function textprop#add(startpos, endpos, severity)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if !s:has_textprop
+        return
+    endif
     let l:lnum = a:startpos['line'] + 1
     let l:col = a:startpos['character'] + 1
     let l:props = {}
@@ -62,6 +70,9 @@ endfunction
 
 function textprop#clear(buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if !s:has_textprop
+        return
+    endif
     let l:bufinfo = getbufinfo(a:buf)
     let l:props = {}
     let l:props['bufnr'] = bufname(a:buf)
@@ -72,6 +83,9 @@ endfunction
 
 function s:type_add(name, props)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if !s:has_textprop
+        return
+    endif
     if empty(prop_type_get(a:name, a:props))
         return prop_type_add(a:name, a:props)
     else
