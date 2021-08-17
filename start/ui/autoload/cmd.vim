@@ -30,6 +30,7 @@ function cmd#setup_buffercmd()
 		autocmd InsertLeave <buffer> LscChange
 		autocmd InsertCharPre <buffer> LscChange
 		autocmd BufWrite <buffer> LscSave
+		autocmd SafeState <buffer> call client#document_hover(bufnr('%'), getpos('.'))
 	augroup END
 endfunction
 

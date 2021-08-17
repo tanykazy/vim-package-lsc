@@ -165,12 +165,39 @@ endfunction
 
 function s:fn.textDocument_hover(server, message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if a:message.result != v:null
+    if !util#isNull(a:message.result)
         let l:contents = a:message.result.contents
+        if type(l:contents) == v:t_list
+            let l:values = []
+            for l:content in l:contents
+                if type(l:content) == v:t_dict
+                    if has_key(l:content, 'value')
+                        for l:line in split(l:content.value, "\n")
+                            call add(l:values, l:line)
+                        endfor
+                    endif
+                else
+                    for l:line in split(l:content, "\n")
+                        call add(l:values, l:line)
+                    endfor
+                endif
+            endfor
+        elseif type(l:contents) == v:t_dict 
+            if has_key(l:contents, 'value')
+                let l:values = split(l:contents.value, "\n")
+            endif
+        else
+            let l:values = split(l:contents, "\n")
+        endif
+        let l:opt = v:none
         if has_key(a:message.result, 'range')
             let l:range = a:message.result.range
+            let l:opt = {}
+            let l:opt.moved = [l:range.start.character + 1, l:range.end.character + 1]
         endif
-        call popup#atcursor(l:contents, v:none)
+        call filter(l:values, {idx, val -> !empty(val)})
+        call map(l:values, {key, val -> trim(val, v:none, 2)})
+        call popup#hover(l:values, l:opt)
     endif
 endfunction
 

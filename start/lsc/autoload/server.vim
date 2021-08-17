@@ -13,9 +13,11 @@ let s:server = {}
 function s:server.create(lang, listener) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:setting = conf#load_server_setting(a:lang)
+    let l:server_path = conf#get_server_path()
     let self.lang = a:lang
     let self.listener = a:listener
-    let self.cmd = l:setting.command.start
+    let self.cmd = './' . l:setting.command.start
+    let self.cwd = l:server_path . '/' . l:setting.path
     let self.options = get(l:setting, 'options', v:none)
     let self.files = []
     let self.wait_res = []
@@ -26,8 +28,7 @@ endfunction
 
 function s:server.start() dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:cwd = conf#get_server_path()
-    let self.channel = channel#open(self.cmd, l:cwd, funcref('self.recv', self))
+    let self.channel = channel#open(self.cmd, self.cwd, funcref('self.recv', self))
     let self.running = v:true
 endfunction
 

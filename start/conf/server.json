@@ -1,61 +1,65 @@
 {
-    "typescript": {
-        "command": {
-            "install": "npm install typescript-language-server",
-            "start": "npx typescript-language-server --stdio"
-        }
-    },
-    "javascript": {
-        "command": {
-            "install": "npm install typescript-language-server",
-            "start": "npx typescript-language-server --stdio"
-        }
-    },
-    "json": {
-        "command": {
-            "install": "npm install vscode-json-languageserver",
-            "start": "npx vscode-json-languageserver --stdio"
-        }
-    },
-    "sh": {
-        "command": {
-            "install": "npm install bash-language-server",
-            "start": "npx bash-language-server start"
-        }
-    },
-    "yaml": {
-        "command": {
-            "install": "npm install yaml-language-server",
-            "start": "npx yaml-language-server --stdio"
-        }
-    },
-    "vim": {
-        "command": {
-            "install": "npm install vim-language-server",
-            "start": "npx vim-language-server --stdio"
+    "language": {
+        "typescript": {
+            "command": {
+                "install": "npm install typescript-language-server",
+                "start": "typescript-language-server --stdio --tsserver-path ./tsserver"
+            },
+            "path": "node_modules/.bin"
         },
-        "options": {
-            "isNeovim": false,
-            "iskeyword": "@,48-57,_,192-255,-#",
-            "vimruntime": "",
-            "runtimepath": "",
-            "diagnostic": {
-                "enable": true
+        "javascript": {
+            "command": {
+                "install": "npm install typescript-language-server",
+                "start": "typescript-language-server --stdio --tsserver-path ./tsserver"
             },
-            "indexes": {
-                "runtimepath": true,
-                "gap": 100,
-                "count": 3,
-                "projectRootPatterns": [
-                    "strange-root-pattern",
-                    ".git",
-                    "autoload",
-                    "plugin"
-                ]
+            "path": "node_modules/.bin"
+        },
+        "json": {
+            "command": {
+                "install": "npm install vscode-json-languageserver",
+                "start": "npx vscode-json-languageserver --stdio"
+            }
+        },
+        "sh": {
+            "command": {
+                "install": "npm install bash-language-server",
+                "start": "npx bash-language-server start"
+            }
+        },
+        "yaml": {
+            "command": {
+                "install": "npm install yaml-language-server",
+                "start": "npx yaml-language-server --stdio"
+            }
+        },
+        "vim": {
+            "command": {
+                "install": "npm install vim-language-server",
+                "start": "npx vim-language-server --stdio"
             },
-            "suggest": {
-                "fromVimruntime": true,
-                "fromRuntimepath": false
+            "options": {
+                "isNeovim": false,
+                "iskeyword": "@,48-57,_,192-255,-#",
+                "vimruntime": "",
+                "runtimepath": "",
+                "diagnostic": {
+                    "enable": true
+                },
+                "indexes": {
+                    "runtimepath": true,
+                    "gap": 100,
+                    "count": 3,
+                    "projectRootPatterns": [
+                        "strange-root-pattern",
+                        ".git",
+                        "autoload",
+                        "plugin"
+                    ]
+                },
+                "suggest": {
+                    "fromVimruntime": true,
+                    "fromRuntimepath": false
+                }
             }
         }
     }
