@@ -1,3 +1,8 @@
+function cmd#setup_install_cmd()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    command -nargs=? -complete=custom,s:completion_support_lang LscInstallServer call lsc#install_server(<f-args>)
+endfunction
+
 function cmd#setup_command()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     command -nargs=? -complete=filetype LscStart call cmd#start(<f-args>)
@@ -26,6 +31,17 @@ function cmd#setup_buffercmd()
 		autocmd InsertCharPre <buffer> LscChange
 		autocmd BufWrite <buffer> LscSave
 	augroup END
+endfunction
+
+function s:completion_support_lang(arglead, cmdline, cursorpos)
+    let l:list = conf#getLangList()
+    return join(l:list, "\n")
+endfunction
+
+function cmd#install(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call log#log_error(string(a:000))
+    " call conf#install('')
 endfunction
 
 function cmd#test(...)

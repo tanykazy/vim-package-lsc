@@ -1,17 +1,17 @@
-function channel#open(cmd, cb)
+function channel#open(cmd, cwd, cb)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return s:channel.open(a:cmd, a:cb)
+	return s:channel.open(a:cmd, a:cwd, a:cb)
 endfunction
 
 let s:channel = {}
-function s:channel.open(cmd, cb) dict
+function s:channel.open(cmd, cwd, cb) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 
 	let l:opt = {}
 	let l:opt.mode = 'raw'
 	let l:opt.stoponexit = 'term'
 	let l:opt.noblock = 1
-	let l:opt.cwd = conf#get_server_path()
+	let l:opt.cwd = a:cwd
 
 	let l:opt.out_cb = funcref('self.out_cb', self)
 	let l:opt.err_cb = funcref('self.err_cb', self)

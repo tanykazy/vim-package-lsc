@@ -7,6 +7,8 @@ let s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
 
+call cmd#setup_install_cmd()
+
 call cmd#setup_command()
 call cmd#setup_autocmd()
 " call cmd#setup_buffercmd()
