@@ -103,6 +103,22 @@ function client#document_hover(buf, pos)
     endif
 endfunction
 
+function client#goto_definition(buf, pos)
+    let l:filetype = util#getfiletype(a:buf)
+    if has_key(s:server_list, l:filetype)
+        let l:server = s:server_list[l:filetype]
+        let l:path = util#buf2path(a:buf)
+        if util#isContain(l:server['files'], l:path)
+            let l:lnum = a:pos[1]
+            let l:col = a:pos[2]
+
+            let l:position = lsp#Position(l:lnum - 1, l:col - 1)
+            let l:params = lsp#DefinitionParams(l:path, l:position, v:none, v:none)
+            call s:send_request(l:server, 'textDocument/definition', l:params)
+        endif
+    endif
+endfunction
+
 let s:fn = {}
 function s:fn.initialize(server, message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
@@ -201,6 +217,37 @@ function s:fn.textDocument_hover(server, message)
     endif
 endfunction
 
+function s:fn.textDocument_definition(server, message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if !util#isNull(a:message.result)
+        if type(a:message.result) == v:t_list
+            " interface Location[]
+            let l:locations = a:message.result
+            for l:location in l:locations
+                let l:path = util#uri2path(l:location.uri)
+                let l:range = l:location.range
+                call log#log_debug(l:path)
+                call log#log_debug(string(l:range))
+
+                let l:buf = bufadd(l:path)
+                " buffer l:buf
+                " call setpos('.', [l:buf, l:range.start.line + 1, l:range.start.character + 1, 0, 0])
+                call execute(l:buf . 'buffer', 'silent')
+                call cursor(l:range.start.line + 1, l:range.start.character + 1)
+            endfor
+            
+
+        elseif type(a:message.result) == v:t_dict
+            " interface Location
+            let l:location = a:message.result
+            let l:path = util#uri2path(l:location.uri)
+            let l:range = l:location.range
+            call log#log_debug(l:path)
+            call log#log_debug(string(l:range))
+        endif
+    endif
+endfunction
+
 function s:fn.unknown(server, message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_error('Unknown event listener function call')
@@ -213,6 +260,7 @@ let s:listener['initialize'] = funcref('s:fn.initialize')
 let s:listener['shutdown'] = funcref('s:fn.shutdown')
 let s:listener['textDocument/publishDiagnostics'] = funcref('s:fn.textDocument_publishDiagnostics')
 let s:listener['textDocument/hover'] = funcref('s:fn.textDocument_hover')
+let s:listener['textDocument/definition'] = funcref('s:fn.textDocument_definition')
 let s:listener['unknown'] = funcref('s:fn.unknown')
 
 function s:send_textDocument_didOpen(server, buf, path)

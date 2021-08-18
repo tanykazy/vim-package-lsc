@@ -27,6 +27,7 @@ function popup#atcursor(what, options)
     let l:opt.col = 'cursor'
     " let l:opt.moved = 'WORD'
     let l:opt.fixed = v:true
+    let l:opt.mapping = v:false
     call log#log_debug(string(a:what))
     return popup_atcursor(a:what, l:opt)
 endfunction

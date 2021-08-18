@@ -113,6 +113,22 @@ function lsp#TextDocumentContentChangeEvent(range, text)
 	return l:params
 endfunction
 
+function lsp#DefinitionParams(path, position, workDoneToken, partialResultToken)
+	let l:params = {}
+	call extend(l:params, lsp#TextDocumentPositionParams(a:path, a:position))
+	call extend(l:params, lsp#WorkDoneProgressParams(a:workDoneToken))
+	call extend(l:params, lsp#PartialResultParams(a:partialResultToken))
+	return l:params
+endfunction
+
+function lsp#PartialResultParams(progressToken)
+	let l:params = {}
+	if !util#isNone(a:progressToken)
+		let l:params['partialResultToken'] = a:progressToken
+	endif
+	return l:params
+endfunction
+
 function lsp#Range(start, end)
 	let l:range = {}
 	let l:range['start'] = a:start
