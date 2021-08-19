@@ -2,29 +2,44 @@ let s:servers = {}
 
 function server#create(lang, listener)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !has_key(s:servers, a:lang)
-        let s:servers[a:lang] = s:server.create(a:lang, a:listener)
-        call log#log_debug('Create server: ' . string(s:servers[a:lang]))
+    if has_key(s:servers, a:lang)
+        return s:servers[a:lang]
     endif
-    return s:servers[a:lang]
+    let l:server = deepcopy(s:server)
+    let l:setting = conf#load_server_setting(a:lang)
+    let l:server_path = conf#get_server_path()
+    let l:server.lang = a:lang
+    let l:server.listener = a:listener
+    let l:server.cmd = './' . l:setting.command.name . ' ' . join(l:setting.command.options, ' ')
+    let l:server.cwd = l:server_path . '/' . l:setting.path
+    let l:server.options = get(l:setting, 'options', v:none)
+    let l:server.files = []
+    let l:server.wait_res = []
+    let l:server.id = 0
+    let l:server.running = v:false
+    " let s:servers[a:lang] = s:server.create(a:lang, a:listener)
+    let s:servers[a:lang] = l:server
+    " call log#log_debug('Create server: ' . string(s:servers[a:lang]))
+    call log#log_debug('Create server: ' . string(l:server))
+    return l:server
 endfunction
 
 let s:server = {}
-function s:server.create(lang, listener) dict
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:setting = conf#load_server_setting(a:lang)
-    let l:server_path = conf#get_server_path()
-    let self.lang = a:lang
-    let self.listener = a:listener
-    let self.cmd = './' . l:setting.command.name . ' ' . join(l:setting.command.options, ' ')
-    let self.cwd = l:server_path . '/' . l:setting.path
-    let self.options = get(l:setting, 'options', v:none)
-    let self.files = []
-    let self.wait_res = []
-    let self.id = 0
-    let self.running = v:false
-    return deepcopy(self)
-endfunction
+" function s:server.create(lang, listener) dict
+" 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+"     let l:setting = conf#load_server_setting(a:lang)
+"     let l:server_path = conf#get_server_path()
+"     let self.lang = a:lang
+"     let self.listener = a:listener
+"     let self.cmd = './' . l:setting.command.name . ' ' . join(l:setting.command.options, ' ')
+"     let self.cwd = l:server_path . '/' . l:setting.path
+"     let self.options = get(l:setting, 'options', v:none)
+"     let self.files = []
+"     let self.wait_res = []
+"     let self.id = 0
+"     let self.running = v:false
+"     return deepcopy(self)
+" endfunction
 
 function s:server.start() dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))

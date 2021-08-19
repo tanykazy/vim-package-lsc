@@ -16,8 +16,15 @@
         },
         "javascript": {
             "command": {
+                "name": "typescript-language-server",
+                "options": [
+                    "--stdio",
+                    "--tsserver-path ./tsserver"
+                ],
                 "install": "npm install typescript-language-server",
-                "start": "typescript-language-server --stdio --tsserver-path ./tsserver"
+                "dependents": [
+                    "npm install typescript"
+                ]
             },
             "path": "node_modules/.bin"
         },

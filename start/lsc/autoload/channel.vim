@@ -1,11 +1,8 @@
 function channel#open(cmd, cwd, cb)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return s:channel.open(a:cmd, a:cwd, a:cb)
-endfunction
+	" return s:channel.open(a:cmd, a:cwd, a:cb)
 
-let s:channel = {}
-function s:channel.open(cmd, cwd, cb) dict
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	let l:self = deepcopy(s:channel)
 
 	let l:opt = {}
 	let l:opt.mode = 'raw'
@@ -13,23 +10,51 @@ function s:channel.open(cmd, cwd, cb) dict
 	let l:opt.noblock = 1
 	let l:opt.cwd = a:cwd
 
-	let l:opt.out_cb = funcref('self.out_cb', self)
-	let l:opt.err_cb = funcref('self.err_cb', self)
-	let l:opt.close_cb = funcref('self.close_cb', self)
-	let l:opt.exit_cb = funcref('self.exit_cb', self)
+	let l:opt.out_cb = funcref('l:self.out_cb', l:self)
+	let l:opt.err_cb = funcref('l:self.err_cb', l:self)
+	let l:opt.close_cb = funcref('l:self.close_cb', l:self)
+	let l:opt.exit_cb = funcref('l:self.exit_cb', l:self)
 
-	let self.job = job_start(a:cmd, l:opt)
-	call log#log_debug('Job start: ' . string(self.job))
+	let l:self.job = job_start(a:cmd, l:opt)
+	call log#log_debug('Job start: ' . string(l:self.job))
 
-	let self.handle = job_getchannel(self.job)
-	call log#log_debug('Open channel: ' . string(self.handle))
+	let l:self.handle = job_getchannel(l:self.job)
+	call log#log_debug('Open channel: ' . string(l:self.handle))
 
-	let self.id = ch_info(self.handle).id
-	let self.callback = a:cb
-	let self.buffer = ''
+	let l:self.id = ch_info(l:self.handle).id
+	let l:self.callback = a:cb
+	let l:self.buffer = ''
 
-	return deepcopy(self)
+	return l:self
 endfunction
+
+let s:channel = {}
+" function s:channel.open(cmd, cwd, cb) dict
+" 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+
+" 	let l:opt = {}
+" 	let l:opt.mode = 'raw'
+" 	let l:opt.stoponexit = 'term'
+" 	let l:opt.noblock = 1
+" 	let l:opt.cwd = a:cwd
+
+" 	let l:opt.out_cb = funcref('self.out_cb', self)
+" 	let l:opt.err_cb = funcref('self.err_cb', self)
+" 	let l:opt.close_cb = funcref('self.close_cb', self)
+" 	let l:opt.exit_cb = funcref('self.exit_cb', self)
+
+" 	let self.job = job_start(a:cmd, l:opt)
+" 	call log#log_debug('Job start: ' . string(self.job))
+
+" 	let self.handle = job_getchannel(self.job)
+" 	call log#log_debug('Open channel: ' . string(self.handle))
+
+" 	let self.id = ch_info(self.handle).id
+" 	let self.callback = a:cb
+" 	let self.buffer = ''
+
+" 	return deepcopy(self)
+" endfunction
 
 function s:channel.close() dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))

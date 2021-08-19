@@ -226,12 +226,8 @@ function s:fn.textDocument_definition(server, message)
             for l:location in l:locations
                 let l:path = util#uri2path(l:location.uri)
                 let l:range = l:location.range
-                call log#log_debug(l:path)
-                call log#log_debug(string(l:range))
 
                 let l:buf = bufadd(l:path)
-                " buffer l:buf
-                " call setpos('.', [l:buf, l:range.start.line + 1, l:range.start.character + 1, 0, 0])
                 call execute(l:buf . 'buffer', 'silent')
                 call cursor(l:range.start.line + 1, l:range.start.character + 1)
             endfor
@@ -242,8 +238,10 @@ function s:fn.textDocument_definition(server, message)
             let l:location = a:message.result
             let l:path = util#uri2path(l:location.uri)
             let l:range = l:location.range
-            call log#log_debug(l:path)
-            call log#log_debug(string(l:range))
+
+            let l:buf = bufadd(l:path)
+            call execute(l:buf . 'buffer', 'silent')
+            call cursor(l:range.start.line + 1, l:range.start.character + 1)
         endif
     endif
 endfunction
