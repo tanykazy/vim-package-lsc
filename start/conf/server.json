@@ -2,8 +2,15 @@
     "language": {
         "typescript": {
             "command": {
+                "name": "typescript-language-server",
+                "options": [
+                    "--stdio",
+                    "--tsserver-path ./tsserver"
+                ],
                 "install": "npm install typescript-language-server",
-                "start": "typescript-language-server --stdio --tsserver-path ./tsserver"
+                "dependents": [
+                    "npm install typescript"
+                ]
             },
             "path": "node_modules/.bin"
         },
@@ -16,9 +23,13 @@
         },
         "json": {
             "command": {
-                "install": "npm install vscode-json-languageserver",
-                "start": "npx vscode-json-languageserver --stdio"
-            }
+                "name": "vscode-json-languageserver",
+                "options": [
+                    "--stdio"
+                ],
+                "install": "npm install vscode-json-languageserver"
+            },
+            "path": "node_modules/.bin"
         },
         "sh": {
             "command": {
@@ -37,7 +48,7 @@
                 "install": "npm install vim-language-server",
                 "start": "npx vim-language-server --stdio"
             },
-            "options": {
+            "initializationOptions": {
                 "isNeovim": false,
                 "iskeyword": "@,48-57,_,192-255,-#",
                 "vimruntime": "",

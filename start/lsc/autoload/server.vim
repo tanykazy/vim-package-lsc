@@ -16,7 +16,7 @@ function s:server.create(lang, listener) dict
     let l:server_path = conf#get_server_path()
     let self.lang = a:lang
     let self.listener = a:listener
-    let self.cmd = './' . l:setting.command.start
+    let self.cmd = './' . l:setting.command.name . ' ' . join(l:setting.command.options, ' ')
     let self.cwd = l:server_path . '/' . l:setting.path
     let self.options = get(l:setting, 'options', v:none)
     let self.files = []
@@ -55,19 +55,21 @@ endfunction
 function s:server.recv(data) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:content= jsonrpc#parse_content(a:data)
-    let l:event = 'unknown'
+    let l:event = v:none
     if jsonrpc#isRequest(l:content)
         let l:event = l:content.method
     elseif jsonrpc#isResponse(l:content)
         if jsonrpc#isResponseError(l:content)
             call log#log_error('Request fails: ' . string(l:content))
+            call dialog#error(l:content.error.message)
+        else
+            for l:wait in self.wait_res
+                if l:wait.id == l:content.id
+                    let l:event = l:wait.method
+                    call remove(self.wait_res, index(self.wait_res, l:wait))
+                endif
+            endfor
         endif
-        for l:wait in self.wait_res
-            if l:wait.id == l:content.id
-                let l:event = l:wait.method
-                call remove(self.wait_res, index(self.wait_res, l:wait))
-            endif
-        endfor
     elseif jsonrpc#isNotification(l:content)
         let l:event = l:content.method
     else
