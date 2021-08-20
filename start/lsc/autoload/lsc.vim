@@ -37,7 +37,6 @@ function lsc#uninstall_server(lang)
 	endif
 endfunction
 
-function s:post_install(...)
-	call cmd#setup_command()
+function s:post_install()
 	call cmd#setup_autocmd()
 endfunction

@@ -57,7 +57,7 @@ endfunction
 
 function s:server.recv(data) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_debug('Receive from channel: ' . a:data)
+    call log#log_trace('Receive from channel: ' . a:data)
     let l:content= jsonrpc#parse_content(a:data)
     let l:event = v:none
     if jsonrpc#isRequest(l:content)

@@ -16,20 +16,7 @@ function util#build_path(...)
 	return simplify(join(a:000, '/'))
 endfunction
 
-function! s:decode_uri(uri)
-    let l:ret = substitute(a:uri, '[?#].*', '', '')
-    return substitute(l:ret, '%\(\x\x\)', '\=printf("%c", str2nr(submatch(1), 16))', 'g')
-endfunction
-
-function! s:urlencode_char(c)
-    return printf('%%%02X', char2nr(a:c))
-endfunction
-
-function! s:get_prefix(path)
-    return matchstr(a:path, '\(^\w\+::\|^\w\+://\)')
-endfunction
-
-function! s:encode_uri(path, start_pos_encode, default_prefix)
+function util#encode_uri(path, start_pos_encode, default_prefix)
     let l:prefix = s:get_prefix(a:path)
     let l:path = a:path[len(l:prefix):]
     if len(l:prefix) == 0
@@ -52,10 +39,52 @@ endfunction
 
 function util#uri2path(uri)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:tmp = split(a:uri, '://', 1)
-	let l:scheme = get(l:tmp, 0, '')
-	let l:path = get(l:tmp, 1, '')
-	return l:path
+	let l:component = util#uri2components(a:uri)
+	let l:path = util#build_path(l:component.authority, l:component.path)
+	return util#decode_uri(l:path)
+endfunction
+
+function util#decode_uri(uri)
+    return substitute(a:uri, '%\(\x\x\)', {m -> util#decode_uri_char(m[1])}, 'g')
+endfunction
+
+function util#encode_uri_char(char)
+    return printf('%%%02X', char2nr(a:char))
+endfunction
+
+function util#decode_uri_char(code)
+	let l:hex = str2nr(a:code, 16)
+	return printf('%c', l:hex)
+endfunction
+
+function util#get_prefix(path)
+    return matchstr(a:path, '\(^\w\+::\|^\w\+://\)')
+endfunction
+
+function util#uri2components(uri)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	let l:component = {}
+	let l:tmp = util#split(a:uri, ':', 2)
+	let l:component.scheme = l:tmp[0]
+	if stridx(l:tmp[1], '#') != -1
+		let l:tmp2 = util#split(l:tmp[1], '#', 2)
+		let l:component.fragment = l:tmp2[1]
+		let l:tmp[1] = l:tmp2[0]
+	endif
+	if stridx(l:tmp[1], '?') != -1
+		let l:tmp2 = util#split(l:tmp[1], '?', 2)
+		let l:component.query = l:tmp2[1]
+		let l:tmp[1] = l:tmp2[0]
+	endif
+	if stridx(l:tmp[1], '//') != -1
+		let l:tmp2 = util#split(l:tmp[1], '//', 2)
+		let l:tmp2 = util#split(l:tmp2[1], '/', 2)
+		let l:component.authority = l:tmp2[0]
+		let l:component.path = l:tmp2[1]
+	else
+		let l:component.path = l:tmp[1]
+	endif
+	return l:component
 endfunction
 
 function util#isSpecialbuffers(buftype)
