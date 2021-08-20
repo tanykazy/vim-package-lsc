@@ -16,6 +16,13 @@ function util#build_path(...)
 	return simplify(join(a:000, '/'))
 endfunction
 
+function util#uri2path(uri)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	let l:component = util#uri2components(a:uri)
+	let l:path = util#build_path(l:component.authority, l:component.path)
+	return util#decode_uri(l:path)
+endfunction
+
 function util#encode_uri(path, start_pos_encode, default_prefix)
     let l:prefix = s:get_prefix(a:path)
     let l:path = a:path[len(l:prefix):]
@@ -37,19 +44,13 @@ function util#encode_uri(path, start_pos_encode, default_prefix)
     return l:prefix . l:result
 endfunction
 
-function util#uri2path(uri)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:component = util#uri2components(a:uri)
-	let l:path = util#build_path(l:component.authority, l:component.path)
-	return util#decode_uri(l:path)
-endfunction
-
 function util#decode_uri(uri)
     return substitute(a:uri, '%\(\x\x\)', {m -> util#decode_uri_char(m[1])}, 'g')
 endfunction
 
 function util#encode_uri_char(char)
-    return printf('%%%02X', char2nr(a:char))
+	let l:code = char2nr(a:char)
+    return printf('%%%02X', l:code)
 endfunction
 
 function util#decode_uri_char(code)
