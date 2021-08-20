@@ -25,20 +25,16 @@ endfunction
 
 function lsc#install_server(lang)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-
-	let l:install_path = conf#get_server_path()
-	if !isdirectory(l:install_path)
-		let l:result = mkdir(l:install_path, 'p')
+	if !util#isNone(a:lang)
+		call setting#install(a:lang, funcref('s:post_install'))
 	endif
-	let l:setting = conf#load_server_setting(a:lang)
-	let l:commands = []
-	if has_key(l:setting.command, 'dependents')
-		let l:dependents = l:setting.command.dependents
-		call extend(l:commands, l:dependents)
-	endif
-	call add(l:commands, l:setting.command.install)
+endfunction
 
-	call installer#install(l:commands, funcref('s:post_install'))
+function lsc#uninstall_server(lang)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	if !util#isNone(a:lang)
+		call setting#uninstall(a:lang)
+	endif
 endfunction
 
 function s:post_install(...)

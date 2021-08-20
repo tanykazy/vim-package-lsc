@@ -5,14 +5,14 @@ function server#create(lang, listener)
     if has_key(s:servers, a:lang)
         return s:servers[a:lang]
     endif
-    let l:server = deepcopy(s:server)
-    let l:setting = conf#load_server_setting(a:lang)
-    let l:server_path = conf#get_server_path()
+    let l:server = s:server.new()
+    let l:setting = setting#load_server_setting(a:lang)
+    let l:install_path = setting#get_install_path()
     let l:server.lang = a:lang
     let l:server.listener = a:listener
     let l:server.cmd = './' . l:setting.command.name . ' ' . join(l:setting.command.options, ' ')
-    let l:server.cwd = l:server_path . '/' . l:setting.path
-    let l:server.options = get(l:setting, 'options', v:none)
+    let l:server.cwd = util#build_path(l:install_path, a:lang, l:setting.path)
+    let l:server.options = get(l:setting, 'initializationOptions', v:none)
     let l:server.files = []
     let l:server.wait_res = []
     let l:server.id = 0
@@ -25,21 +25,9 @@ function server#create(lang, listener)
 endfunction
 
 let s:server = {}
-" function s:server.create(lang, listener) dict
-" 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-"     let l:setting = conf#load_server_setting(a:lang)
-"     let l:server_path = conf#get_server_path()
-"     let self.lang = a:lang
-"     let self.listener = a:listener
-"     let self.cmd = './' . l:setting.command.name . ' ' . join(l:setting.command.options, ' ')
-"     let self.cwd = l:server_path . '/' . l:setting.path
-"     let self.options = get(l:setting, 'options', v:none)
-"     let self.files = []
-"     let self.wait_res = []
-"     let self.id = 0
-"     let self.running = v:false
-"     return deepcopy(self)
-" endfunction
+function s:server.new() dict
+    return deepcopy(self)
+endfunction
 
 function s:server.start() dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
@@ -69,6 +57,7 @@ endfunction
 
 function s:server.recv(data) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call log#log_debug('Receive from channel: ' . a:data)
     let l:content= jsonrpc#parse_content(a:data)
     let l:event = v:none
     if jsonrpc#isRequest(l:content)
@@ -91,6 +80,7 @@ function s:server.recv(data) dict
         call log#log_error('Undetected event: ' . string(l:content))
     endif
     if has_key(self.listener, l:event)
+        call log#log_debug('Call in event: ' . l:event)
         call self.listener[l:event](self, l:content)
     else
         call log#log_debug('Unimplemented listener function call')

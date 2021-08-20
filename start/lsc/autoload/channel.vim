@@ -1,8 +1,6 @@
 function channel#open(cmd, cwd, cb)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	" return s:channel.open(a:cmd, a:cwd, a:cb)
-
-	let l:self = deepcopy(s:channel)
+	let l:ch = s:channel.new()
 
 	let l:opt = {}
 	let l:opt.mode = 'raw'
@@ -10,51 +8,28 @@ function channel#open(cmd, cwd, cb)
 	let l:opt.noblock = 1
 	let l:opt.cwd = a:cwd
 
-	let l:opt.out_cb = funcref('l:self.out_cb', l:self)
-	let l:opt.err_cb = funcref('l:self.err_cb', l:self)
-	let l:opt.close_cb = funcref('l:self.close_cb', l:self)
-	let l:opt.exit_cb = funcref('l:self.exit_cb', l:self)
+	let l:opt.out_cb = funcref('l:ch.out_cb', l:ch)
+	let l:opt.err_cb = funcref('l:ch.err_cb', l:ch)
+	let l:opt.close_cb = funcref('l:ch.close_cb', l:ch)
+	let l:opt.exit_cb = funcref('l:ch.exit_cb', l:ch)
 
-	let l:self.job = job_start(a:cmd, l:opt)
-	call log#log_debug('Job start: ' . string(l:self.job))
+	let l:ch.job = job_start(a:cmd, l:opt)
+	call log#log_debug('Job start: ' . string(l:ch.job))
 
-	let l:self.handle = job_getchannel(l:self.job)
-	call log#log_debug('Open channel: ' . string(l:self.handle))
+	let l:ch.handle = job_getchannel(l:ch.job)
+	call log#log_debug('Open channel: ' . string(l:ch.handle))
 
-	let l:self.id = ch_info(l:self.handle).id
-	let l:self.callback = a:cb
-	let l:self.buffer = ''
+	let l:ch.id = ch_info(l:ch.handle).id
+	let l:ch.callback = a:cb
+	let l:ch.buffer = ''
 
-	return l:self
+	return l:ch
 endfunction
 
 let s:channel = {}
-" function s:channel.open(cmd, cwd, cb) dict
-" 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-
-" 	let l:opt = {}
-" 	let l:opt.mode = 'raw'
-" 	let l:opt.stoponexit = 'term'
-" 	let l:opt.noblock = 1
-" 	let l:opt.cwd = a:cwd
-
-" 	let l:opt.out_cb = funcref('self.out_cb', self)
-" 	let l:opt.err_cb = funcref('self.err_cb', self)
-" 	let l:opt.close_cb = funcref('self.close_cb', self)
-" 	let l:opt.exit_cb = funcref('self.exit_cb', self)
-
-" 	let self.job = job_start(a:cmd, l:opt)
-" 	call log#log_debug('Job start: ' . string(self.job))
-
-" 	let self.handle = job_getchannel(self.job)
-" 	call log#log_debug('Open channel: ' . string(self.handle))
-
-" 	let self.id = ch_info(self.handle).id
-" 	let self.callback = a:cb
-" 	let self.buffer = ''
-
-" 	return deepcopy(self)
-" endfunction
+function s:channel.new() dict
+	return deepcopy(self)
+endfunction
 
 function s:channel.close() dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
@@ -76,14 +51,25 @@ function s:channel.out_cb(ch, msg) dict
 	call log#log_debug('Receive data from[' . self.id . ']:' . a:msg)
 	let self.buffer = self.buffer . a:msg
 	while jsonrpc#contain_header(self.buffer)
+		" call log#log_debug('Analyze buffer data: ' . self.buffer)
 		let l:parts = jsonrpc#split_header(self.buffer)
+		" call log#log_debug('Split header: ' . string(l:parts))
 		let l:header = jsonrpc#parse_header(l:parts[0])
+		" call log#log_debug('Header: ' . string(l:header))
 		let l:length = l:header['Content-Length']
-		let l:content = l:parts[1][0 : l:length]
+		let l:content = l:parts[1][0 : l:length - 1]
+		" call log#log_debug('Match content: ' . l:content)
+		" call log#log_debug('Match content length: ' . len(l:content))
 		if len(l:content) == l:length
 			let self.buffer = l:parts[1][l:length : -1]
+			" call log#log_debug('Enough message: ' . l:content)
+			" call log#log_debug('Enough message length: ' . len(l:content))
 			call self.callback(l:content)
+			" call log#log_debug('Remaining buffer: ' . self.buffer)
+			" call log#log_debug('Remaining buffer length: ' . len(self.buffer))
 		else
+			" call log#log_debug('Not enough message: ' . self.buffer)
+			" call log#log_debug('Not enough message length: ' . len(self.buffer))
 			break
 		endif
 	endwhile

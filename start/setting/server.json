@@ -40,21 +40,33 @@
         },
         "sh": {
             "command": {
-                "install": "npm install bash-language-server",
-                "start": "npx bash-language-server start"
-            }
+                "name": "bash-language-server",
+                "options": [
+                    "start"
+                ],
+                "install": "npm install bash-language-server"
+            },
+            "path": "node_modules/.bin"
         },
         "yaml": {
             "command": {
-                "install": "npm install yaml-language-server",
-                "start": "npx yaml-language-server --stdio"
-            }
+                "name": "yaml-language-server",
+                "options": [
+                    "--stdio"
+                ],
+                "install": "npm install yaml-language-server"
+            },
+            "path": "node_modules/.bin"
         },
         "vim": {
             "command": {
-                "install": "npm install vim-language-server",
-                "start": "npx vim-language-server --stdio"
+                "name": "vim-language-server",
+                "options": [
+                    "--stdio"
+                ],
+                "install": "npm install vim-language-server"
             },
+            "path": "node_modules/.bin",
             "initializationOptions": {
                 "isNeovim": false,
                 "iskeyword": "@,48-57,_,192-255,-#",

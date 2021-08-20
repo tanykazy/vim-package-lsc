@@ -1,6 +1,7 @@
 function cmd#setup_install_cmd()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    command -nargs=? -complete=custom,s:completion_support_lang LscInstallServer call lsc#install_server(<f-args>)
+    command -nargs=1 -complete=custom,s:completion_support_lang LscInstallServer call lsc#install_server(<f-args>)
+    command -nargs=1 -complete=custom,s:completion_installed_lang LscUninstallServer call lsc#uninstall_server(<f-args>)
 endfunction
 
 function cmd#setup_command()
@@ -35,14 +36,19 @@ function cmd#setup_buffercmd()
 endfunction
 
 function s:completion_support_lang(arglead, cmdline, cursorpos)
-    let l:list = conf#getLangList()
+    let l:list = setting#getLangList()
+    return join(l:list, "\n")
+endfunction
+
+function s:completion_installed_lang(arglead, cmdline, cursorpos)
+    let l:list = setting#getInstalledList()
     return join(l:list, "\n")
 endfunction
 
 function cmd#install(...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_error(string(a:000))
-    " call conf#install('')
+    " call setting#install('')
 endfunction
 
 function cmd#test(...)

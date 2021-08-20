@@ -12,20 +12,24 @@ function util#split(str, pattern, max)
 	return l:first
 endfunction
 
-function! s:decode_uri(uri) abort
+function util#build_path(...)
+	return simplify(join(a:000, '/'))
+endfunction
+
+function! s:decode_uri(uri)
     let l:ret = substitute(a:uri, '[?#].*', '', '')
     return substitute(l:ret, '%\(\x\x\)', '\=printf("%c", str2nr(submatch(1), 16))', 'g')
 endfunction
 
-function! s:urlencode_char(c) abort
+function! s:urlencode_char(c)
     return printf('%%%02X', char2nr(a:c))
 endfunction
 
-function! s:get_prefix(path) abort
+function! s:get_prefix(path)
     return matchstr(a:path, '\(^\w\+::\|^\w\+://\)')
 endfunction
 
-function! s:encode_uri(path, start_pos_encode, default_prefix) abort
+function! s:encode_uri(path, start_pos_encode, default_prefix)
     let l:prefix = s:get_prefix(a:path)
     let l:path = a:path[len(l:prefix):]
     if len(l:prefix) == 0
