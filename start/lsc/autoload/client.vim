@@ -92,14 +92,14 @@ function client#document_hover(buf, pos)
     if has_key(s:server_list, l:filetype)
         let l:server = s:server_list[l:filetype]
         let l:path = util#buf2path(a:buf)
-        if util#isContain(l:server['files'], l:path)
+        " if util#isContain(l:server['files'], l:path)
             let l:lnum = a:pos[1]
             let l:col = a:pos[2]
 
             let l:position = lsp#Position(l:lnum - 1, l:col - 1)
-            let l:params = lsp#HoverParams(l:path, l:position, v:none)
+            let l:params = lsp#HoverParams(util#encode_uri(l:path), l:position, v:none)
             call s:send_request(l:server, 'textDocument/hover', l:params)
-        endif
+        " endif
     endif
 endfunction
 
@@ -108,14 +108,14 @@ function client#goto_definition(buf, pos)
     if has_key(s:server_list, l:filetype)
         let l:server = s:server_list[l:filetype]
         let l:path = util#buf2path(a:buf)
-        if util#isContain(l:server['files'], l:path)
+        " if util#isContain(l:server['files'], l:path)
             let l:lnum = a:pos[1]
             let l:col = a:pos[2]
 
             let l:position = lsp#Position(l:lnum - 1, l:col - 1)
-            let l:params = lsp#DefinitionParams(l:path, l:position, v:none, v:none)
+            let l:params = lsp#DefinitionParams(util#encode_uri(l:path), l:position, v:none, v:none)
             call s:send_request(l:server, 'textDocument/definition', l:params)
-        endif
+        " endif
     endif
 endfunction
 
@@ -265,14 +265,14 @@ function s:send_textDocument_didOpen(server, buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:text = util#getbuftext(a:buf)
     let l:changedtick = util#getchangedtick(a:buf)
-    let l:params = lsp#DidOpenTextDocumentParams(a:path, &filetype, l:changedtick, l:text)
+    let l:params = lsp#DidOpenTextDocumentParams(util#encode_uri(a:path), &filetype, l:changedtick, l:text)
     call add(a:server['files'], a:path)
     call s:send_notification(a:server, 'textDocument/didOpen', l:params)
 endfunction
 
 function s:send_textDocument_didClose(server, buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:params = lsp#DidCloseTextDocumentParams(a:path)
+    let l:params = lsp#DidCloseTextDocumentParams(util#encode_uri(a:path))
     call filter(a:server['files'], {idx, val -> val != a:path})
     call s:send_notification(a:server, 'textDocument/didClose', l:params)
 endfunction
@@ -281,14 +281,14 @@ function s:send_textDocument_didChange(server, buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:version = util#getchangedtick(a:buf)
     let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
-    let l:params = lsp#DidChangeTextDocumentParams(a:path, l:version, [l:change])
+    let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
     return s:send_notification(a:server, 'textDocument/didChange', l:params)
 endfunction
 
 function s:send_textDocument_didSave(server, buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:text = util#getbuftext(a:buf)
-    let l:params = lsp#DidSaveTextDocumentParams(a:path, l:text)
+    let l:params = lsp#DidSaveTextDocumentParams(util#encode_uri(a:path), l:text)
     return s:send_notification(a:server, 'textDocument/didSave', l:params)
 endfunction
 

@@ -23,25 +23,19 @@ function util#uri2path(uri)
 	return util#decode_uri(l:path)
 endfunction
 
-function util#encode_uri(path, start_pos_encode, default_prefix)
-    let l:prefix = s:get_prefix(a:path)
-    let l:path = a:path[len(l:prefix):]
-    if len(l:prefix) == 0
-        let l:prefix = a:default_prefix
-    endif
+let s:exclude_chars = '^[a-zA-Z0-9_.~/-]$'
 
-    let l:result = strpart(a:path, 0, a:start_pos_encode)
-
-    for l:i in range(a:start_pos_encode, len(l:path) - 1)
-        " Don't encode '/' here, `path` is expected to be a valid path.
-        if l:path[l:i] =~# '^[a-zA-Z0-9_.~/-]$'
-            let l:result .= l:path[l:i]
+function util#encode_uri(uri)
+	let l:result = ''
+    for l:index in range(len(a:uri))
+		let l:char = a:uri[l:index]
+		if match(l:char, s:exclude_chars) == -1
+			let l:result = l:result . util#encode_uri_char(l:char)
         else
-            let l:result .= s:urlencode_char(l:path[l:i])
+            let l:result = l:result . l:char
         endif
     endfor
-
-    return l:prefix . l:result
+    return l:result
 endfunction
 
 function util#decode_uri(uri)

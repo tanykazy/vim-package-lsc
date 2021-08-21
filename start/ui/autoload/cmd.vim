@@ -26,12 +26,12 @@ function cmd#setup_buffercmd()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_debug('set up buffer autocmd')
 	augroup vim_package_lsc
-		autocmd BufDelete <buffer> call cmd#close()
-		autocmd TextChanged <buffer> call cmd#change()
-		autocmd InsertLeave <buffer> call cmd#change()
-		autocmd InsertCharPre <buffer> call cmd#change()
-		autocmd BufWrite <buffer> call cmd#save()
-		autocmd SafeState <buffer> call client#document_hover(bufnr('%'), getpos('.'))
+		autocmd! BufDelete <buffer> call cmd#close()
+		autocmd! TextChanged <buffer> call cmd#change()
+		autocmd! InsertLeave <buffer> call cmd#change()
+		autocmd! InsertCharPre <buffer> call cmd#change()
+		autocmd! BufWrite <buffer> call cmd#save()
+		autocmd! SafeState <buffer> call client#document_hover(bufnr('%'), getpos('.'))
 	augroup END
 endfunction
 
@@ -49,10 +49,6 @@ function cmd#install(...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_error(string(a:000))
     " call setting#install('')
-endfunction
-
-function cmd#test(...)
-    call log#log_debug(string(a:000))
 endfunction
 
 function cmd#start(...) abort

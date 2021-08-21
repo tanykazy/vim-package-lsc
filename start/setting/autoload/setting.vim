@@ -66,9 +66,11 @@ function setting#uninstall(lang)
 	let l:server_path = util#build_path(s:install_path, a:lang)
 	call log#log_debug('Delete: ' . l:server_path)
 	let l:result =  delete(l:server_path, 'rf')
-	if l:result == 0
+	if l:result == -1
 		call log#log_error('Failed to delete: ' . l:server_path)
+		return v:false
 	endif
+	return v:true
 endfunction
 
 function s:install(path, commands, finished, ...)
