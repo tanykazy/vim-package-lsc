@@ -1,20 +1,21 @@
 let s:log_name = 'vim-package-lsc.log'
 
-let s:log_level_trace = 0
-let s:log_level_debug = 1
-let s:log_level_error = 2
-let s:log_level_none = 3
+let s:log_level = {}
+let s:log_level.trace = 0
+let s:log_level.debug = 1
+let s:log_level.error = 2
+let s:log_level.none = 3
 
-let log#level_trace = s:log_level_trace
-let log#level_debug = s:log_level_debug
-let log#level_error = s:log_level_error
-let log#level_none = s:log_level_none
+let log#level_trace = s:log_level.trace
+let log#level_debug = s:log_level.debug
+let log#level_error = s:log_level.error
+let log#level_none = s:log_level.none
 
-let g:log_level = get(g:, 'log_level', s:log_level_none)
+let g:log_level = get(g:, 'log_level', s:log_level.none)
 let g:log_file = get(g:, 'log_file', expand('<sfile>:p:h:h') . '/' . s:log_name)
 
 function log#start_log()
-    if g:log_level < s:log_level_none
+    if g:log_level < s:log_level.none
         call ch_logfile(g:log_file, 'w')
     endif
 endfunction
@@ -24,19 +25,19 @@ function log#stop_log()
 endfunction
 
 function log#log_trace(msg)
-    if !(g:log_level > s:log_level_trace)
+    if !(g:log_level > s:log_level.trace)
         call s:log('[TRACE]', a:msg)
     endif
 endfunction
 
 function log#log_debug(msg)
-    if !(g:log_level > s:log_level_debug)
+    if !(g:log_level > s:log_level.debug)
         call s:log('[DEBUG]', a:msg)
     endif
 endfunction
 
 function log#log_error(msg)
-    if !(g:log_level > s:log_level_error)
+    if !(g:log_level > s:log_level.error)
         call s:log('[ERROR]', a:msg)
     endif
 endfunction
