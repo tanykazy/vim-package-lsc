@@ -17,15 +17,15 @@ function server#create(lang, listener)
     let l:server.wait_res = []
     let l:server.id = 0
     let l:server.running = v:false
-    " let s:servers[a:lang] = s:server.create(a:lang, a:listener)
     let s:servers[a:lang] = l:server
-    " call log#log_debug('Create server: ' . string(s:servers[a:lang]))
-    call log#log_debug('Create server: ' . string(l:server))
+    call log#log_trace('Create server: ' . string(l:server))
+    call log#log_debug('Create server: ' . a:lang)
     return l:server
 endfunction
 
 let s:server = {}
 function s:server.new() dict
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     return deepcopy(self)
 endfunction
 
@@ -45,7 +45,7 @@ function s:server.send(data) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if jsonrpc#isRequest(a:data)
         call add(self.wait_res, a:data)
-        call log#log_debug('Wait for a response to ' . string(a:data))
+        call log#log_debug('Wait for a response to ' . a:data.method)
     endif
     call self.channel.send(a:data)
     let l:id = self.id + 1

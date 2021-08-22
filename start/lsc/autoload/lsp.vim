@@ -22,6 +22,11 @@ let lsp#ErrorCodes['ContentModified'] = -32801
 let lsp#ErrorCodes['RequestCancelled'] = -32800
 let lsp#ErrorCodes['lspReservedErrorRangeEnd'] = -32800
 
+let lsp#CompletionTriggerKind = {}
+let lsp#CompletionTriggerKind['Invoked'] = 1
+let lsp#CompletionTriggerKind['TriggerCharacter'] = 2
+let lsp#CompletionTriggerKind['TriggerForIncompleteCompletions'] = 3
+
 function lsp#InitializeParams(initializationOptions, workspaceFolders, token)
 	let l:params = {}
 	call extend(l:params, lsp#WorkDoneProgressParams(a:token))
@@ -119,6 +124,34 @@ function lsp#DefinitionParams(path, position, workDoneToken, partialResultToken)
 	call extend(l:params, lsp#WorkDoneProgressParams(a:workDoneToken))
 	call extend(l:params, lsp#PartialResultParams(a:partialResultToken))
 	return l:params
+endfunction
+
+function lsp#CompletionParams(context, path, position, workDoneToken, partialResultToken)
+	let l:params = {}
+	call extend(l:params, lsp#TextDocumentPositionParams(a:path, a:position))
+	call extend(l:params, lsp#WorkDoneProgressParams(a:workDoneToken))
+	call extend(l:params, lsp#PartialResultParams(a:partialResultToken))
+	if !util#isNone(a:range)
+		let l:params['context'] = a:context
+	endif
+	return l:params
+endfunction
+
+function lsp#CompletionContext(triggerKind, triggerCharacter)
+	let l:params = {}
+	let l:params['triggerKind'] = a:triggerKind
+	if !util#isNone(a:triggerCharacter)
+		let l:params['triggerCharacter'] = a:triggerCharacter
+	endif
+	return l:params
+endfunction
+
+function lsp#WorkDoneProgressParams(workDoneToken)
+	let l:workDoneProgressParams = {}
+	if !util#isNone(a:workDoneToken)
+		let l:workDoneProgressParams['workDoneToken'] = a:workDoneToken
+	endif
+	return l:workDoneProgressParams
 endfunction
 
 function lsp#PartialResultParams(progressToken)
@@ -240,7 +273,6 @@ function lsp#DidChangeWatchedFilesClientCapabilities()
 	let l:params['dynamicRegistration'] = v:false
 	return l:params
 endfunction
-
 
 function lsp#WorkspaceSymbolClientCapabilities()
 	let l:params = {}
@@ -554,12 +586,4 @@ function lsp#PrepareSupportDefaultBehavior()
 	let l:params = {}
 	let l:params['Identifier'] = 1
 	return l:params
-endfunction
-
-function lsp#WorkDoneProgressParams(workDoneToken)
-	let l:workDoneProgressParams = {}
-	if !util#isNone(a:workDoneToken)
-		let l:workDoneProgressParams['workDoneToken'] = a:workDoneToken
-	endif
-	return l:workDoneProgressParams
 endfunction

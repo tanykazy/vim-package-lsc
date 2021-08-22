@@ -13,6 +13,7 @@ function util#split(str, pattern, max)
 endfunction
 
 function util#build_path(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return simplify(join(a:000, '/'))
 endfunction
 
@@ -26,6 +27,7 @@ endfunction
 let s:exclude_chars = '^[a-zA-Z0-9_.~/-]$'
 
 function util#encode_uri(uri)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:result = ''
     for l:index in range(len(a:uri))
 		let l:char = a:uri[l:index]
@@ -39,21 +41,20 @@ function util#encode_uri(uri)
 endfunction
 
 function util#decode_uri(uri)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     return substitute(a:uri, '%\(\x\x\)', {m -> util#decode_uri_char(m[1])}, 'g')
 endfunction
 
 function util#encode_uri_char(char)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:code = char2nr(a:char)
     return printf('%%%02X', l:code)
 endfunction
 
 function util#decode_uri_char(code)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:hex = str2nr(a:code, 16)
 	return printf('%c', l:hex)
-endfunction
-
-function util#get_prefix(path)
-    return matchstr(a:path, '\(^\w\+::\|^\w\+://\)')
 endfunction
 
 function util#uri2components(uri)

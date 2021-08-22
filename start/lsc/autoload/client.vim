@@ -59,7 +59,9 @@ function client#document_close(buf, path)
     if has_key(s:server_list, l:filetype)
         let l:server = s:server_list[l:filetype]
         if util#isContain(l:server['files'], a:path)
-            call s:send_textDocument_didClose(l:server, a:buf, a:path)
+            let l:params = lsp#DidCloseTextDocumentParams(util#encode_uri(a:path))
+            call s:send_notification(l:server, 'textDocument/didClose', l:params)
+            call filter(l:server['files'], {idx, val -> val != a:path})
         endif
     endif
 endfunction
@@ -104,6 +106,7 @@ function client#document_hover(buf, pos)
 endfunction
 
 function client#goto_definition(buf, pos)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
     if has_key(s:server_list, l:filetype)
         let l:server = s:server_list[l:filetype]
@@ -118,6 +121,23 @@ function client#goto_definition(buf, pos)
         " endif
     endif
 endfunction
+
+" function client#document_completion(buf, pos)
+" 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+"     let l:filetype = util#getfiletype(a:buf)
+"     if has_key(s:server_list, l:filetype)
+"         let l:server = s:server_list[l:filetype]
+"         let l:path = util#buf2path(a:buf)
+"         " if util#isContain(l:server['files'], l:path)
+"             let l:lnum = a:pos[1]
+"             let l:col = a:pos[2]
+
+"             let l:position = lsp#Position(l:lnum - 1, l:col - 1)
+"             let l:params = lsp#DefinitionParams(util#encode_uri(l:path), l:position, v:none, v:none)
+"             call s:send_request(l:server, 'textDocument/definition', l:params)
+"         " endif
+"     endif
+" endfunction
 
 let s:fn = {}
 function s:fn.initialize(server, message)
@@ -207,18 +227,15 @@ function s:fn.textDocument_hover(server, message)
         endif
         let l:opt = v:none
         if has_key(a:message.result, 'range')
-        " 画面上の行とファイルの行を変換する必要がある。
-        " screenpos()
             let l:range = a:message.result.range
+            let l:screenpos = screenpos(bufwinid('%'), l:range.start.line + 1, l:range.start.character + 1)
             let l:opt = {}
-            let l:opt.line = l:range.start.line - 1
-            let l:opt.col = l:range.start.character + 1
+            let l:opt.col = l:screenpos.col
             let l:opt.moved = [l:range.start.character + 1, l:range.end.character + 1]
-            call log#log_debug('hover option: ' . string(l:opt))
         endif
         call filter(l:values, {idx, val -> !empty(val)})
         call map(l:values, {key, val -> trim(val, v:none, 2)})
-        call popup#hover(l:values, l:opt)
+        call popup#hover(v:none, l:values, l:opt)
     endif
 endfunction
 
@@ -259,11 +276,11 @@ endfunction
 " endfunction
 
 let s:listener = {}
-let s:listener['initialize'] = funcref('s:fn.initialize')
-let s:listener['shutdown'] = funcref('s:fn.shutdown')
-let s:listener['textDocument/publishDiagnostics'] = funcref('s:fn.textDocument_publishDiagnostics')
-let s:listener['textDocument/hover'] = funcref('s:fn.textDocument_hover')
-let s:listener['textDocument/definition'] = funcref('s:fn.textDocument_definition')
+let s:listener['initialize'] = s:fn.initialize
+let s:listener['shutdown'] = s:fn.shutdown
+let s:listener['textDocument/publishDiagnostics'] = s:fn.textDocument_publishDiagnostics
+let s:listener['textDocument/hover'] = s:fn.textDocument_hover
+let s:listener['textDocument/definition'] = s:fn.textDocument_definition
 " let s:listener['unknown'] = funcref('s:fn.response_error')
 
 function s:send_textDocument_didOpen(server, buf, path)
@@ -273,13 +290,6 @@ function s:send_textDocument_didOpen(server, buf, path)
     let l:params = lsp#DidOpenTextDocumentParams(util#encode_uri(a:path), &filetype, l:changedtick, l:text)
     call add(a:server['files'], a:path)
     call s:send_notification(a:server, 'textDocument/didOpen', l:params)
-endfunction
-
-function s:send_textDocument_didClose(server, buf, path)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:params = lsp#DidCloseTextDocumentParams(util#encode_uri(a:path))
-    call filter(a:server['files'], {idx, val -> val != a:path})
-    call s:send_notification(a:server, 'textDocument/didClose', l:params)
 endfunction
 
 function s:send_textDocument_didChange(server, buf, path)

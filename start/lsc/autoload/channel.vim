@@ -28,6 +28,7 @@ endfunction
 
 let s:channel = {}
 function s:channel.new() dict
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return deepcopy(self)
 endfunction
 
@@ -42,13 +43,13 @@ endfunction
 function s:channel.send(data) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:payload = jsonrpc#build_payload(a:data)
-	" call log#log_trace('Send data to[' . self.id . ']:' . l:payload)
+	call log#log_trace('Send data to[' . self.id . ']:' . l:payload)
 	call ch_sendraw(self.handle, l:payload, {})
 endfunction
 
 function s:channel.out_cb(ch, msg) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	" call log#log_trace('Receive data from[' . self.id . ']:' . a:msg)
+	call log#log_trace('Receive data from[' . self.id . ']:' . a:msg)
 	let self.buffer = self.buffer . a:msg
 	while jsonrpc#contain_header(self.buffer)
 		" call log#log_debug('Analyze buffer data: ' . self.buffer)
