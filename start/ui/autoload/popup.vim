@@ -1,13 +1,17 @@
 let s:has_popupwin = has('popupwin')
 
-let s:hover_id = v:none
-
 function popup#hover(text, options)
-    if !util#isNone(s:hover_id)
-        call popup_close(s:hover_id)
+    let b:hover_id = get(b:, 'hover_id', v:none)
+    let b:hover_text = get(b:, 'hover_text', [])
+    if b:hover_text ==# a:text
+        return
+    endif
+    if !util#isNone(b:hover_id)
+        call popup_close(b:hover_id)
     endif
     let l:id = popup#atcursor(a:text, a:options)
-    let s:hover_id = l:id
+    let b:hover_id = l:id
+    let b:hover_text = a:text
 endfunction
 
 function popup#atcursor(what, options)
@@ -19,15 +23,15 @@ function popup#atcursor(what, options)
         return
     endif
     let l:opt = {}
-    if !util#isNone(a:options)
-        call extend(l:opt, a:options)
-    endif
     let l:opt.pos = 'botleft'
     let l:opt.line = 'cursor-1'
     let l:opt.col = 'cursor'
     " let l:opt.moved = 'WORD'
     let l:opt.fixed = v:true
     let l:opt.mapping = v:false
-    " call log#log_debug(string(a:what))
+    if !util#isNone(a:options)
+        call extend(l:opt, a:options)
+    endif
+    call log#log_debug(string(l:opt))
     return popup_atcursor(a:what, l:opt)
 endfunction

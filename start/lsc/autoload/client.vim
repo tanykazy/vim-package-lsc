@@ -207,9 +207,14 @@ function s:fn.textDocument_hover(server, message)
         endif
         let l:opt = v:none
         if has_key(a:message.result, 'range')
+        " 画面上の行とファイルの行を変換する必要がある。
+        " screenpos()
             let l:range = a:message.result.range
             let l:opt = {}
+            let l:opt.line = l:range.start.line - 1
+            let l:opt.col = l:range.start.character + 1
             let l:opt.moved = [l:range.start.character + 1, l:range.end.character + 1]
+            call log#log_debug('hover option: ' . string(l:opt))
         endif
         call filter(l:values, {idx, val -> !empty(val)})
         call map(l:values, {key, val -> trim(val, v:none, 2)})
