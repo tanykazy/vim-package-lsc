@@ -7,12 +7,19 @@ function dialog#confirm(msg, ...) " choices, default, type
     return l:answer - 1
 endfunction
 
+function dialog#info(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    redraw
+    echohl Normal
+    echomsg join(a:000)
+    echohl Normal
+endfunction
+
 function dialog#error(...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     redraw
     echohl ErrorMsg
     echomsg join(a:000)
-    " echohl None
     echohl Normal
 endfunction
 
