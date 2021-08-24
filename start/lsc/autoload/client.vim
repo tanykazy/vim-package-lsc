@@ -143,7 +143,7 @@ function s:defmap(key)
     call execute("imap <buffer><nowait> <LocalLeader> " . a:key . "<Esc>:<C-u>call dialog#info('trigger characters!')<CR>")
 endfunction
 
-function client#complement(buf, path, char)
+function client#document_completion(buf, path, pos, char)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_error('complement!!')
     call dialog#info(a:buf)
@@ -152,11 +152,17 @@ function client#complement(buf, path, char)
     let l:filetype = util#getfiletype(a:buf)
     if has_key(s:server_list, l:filetype)
         let l:server = s:server_list[l:filetype]
-        " if util#isContain(l:server['files'], l:path)
-            " let l:position = lsp#Position(l:lnum - 1, l:col - 1)
-            " let l:params = lsp#DefinitionParams(util#encode_uri(l:path), l:position, v:none, v:none)
-            " call s:send_request(l:server, 'textDocument/definition', l:params)
-        " endif
+        if util#isContain(l:server['capabilities']['completionProvider']['triggerCharacters'], a:char)
+            " if util#isContain(l:server['files'], l:path)
+                let l:lnum = a:pos[1]
+                let l:col = a:pos[2]
+                let l:position = lsp#Position(l:lnum - 1, l:col - 1)
+                " let l:var = lsp#testvar
+                let l:context = lsp#CompletionContext(2, a:char)
+                let l:params = lsp#CompletionParams(l:context, util#encode_uri(a:path), l:position, v:none, v:none)
+                call s:send_request(l:server, 'textDocument/completion', l:params)
+            " endif
+        endif
     endif
 endfunction
 
@@ -171,21 +177,21 @@ function s:fn.initialize(server, message)
         let a:server['serverInfo'] = get(a:message['result'], 'serverInfo', {})
         call log#log_debug('Update server info ' . string(a:server))
 
-        let l:serverCapabilities = a:server['capabilities']
-        call log#log_error(string(l:serverCapabilities))
-        let l:completionProvider = l:serverCapabilities['completionProvider']
-        call log#log_error(string(l:completionProvider))
-        let l:triggerCharacters = l:completionProvider['triggerCharacters']
-        call log#log_error(string(l:triggerCharacters))
+        " let l:serverCapabilities = a:server['capabilities']
+        " call log#log_error(string(l:serverCapabilities))
+        " let l:completionProvider = l:serverCapabilities['completionProvider']
+        " call log#log_error(string(l:completionProvider))
+        " let l:triggerCharacters = l:completionProvider['triggerCharacters']
+        " call log#log_error(string(l:triggerCharacters))
 
-        for l:triggerCharacter in l:triggerCharacters
-            call log#log_error(l:triggerCharacter)
+        " for l:triggerCharacter in l:triggerCharacters
+            " call log#log_error(l:triggerCharacter)
 
             " let maplocalleader = l:triggerCharacter
             " call log#log_error(maplocalleader)
             " call s:defmap(l:triggerCharacter)
             " imap <buffer><nowait> <LocalLeader>a <Esc>:<C-u>call dialog#info('trigger characters!')<CR>
-        endfor
+        " endfor
 
 
         let l:params = lsp#InitializedParams()

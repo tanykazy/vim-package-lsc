@@ -143,7 +143,7 @@ function cmd#complement(...) abort
     if !util#isSpecialbuffers(&buftype)
         let l:path = expand('%:p')
         if !empty(l:path)
-            call client#complement(l:buffer, l:path, v:char)
+            call client#document_completion(l:buffer, l:path, getpos('.'), v:char)
         endif
     endif
 endfunction
