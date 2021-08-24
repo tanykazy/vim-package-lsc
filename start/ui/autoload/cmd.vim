@@ -31,7 +31,7 @@ function cmd#setup_buffercmd()
 		autocmd! InsertLeave <buffer> call cmd#change()
 		autocmd! InsertCharPre <buffer> call cmd#complement()
 		autocmd! BufWrite <buffer> call cmd#save()
-		autocmd! SafeState <buffer> call client#document_hover(bufnr('%'), getpos('.'))
+		" autocmd! SafeState <buffer> call client#document_hover(bufnr('%'), getpos('.'))
 	augroup END
 endfunction
 
@@ -43,12 +43,6 @@ endfunction
 function s:completion_installed_lang(arglead, cmdline, cursorpos)
     let l:list = setting#getInstalledList()
     return join(l:list, "\n")
-endfunction
-
-function cmd#install(...)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_error(string(a:000))
-    " call setting#install('')
 endfunction
 
 function cmd#start(...) abort

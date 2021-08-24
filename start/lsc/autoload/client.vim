@@ -72,7 +72,10 @@ function client#document_change(buf, path)
     if has_key(s:server_list, l:filetype)
         let l:server = s:server_list[l:filetype]
         if util#isContain(l:server['files'], a:path)
-            call s:send_textDocument_didChange(l:server, a:buf, a:path)
+            let l:version = util#getchangedtick(a:buf)
+            let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
+            let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
+            call s:send_notification(l:server, 'textDocument/didChange', l:params)
         endif
     endif
 endfunction
@@ -154,6 +157,11 @@ function client#document_completion(buf, path, pos, char)
         let l:server = s:server_list[l:filetype]
         if util#isContain(l:server['capabilities']['completionProvider']['triggerCharacters'], a:char)
             " if util#isContain(l:server['files'], l:path)
+                let l:version = util#getchangedtick(a:buf)
+                let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
+                let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
+                call s:send_notification(l:server, 'textDocument/didChange', l:params)
+
                 let l:lnum = a:pos[1]
                 let l:col = a:pos[2]
                 let l:position = lsp#Position(l:lnum - 1, l:col - 1)
@@ -308,6 +316,25 @@ function s:fn.textDocument_definition(server, message)
     endif
 endfunction
 
+function s:fn.textDocument_completion(server, message)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if !util#isNull(a:message.result)
+        let l:result = a:message.result
+        if has_key(l:result, 'isIncomplete')
+            if l:result.isIncomplete
+                let l:items = l:result.items
+            else
+                let l:items = l:result.items
+            endif
+        elseif type(l:result) == v:t_list
+            let l:items = l:result
+        endif
+        for l:item in l:items
+            call log#log_debug(l:item.label)
+        endfor
+    endif
+endfunction
+
 " function s:fn.response_error(server, message)
 " 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 "     call log#log_error('Unknown event listener function call')
@@ -321,6 +348,7 @@ let s:listener['shutdown'] = s:fn.shutdown
 let s:listener['textDocument/publishDiagnostics'] = s:fn.textDocument_publishDiagnostics
 let s:listener['textDocument/hover'] = s:fn.textDocument_hover
 let s:listener['textDocument/definition'] = s:fn.textDocument_definition
+let s:listener['textDocument/completion'] = s:fn.textDocument_completion
 " let s:listener['unknown'] = funcref('s:fn.response_error')
 
 function s:send_textDocument_didOpen(server, buf, path)
@@ -332,13 +360,13 @@ function s:send_textDocument_didOpen(server, buf, path)
     call s:send_notification(a:server, 'textDocument/didOpen', l:params)
 endfunction
 
-function s:send_textDocument_didChange(server, buf, path)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:version = util#getchangedtick(a:buf)
-    let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
-    let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
-    return s:send_notification(a:server, 'textDocument/didChange', l:params)
-endfunction
+" function s:send_textDocument_didChange(server, buf, path)
+" 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+"     let l:version = util#getchangedtick(a:buf)
+"     let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
+"     let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
+"     return s:send_notification(a:server, 'textDocument/didChange', l:params)
+" endfunction
 
 function s:send_textDocument_didSave(server, buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
