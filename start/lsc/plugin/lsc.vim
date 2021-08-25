@@ -24,6 +24,8 @@ call log#log_error('load: plugin/lsc.vim')
 call cmd#setup_install_cmd()
 call cmd#setup_command()
 
+set completefunc=complete#completefunc
+
 " call log#log_error(string(conf#getLangList()))
 " call conf#install('typescript')
 

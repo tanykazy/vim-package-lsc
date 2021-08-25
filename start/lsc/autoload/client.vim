@@ -148,14 +148,22 @@ endfunction
 
 function client#document_completion(buf, path, pos, char)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_error('complement!!')
-    call dialog#info(a:buf)
-    call dialog#info(a:path)
-    call dialog#info(a:char)
+    " call log#log_error('complement!!')
+    " call dialog#info(a:buf)
+    " call dialog#info(a:path)
+    " call dialog#info(a:char)
+    " call log#log_error('buf: ' . a:buf)
     let l:filetype = util#getfiletype(a:buf)
+    " call log#log_error('filetype: ' . l:filetype)
     if has_key(s:server_list, l:filetype)
         let l:server = s:server_list[l:filetype]
-        if util#isContain(l:server['capabilities']['completionProvider']['triggerCharacters'], a:char)
+        if util#isNone(a:char)
+            let l:kind = 1
+        else
+            let l:kind = 2
+        endif
+        " call log#log_error('kind: ' . l:kind)
+        if util#isContain(l:server['capabilities']['completionProvider']['triggerCharacters'], a:char) || l:kind == 1
             " if util#isContain(l:server['files'], l:path)
                 let l:version = util#getchangedtick(a:buf)
                 let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
@@ -166,9 +174,10 @@ function client#document_completion(buf, path, pos, char)
                 let l:col = a:pos[2]
                 let l:position = lsp#Position(l:lnum - 1, l:col - 1)
                 " let l:var = lsp#testvar
-                let l:context = lsp#CompletionContext(2, a:char)
+                let l:context = lsp#CompletionContext(l:kind, a:char)
                 let l:params = lsp#CompletionParams(l:context, util#encode_uri(a:path), l:position, v:none, v:none)
                 call s:send_request(l:server, 'textDocument/completion', l:params)
+                " call log#log_debug('send request: textDocument/completion')
             " endif
         endif
     endif
@@ -329,9 +338,25 @@ function s:fn.textDocument_completion(server, message)
         elseif type(l:result) == v:t_list
             let l:items = l:result
         endif
+        let l:complete_items = []
         for l:item in l:items
-            call log#log_debug(l:item.label)
+            " call log#log_debug(l:item.label)
+            let l:complete_item = {}
+            let l:complete_item.word = l:item.label
+            if has_key(l:item, 'detail')
+                let l:complete_item.menu = l:item.detail
+            endif
+            if has_key(l:item, 'documentation')
+                let l:complete_item.info = l:item.documentation
+            endif
+            if has_key(l:item, 'kind')
+                let l:complete_item.kind = util#lsp_kind2vim_kind(l:item.kind)
+            endif
+            call add(l:complete_items, l:complete_item)
         endfor
+        call log#log_debug(string(l:complete_items))
+        
+        doautocmd <nomodeline> vim_package_lsc CompleteChanged
     endif
 endfunction
 

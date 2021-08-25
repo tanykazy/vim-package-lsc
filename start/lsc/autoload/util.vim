@@ -83,6 +83,60 @@ function util#uri2components(uri)
 	return l:component
 endfunction
 
+function util#lsp_kind2vim_kind(kind)
+	if a:kind == 1
+		return ''
+	elseif a:kind == 2
+		return 'f'
+	elseif a:kind == 3
+		return 'f'
+	elseif a:kind == 4
+		return 'f'
+	elseif a:kind == 5
+		return 'm'
+	elseif a:kind == 6
+		return 'v'
+	elseif a:kind == 7
+		return 't'
+	elseif a:kind == 8
+		return 't'
+	elseif a:kind == 9
+		return 't'
+	elseif a:kind == 10
+		return 'm'
+	elseif a:kind == 11
+		return 't'
+	elseif a:kind == 12
+		return 'v'
+	elseif a:kind == 13
+		return 't'
+	elseif a:kind == 14
+		return 't'
+	elseif a:kind == 15
+		return 'd'
+	elseif a:kind == 16
+		return 'd'
+	elseif a:kind == 17
+		return 'd'
+	elseif a:kind == 18
+		return ''
+	elseif a:kind == 19
+		return 'd'
+	elseif a:kind == 20
+		return 'm'
+	elseif a:kind == 21
+		return 'v'
+	elseif a:kind == 22
+		return 't'
+	elseif a:kind == 23
+		return 't'
+	elseif a:kind == 24
+		return 'd'
+	elseif a:kind == 25
+		return ''
+	endif
+endfunction
+
 function util#isSpecialbuffers(buftype)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:specialbuffers = ['quickfix', 'help', 'terminal', 'directory', 'scratch', 'unlisted']
