@@ -138,6 +138,11 @@ endfunction
 
 function s:serialize_content(params)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:data = json_encode(a:params)
+	try
+		let l:data = json_encode(a:params)
+	catch
+		call log#log_error('Failed encode: ' . a:params)
+		call log#log_error(v:exception)
+	endtry
 	return l:data
 endfunction

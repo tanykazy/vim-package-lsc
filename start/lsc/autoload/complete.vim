@@ -1,14 +1,6 @@
-let s:break = v:false
-
 function complete#completefunc(findstart, base)
+    let l:buf = bufnr('%')
 	if a:findstart
-        
-        augroup vim_package_lsc
-            autocmd! CompleteChanged * call log#log_error('complete changed!')
-            autocmd! CompleteChanged * let s:break = v:true
-        augroup END
-        
-        let l:buf = bufnr('%')
         let l:path = expand('%:p')
         let l:pos = getpos('.')
         let l:char = v:none
@@ -25,30 +17,12 @@ function complete#completefunc(findstart, base)
 	else
         " Find matches starting with a:base.
         let l:matches = []
-        while !complete_check()
-            sleep 100m
-            call log#log_debug('wait!')
-            if s:break
-                let s:break = v:false
-                break
-            endif
-        endwhile
-        " "a:base" にマッチする月を探す
-        " for m in split("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec")
-        "     if m =~ '^' . a:base
-        "         call complete_add(m)
-        "     endif
-        "         sleep 300m        " 次の候補の検索をシミュレートする
-        "     if complete_check()
-        "         break
-        "     endif
-        " endfor
-		" let res = []
-		" for m in split("feat: fix: docs: style: refactor: perf: test: chore:")
-		" 	if m =~ '^' . a:base
-		" 		call add(res, m)
-		" 	endif
-		" endfor
+        call util#wait(-1, { -> client#completion_status(l:buf) || complete_check()})
+        let l:items = client#get_completion(l:buf)
+        call complete_add(l:items)
+        " call filter(l:matches, {idx, val -> stridx(val, a:base) == 0})
+        " call log#log_debug('after get completion')
+        " call log#log_debug(string(l:matches))
         return l:matches
 	endif
 endfunction

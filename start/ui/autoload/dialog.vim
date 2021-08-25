@@ -1,6 +1,6 @@
 function dialog#confirm(msg, ...) " choices, default, type
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:choices = get(a:, 1, v:none)
+    let l:choices = get(a:, 1, [])
     let l:default = get(a:, 2, 1)
     let l:type = get(a:, 3, 'Generic')
     let l:answer = confirm(a:msg, join(l:choices, '\n'), l:default, l:type)

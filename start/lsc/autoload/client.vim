@@ -125,27 +125,6 @@ function client#goto_definition(buf, pos)
     endif
 endfunction
 
-" function client#document_completion(buf, pos)
-" 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-"     let l:filetype = util#getfiletype(a:buf)
-"     if has_key(s:server_list, l:filetype)
-"         let l:server = s:server_list[l:filetype]
-"         let l:path = util#buf2path(a:buf)
-"         " if util#isContain(l:server['files'], l:path)
-"             let l:lnum = a:pos[1]
-"             let l:col = a:pos[2]
-
-"             let l:position = lsp#Position(l:lnum - 1, l:col - 1)
-"             let l:params = lsp#DefinitionParams(util#encode_uri(l:path), l:position, v:none, v:none)
-"             call s:send_request(l:server, 'textDocument/definition', l:params)
-"         " endif
-"     endif
-" endfunction
-
-function s:defmap(key)
-    call execute("imap <buffer><nowait> <LocalLeader> " . a:key . "<Esc>:<C-u>call dialog#info('trigger characters!')<CR>")
-endfunction
-
 function client#document_completion(buf, path, pos, char)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     " call log#log_error('complement!!')
@@ -181,6 +160,30 @@ function client#document_completion(buf, path, pos, char)
             " endif
         endif
     endif
+endfunction
+
+function client#completion_status(buf)
+    let l:filetype = util#getfiletype(a:buf)
+    let l:status = v:false
+    if has_key(s:server_list, l:filetype)
+        let l:server = s:server_list[l:filetype]
+        if has_key(l:server, 'complete-items')
+            let l:status = v:true
+        endif
+    endif
+    return l:status
+endfunction
+
+function client#get_completion(buf)
+    let l:filetype = util#getfiletype(a:buf)
+    let l:items = []
+    if has_key(s:server_list, l:filetype)
+        let l:server = s:server_list[l:filetype]
+        if has_key(l:server, 'complete-items')
+            let l:items = remove(l:server, 'complete-items')
+        endif
+    endif
+    return l:items
 endfunction
 
 let s:fn = {}
@@ -355,8 +358,10 @@ function s:fn.textDocument_completion(server, message)
             call add(l:complete_items, l:complete_item)
         endfor
         call log#log_debug(string(l:complete_items))
+
+        let a:server['complete-items'] = l:complete_items
         
-        doautocmd <nomodeline> vim_package_lsc CompleteChanged
+        " doautocmd <nomodeline> vim_package_lsc CompleteChanged
     endif
 endfunction
 
