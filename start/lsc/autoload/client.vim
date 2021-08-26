@@ -197,7 +197,7 @@ function client#get_completion(buf)
 endfunction
 
 let s:fn = {}
-function s:fn.initialize(server, message)
+function s:fn.initialize(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if has_key(a:message, 'error')
         call s:print_error(a:message['error'])
@@ -237,14 +237,14 @@ function s:fn.initialize(server, message)
     endif
 endfunction
 
-function s:fn.shutdown(server, message)
+function s:fn.shutdown(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call s:send_notification(a:server, 'exit', v:none)
     call a:server.stop()
     call remove(s:server_list, a:server.lang)
 endfunction
 
-function s:fn.textDocument_publishDiagnostics(server, message)
+function s:fn.textDocument_publishDiagnostics(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 
     let l:file = util#uri2path(a:message['params']['uri'])
@@ -269,7 +269,7 @@ function s:fn.textDocument_publishDiagnostics(server, message)
     call quickfix#set_location(l:winid, l:location, 'r')
 endfunction
 
-function s:fn.textDocument_hover(server, message)
+function s:fn.textDocument_hover(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !util#isNull(a:message.result)
         let l:contents = a:message.result.contents
@@ -309,7 +309,7 @@ function s:fn.textDocument_hover(server, message)
     endif
 endfunction
 
-function s:fn.textDocument_definition(server, message)
+function s:fn.textDocument_definition(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !util#isNull(a:message.result)
         if type(a:message.result) == v:t_list
@@ -338,7 +338,7 @@ function s:fn.textDocument_definition(server, message)
     endif
 endfunction
 
-function s:fn.textDocument_completion(server, message)
+function s:fn.textDocument_completion(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:complete_items = []
     if !util#isNull(a:message.result)
@@ -378,7 +378,7 @@ function s:fn.textDocument_completion(server, message)
     endif
 endfunction
 
-" function s:fn.response_error(server, message)
+" function s:fn.response_error(server, message, ...)
 " 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 "     call log#log_error('Unknown event listener function call')
 "     call log#log_error(string(a:server))

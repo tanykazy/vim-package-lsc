@@ -60,7 +60,7 @@ function s:server.recv(data) dict
     call log#log_trace('Receive from channel: ' . a:data)
     let l:content= jsonrpc#parse_content(a:data)
     let l:event = v:none
-    let l:hit = v:none
+    let l:origin = v:none
     if jsonrpc#isRequest(l:content)
         let l:event = l:content.method
     elseif jsonrpc#isResponse(l:content)
@@ -71,8 +71,8 @@ function s:server.recv(data) dict
         for l:wait in self.wait_res
             if l:wait.id == l:content.id
                 let l:event = l:wait.method
-                let l:hit = l:wait
-                " call remove(self.wait_res, index(self.wait_res, l:wait))
+                let l:origin = remove(self.wait_res, index(self.wait_res, l:wait))
+                break
             endif
         endfor
     elseif jsonrpc#isNotification(l:content)
@@ -82,14 +82,11 @@ function s:server.recv(data) dict
     endif
     if has_key(self.listener, l:event)
         call log#log_debug('Call in event: ' . l:event)
-        call self.listener[l:event](self, l:content)
+        call self.listener[l:event](self, l:content, l:origin)
     else
         call log#log_debug('Unimplemented listener function call')
         call log#log_debug(string(self))
         call log#log_debug(l:event)
         call log#log_debug(string(a:data))
-    endif
-    if !util#isNone(l:hit)
-        call remove(self.wait_res, index(self.wait_res, l:hit))
     endif
 endfunction
