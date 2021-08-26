@@ -60,6 +60,7 @@ function s:server.recv(data) dict
     call log#log_trace('Receive from channel: ' . a:data)
     let l:content= jsonrpc#parse_content(a:data)
     let l:event = v:none
+    let l:hit = v:none
     if jsonrpc#isRequest(l:content)
         let l:event = l:content.method
     elseif jsonrpc#isResponse(l:content)
@@ -70,7 +71,8 @@ function s:server.recv(data) dict
         for l:wait in self.wait_res
             if l:wait.id == l:content.id
                 let l:event = l:wait.method
-                call remove(self.wait_res, index(self.wait_res, l:wait))
+                let l:hit = l:wait
+                " call remove(self.wait_res, index(self.wait_res, l:wait))
             endif
         endfor
     elseif jsonrpc#isNotification(l:content)
@@ -86,5 +88,8 @@ function s:server.recv(data) dict
         call log#log_debug(string(self))
         call log#log_debug(l:event)
         call log#log_debug(string(a:data))
+    endif
+    if !util#isNone(l:hit)
+        call remove(self.wait_res, index(self.wait_res, l:hit))
     endif
 endfunction

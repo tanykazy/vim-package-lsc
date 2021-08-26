@@ -125,6 +125,8 @@ function client#goto_definition(buf, pos)
     endif
 endfunction
 
+let s:wait_completion = v:none
+
 function client#document_completion(buf, path, pos, char)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
@@ -152,6 +154,8 @@ function client#document_completion(buf, path, pos, char)
         let l:params = lsp#CompletionParams(l:context, util#encode_uri(a:path), l:position, v:none, v:none)
         call s:send_request(l:server, 'textDocument/completion', l:params)
         " call log#log_debug('send request: textDocument/completion')
+        let s:wait_completion = a:char
+        call log#log_error(s:wait_completion)
         return v:true
     endif
     return v:false
@@ -354,13 +358,23 @@ function s:fn.textDocument_completion(server, message)
                 let l:complete_item.kind = util#lsp_kind2vim_kind(l:item.kind)
             endif
             call add(l:complete_items, l:complete_item)
-            " call complete_add(l:complete_item)
         endfor
         " call log#log_debug(string(l:complete_items))
 
-        let a:server['complete-items'] = l:complete_items
+        " let l:comp_info = complete_info()
+        " call log#log_error(string(l:comp_info))
 
-        call complete(col('.'), l:complete_items)
+        call log#log_error(s:wait_completion) " if util#isNone(s:wait_completion)
+            let a:server['complete-items'] = l:complete_items
+        else
+            call complete(col('.'), l:complete_items)
+        endif
+        let s:wait_completion = v:none
+
+        " let l:comp_info = complete_info()
+        " call log#log_error(string(l:comp_info))
+    
+        " let a:server['complete-items'] = l:complete_items
         
         " doautocmd <nomodeline> vim_package_lsc CompleteChanged
     endif

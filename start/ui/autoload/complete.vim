@@ -19,6 +19,10 @@ function complete#completefunc(findstart, base)
         " Find matches starting with a:base.
         call util#wait({-> client#completion_status(l:buf) || complete_check()})
         let l:items = client#get_completion(l:buf)
+
+        " let l:comp_info = complete_info()
+        " call log#log_error(string(l:comp_info))
+
         for l:item in l:items
             if stridx(l:item.word, a:base) == 0
                 call complete_add(l:item)
@@ -27,6 +31,10 @@ function complete#completefunc(findstart, base)
                 return -3
             endif
         endfor
+
+        " let l:comp_info = complete_info()
+        " call log#log_error(string(l:comp_info))
+
         return []
 	endif
 endfunction
