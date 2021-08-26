@@ -1,18 +1,13 @@
-let s:save_completeopt = &completeopt
-set completeopt+=noinsert,menuone,noselect
-
-" 補完表示時のEnterで改行をしない
-inoremap <expr><CR>  pumvisible() ? "<C-y>" : "<CR>"
-inoremap <expr><C-n> pumvisible() ? "<Down>" : "<C-n>"
-inoremap <expr><C-p> pumvisible() ? "<Up>" : "<C-p>"
-
 function complete#completefunc(findstart, base)
     let l:buf = bufnr('%')
 	if a:findstart
         let l:path = expand('%:p')
         let l:pos = getpos('.')
         let l:char = v:none
-        call client#document_completion(l:buf, l:path, l:pos, l:char)
+        let l:success = client#document_completion(l:buf, l:path, l:pos, l:char)
+        if !l:success
+            return -2
+        endif
         " Locate the start of the keyword.
         let l:pattern = '\a'
         let l:flags = 'bn'
@@ -29,7 +24,7 @@ function complete#completefunc(findstart, base)
                 call complete_add(l:item)
             endif
             if complete_check()
-                break
+                return -3
             endif
         endfor
         return []

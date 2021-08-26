@@ -127,39 +127,37 @@ endfunction
 
 function client#document_completion(buf, path, pos, char)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    " call log#log_error('complement!!')
-    " call dialog#info(a:buf)
-    " call dialog#info(a:path)
-    " call dialog#info(a:char)
-    " call log#log_error('buf: ' . a:buf)
     let l:filetype = util#getfiletype(a:buf)
-    " call log#log_error('filetype: ' . l:filetype)
-    if has_key(s:server_list, l:filetype)
-        let l:server = s:server_list[l:filetype]
-        if util#isNone(a:char)
-            let l:kind = 1
-        else
-            let l:kind = 2
-        endif
-        " call log#log_error('kind: ' . l:kind)
-        if util#isContain(l:server['capabilities']['completionProvider']['triggerCharacters'], a:char) || l:kind == 1
-            " if util#isContain(l:server['files'], l:path)
-                let l:version = util#getchangedtick(a:buf)
-                let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
-                let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
-                call s:send_notification(l:server, 'textDocument/didChange', l:params)
-
-                let l:lnum = a:pos[1]
-                let l:col = a:pos[2]
-                let l:position = lsp#Position(l:lnum - 1, l:col - 1)
-                " let l:var = lsp#testvar
-                let l:context = lsp#CompletionContext(l:kind, a:char)
-                let l:params = lsp#CompletionParams(l:context, util#encode_uri(a:path), l:position, v:none, v:none)
-                call s:send_request(l:server, 'textDocument/completion', l:params)
-                " call log#log_debug('send request: textDocument/completion')
-            " endif
-        endif
+    if !has_key(s:server_list, l:filetype)
+        return v:false
     endif
+    let l:server = s:server_list[l:filetype]
+    if util#isNone(a:char)
+        let l:kind = 1
+    else
+        let l:kind = 2
+    endif
+    " call log#log_error('kind: ' . l:kind)
+    if util#isContain(l:server['capabilities']['completionProvider']['triggerCharacters'], a:char) || l:kind == 1
+        let l:version = util#getchangedtick(a:buf)
+        let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
+        let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
+        call s:send_notification(l:server, 'textDocument/didChange', l:params)
+
+        let l:lnum = a:pos[1]
+        let l:col = a:pos[2]
+        let l:position = lsp#Position(l:lnum - 1, l:col - 1)
+        " let l:var = lsp#testvar
+        let l:context = lsp#CompletionContext(l:kind, a:char)
+        let l:params = lsp#CompletionParams(l:context, util#encode_uri(a:path), l:position, v:none, v:none)
+        call s:send_request(l:server, 'textDocument/completion', l:params)
+        " call log#log_debug('send request: textDocument/completion')
+        return v:true
+    endif
+    return v:false
+endfunction
+
+function client#completion_resolve(buf, item)
 endfunction
 
 function client#completion_status(buf)
@@ -356,10 +354,13 @@ function s:fn.textDocument_completion(server, message)
                 let l:complete_item.kind = util#lsp_kind2vim_kind(l:item.kind)
             endif
             call add(l:complete_items, l:complete_item)
+            " call complete_add(l:complete_item)
         endfor
-        call log#log_debug(string(l:complete_items))
+        " call log#log_debug(string(l:complete_items))
 
         let a:server['complete-items'] = l:complete_items
+
+        call complete(col('.'), l:complete_items)
         
         " doautocmd <nomodeline> vim_package_lsc CompleteChanged
     endif

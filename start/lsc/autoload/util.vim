@@ -252,8 +252,8 @@ function util#wait(condition, ...) " timeout
 			if call(a:condition, [])
 				return 0
 			endif
-			let l:progress = reltime(l:start)
 			call util#sleep(10)
+			let l:progress = reltime(l:start)
 		endwhile
 		return -1
 	catch /^Vim:Interrupt$/

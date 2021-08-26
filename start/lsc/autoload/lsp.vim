@@ -169,6 +169,9 @@ function lsp#CompletionContext(triggerKind, triggerCharacter)
 	return l:params
 endfunction
 
+function lsp#CompletionItem()
+endfunction
+
 function lsp#WorkDoneProgressParams(workDoneToken)
 	let l:workDoneProgressParams = {}
 	if !util#isNone(a:workDoneToken)
