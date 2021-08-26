@@ -31,6 +31,7 @@ function cmd#setup_buffercmd()
 		autocmd! InsertLeave <buffer> call cmd#change()
 		autocmd! InsertCharPre <buffer> call cmd#complement()
 		autocmd! BufWrite <buffer> call cmd#save()
+		" autocmd! InsertChange <buffer> call dialog#info('InsertChange !')
 		" autocmd! SafeState <buffer> call client#document_hover(bufnr('%'), getpos('.'))
 	augroup END
 endfunction

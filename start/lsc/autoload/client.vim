@@ -139,23 +139,31 @@ function client#document_completion(buf, path, pos, char)
     else
         let l:kind = 2
     endif
-    " call log#log_error('kind: ' . l:kind)
     if util#isContain(l:server['capabilities']['completionProvider']['triggerCharacters'], a:char) || l:kind == 1
-        let l:version = util#getchangedtick(a:buf)
-        let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
-        let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
-        call s:send_notification(l:server, 'textDocument/didChange', l:params)
+        if !util#isNone(a:char)
+            let l:version = util#getchangedtick(a:buf)
+            let l:line = a:pos[1] - 1
+            let l:character = a:pos[2] - 1
+            let l:position = lsp#Position(l:line, l:character)
+            let l:range = lsp#Range(l:position, l:position)
+            let l:change = lsp#TextDocumentContentChangeEvent(l:range, a:char)
+            let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
+            call s:send_notification(l:server, 'textDocument/didChange', l:params)
+        endif
 
-        let l:lnum = a:pos[1]
-        let l:col = a:pos[2]
-        let l:position = lsp#Position(l:lnum - 1, l:col - 1)
-        " let l:var = lsp#testvar
+        let l:line = a:pos[1] - 1
+        if util#isNone(a:char)
+            let l:character = a:pos[2] - 1
+        else
+            let l:character = a:pos[2]
+        endif
+        let l:position = lsp#Position(l:line, l:character)
         let l:context = lsp#CompletionContext(l:kind, a:char)
         let l:params = lsp#CompletionParams(l:context, util#encode_uri(a:path), l:position, v:none, v:none)
         call s:send_request(l:server, 'textDocument/completion', l:params)
-        " call log#log_debug('send request: textDocument/completion')
+
         let s:wait_completion = a:char
-        call log#log_error(s:wait_completion)
+
         return v:true
     endif
     return v:false
@@ -332,6 +340,7 @@ endfunction
 
 function s:fn.textDocument_completion(server, message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:complete_items = []
     if !util#isNull(a:message.result)
         let l:result = a:message.result
         if has_key(l:result, 'isIncomplete')
@@ -343,9 +352,7 @@ function s:fn.textDocument_completion(server, message)
         elseif type(l:result) == v:t_list
             let l:items = l:result
         endif
-        let l:complete_items = []
         for l:item in l:items
-            " call log#log_debug(l:item.label)
             let l:complete_item = {}
             let l:complete_item.word = l:item.label
             if has_key(l:item, 'detail')
@@ -359,24 +366,15 @@ function s:fn.textDocument_completion(server, message)
             endif
             call add(l:complete_items, l:complete_item)
         endfor
-        " call log#log_debug(string(l:complete_items))
-
-        " let l:comp_info = complete_info()
-        " call log#log_error(string(l:comp_info))
-
-        call log#log_error(s:wait_completion) " if util#isNone(s:wait_completion)
+        if util#isNone(s:wait_completion)
             let a:server['complete-items'] = l:complete_items
         else
-            call complete(col('.'), l:complete_items)
+            let l:col = col('.')
+            call complete(l:col + 1, l:complete_items)
+            let s:wait_completion = v:none
         endif
-        let s:wait_completion = v:none
-
-        " let l:comp_info = complete_info()
-        " call log#log_error(string(l:comp_info))
-    
-        " let a:server['complete-items'] = l:complete_items
-        
-        " doautocmd <nomodeline> vim_package_lsc CompleteChanged
+    else
+        let a:server['complete-items'] = l:complete_items
     endif
 endfunction
 
@@ -404,14 +402,6 @@ function s:send_textDocument_didOpen(server, buf, path)
     call add(a:server['files'], a:path)
     call s:send_notification(a:server, 'textDocument/didOpen', l:params)
 endfunction
-
-" function s:send_textDocument_didChange(server, buf, path)
-" 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-"     let l:version = util#getchangedtick(a:buf)
-"     let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
-"     let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
-"     return s:send_notification(a:server, 'textDocument/didChange', l:params)
-" endfunction
 
 function s:send_textDocument_didSave(server, buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
@@ -449,9 +439,6 @@ function s:start_server(lang)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !has_key(s:server_list, a:lang)
         if setting#isSupport(a:lang)
-
-            " call s:install_server(a:lang)
-
             let l:server = server#create(a:lang, s:listener)
             call l:server.start()
             let s:server_list[a:lang] = l:server
@@ -459,15 +446,6 @@ function s:start_server(lang)
     endif
     return s:server_list[a:lang]
 endfunction
-
-" function s:install_server(lang)
-" 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-"     call setting#install(a:lang, funcref('s:test_finish'))
-" endfunction
-
-" function s:test_finish()
-"     call log#log_error('test finish')
-" endfunction
 
 " function client#bufchange_listener(bufnr, start, end, added, changes)
 " 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))

@@ -9,32 +9,24 @@ function complete#completefunc(findstart, base)
             return -2
         endif
         " Locate the start of the keyword.
-        let l:pattern = '\a'
-        let l:flags = 'bn'
-        let l:timeout = 0
-        let l:skip = v:none
-        let l:match = searchpos(l:pattern, l:flags, l:pos[1], l:timeout, l:skip)
-		return l:match[1]
+        let l:text = strpart(getline('.'), 0, l:pos[2] - 1)
+        let l:match = match(l:text, '\k*$')
+		return l:match
 	else
         " Find matches starting with a:base.
         call util#wait({-> client#completion_status(l:buf) || complete_check()})
         let l:items = client#get_completion(l:buf)
-
-        " let l:comp_info = complete_info()
-        " call log#log_error(string(l:comp_info))
-
+        " let l:result = []
         for l:item in l:items
             if stridx(l:item.word, a:base) == 0
                 call complete_add(l:item)
+                " call add(l:result, l:item)
             endif
             if complete_check()
                 return -3
             endif
         endfor
-
-        " let l:comp_info = complete_info()
-        " call log#log_error(string(l:comp_info))
-
+        " return {'words': l:result, 'refresh': 'always'}
         return []
 	endif
 endfunction
