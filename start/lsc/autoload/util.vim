@@ -243,20 +243,29 @@ function util#parse_json_file(path)
 	return l:json
 endfunction
 
-function util#wait(timeout, condition)
-	let l:ms = a:timeout / 1000.0
+function util#wait(condition, ...) " timeout
+	let l:timeout = get(a:, 1, -1) / 1000.0
 	let l:start = reltime()
 	let l:progress = reltime(l:start)
 	try
-		while l:ms < 0 || reltimefloat(l:progress) < l:ms
+		while l:timeout < 0 || reltimefloat(l:progress) < l:timeout
 			if call(a:condition, [])
 				return 0
 			endif
 			let l:progress = reltime(l:start)
-			call execute('sleep 10m')
+			call util#sleep(10)
 		endwhile
 		return -1
 	catch /^Vim:Interrupt$/
 		return -2
 	endtry
+endfunction
+
+function util#execute(...)
+	call execute(join(a:000), ' ')
+endfunction
+
+function util#sleep(ms)
+	" call execute('sleep ' . a:ms . 'm')
+	call util#execute('sleep', a:ms . 'm')
 endfunction
