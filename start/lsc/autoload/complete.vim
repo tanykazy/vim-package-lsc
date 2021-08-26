@@ -1,3 +1,11 @@
+let s:save_completeopt = &completeopt
+set completeopt+=noinsert,menuone,noselect
+
+" 補完表示時のEnterで改行をしない
+inoremap <expr><CR>  pumvisible() ? "<C-y>" : "<CR>"
+inoremap <expr><C-n> pumvisible() ? "<Down>" : "<C-n>"
+inoremap <expr><C-p> pumvisible() ? "<Up>" : "<C-p>"
+
 function complete#completefunc(findstart, base)
     let l:buf = bufnr('%')
 	if a:findstart

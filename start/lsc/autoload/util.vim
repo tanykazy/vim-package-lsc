@@ -261,11 +261,6 @@ function util#wait(condition, ...) " timeout
 	endtry
 endfunction
 
-function util#execute(...)
-	call execute(join(a:000), ' ')
-endfunction
-
 function util#sleep(ms)
-	" call execute('sleep ' . a:ms . 'm')
-	call util#execute('sleep', a:ms . 'm')
+	execute 'sleep' a:ms . 'm'
 endfunction

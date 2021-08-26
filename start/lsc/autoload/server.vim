@@ -66,14 +66,13 @@ function s:server.recv(data) dict
         if jsonrpc#isResponseError(l:content)
             call log#log_error('Request fails: ' . string(l:content))
             call dialog#error(l:content.error.message)
-        else
-            for l:wait in self.wait_res
-                if l:wait.id == l:content.id
-                    let l:event = l:wait.method
-                    call remove(self.wait_res, index(self.wait_res, l:wait))
-                endif
-            endfor
         endif
+        for l:wait in self.wait_res
+            if l:wait.id == l:content.id
+                let l:event = l:wait.method
+                call remove(self.wait_res, index(self.wait_res, l:wait))
+            endif
+        endfor
     elseif jsonrpc#isNotification(l:content)
         let l:event = l:content.method
     else
