@@ -66,14 +66,21 @@ function client#document_close(buf, path)
     endif
 endfunction
 
-function client#document_change(buf, path)
+function client#document_change(buf, path, pos, char)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
     if has_key(s:server_list, l:filetype)
         let l:server = s:server_list[l:filetype]
         if util#isContain(l:server['files'], a:path)
+            let l:range = v:none
+            if !empty(a:char)
+                let l:line = a:pos[1] - 1
+                let l:character = a:pos[2] - 1
+                let l:position = lsp#Position(l:line, l:character)
+                let l:range = lsp#Range(l:position, l:position)
+            endif
             let l:version = util#getchangedtick(a:buf)
-            let l:change = lsp#TextDocumentContentChangeEvent(v:none, util#getbuftext(a:buf))
+            let l:change = lsp#TextDocumentContentChangeEvent(l:range, a:char)
             let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
             call s:send_notification(l:server, 'textDocument/didChange', l:params)
         endif
@@ -140,17 +147,6 @@ function client#document_completion(buf, path, pos, char)
         let l:kind = 2
     endif
     if util#isContain(l:server['capabilities']['completionProvider']['triggerCharacters'], a:char) || l:kind == 1
-        if !util#isNone(a:char)
-            let l:version = util#getchangedtick(a:buf)
-            let l:line = a:pos[1] - 1
-            let l:character = a:pos[2] - 1
-            let l:position = lsp#Position(l:line, l:character)
-            let l:range = lsp#Range(l:position, l:position)
-            let l:change = lsp#TextDocumentContentChangeEvent(l:range, a:char)
-            let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
-            call s:send_notification(l:server, 'textDocument/didChange', l:params)
-        endif
-
         let l:line = a:pos[1] - 1
         if util#isNone(a:char)
             let l:character = a:pos[2] - 1

@@ -26,13 +26,14 @@ function cmd#setup_buffercmd()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_debug('set up buffer autocmd')
 	augroup vim_package_lsc
-		autocmd! BufDelete <buffer> call cmd#close()
-		autocmd! TextChanged <buffer> call cmd#change()
-		autocmd! InsertLeave <buffer> call cmd#change()
-		autocmd! InsertCharPre <buffer> call cmd#complement()
-		autocmd! BufWrite <buffer> call cmd#save()
-		" autocmd! InsertChange <buffer> call dialog#info('InsertChange !')
-		" autocmd! SafeState <buffer> call client#document_hover(bufnr('%'), getpos('.'))
+		autocmd BufDelete <buffer> call cmd#close()
+		autocmd TextChanged <buffer> call cmd#change()
+		autocmd InsertLeave <buffer> call cmd#change()
+		autocmd InsertCharPre <buffer> call cmd#change()
+		autocmd InsertCharPre <buffer> call cmd#complement()
+		autocmd BufWrite <buffer> call cmd#save()
+		" autocmd InsertChange <buffer> call dialog#info('InsertChange !')
+		" autocmd SafeState <buffer> call client#document_hover(bufnr('%'), getpos('.'))
 	augroup END
 endfunction
 
@@ -108,7 +109,7 @@ function cmd#change(...) abort
     if !util#isSpecialbuffers(&buftype)
         let l:path = expand('%:p')
         if !empty(l:path)
-            call client#document_change(l:buffer, l:path)
+            call client#document_change(l:buffer, l:path, getpos('.'), v:char)
         endif
     endif
 endfunction
