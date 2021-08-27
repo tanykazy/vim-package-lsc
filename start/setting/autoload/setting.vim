@@ -1,4 +1,4 @@
-let s:server_setting_file = expand('<sfile>:p:h:h') . '/server.json'
+let s:server_setting_file = expand('<sfile>:p:h:h') . '/servers.json'
 let s:client_setting_file = expand('<sfile>:p:h:h') . '/client.json'
 let s:install_path = expand('<sfile>:p:h:h') . '/servers'
 let s:settings = util#parse_json_file(s:server_setting_file)

@@ -66,7 +66,7 @@ function s:server.recv(data) dict
     elseif jsonrpc#isResponse(l:content)
         if jsonrpc#isResponseError(l:content)
             call log#log_error('Request fails: ' . string(l:content))
-            call dialog#error(l:content.error.message)
+            " call dialog#error(l:content.error.message)
         endif
         for l:wait in self.wait_res
             if l:wait.id == l:content.id

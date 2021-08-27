@@ -52,25 +52,14 @@ function s:channel.out_cb(ch, msg) dict
 	call log#log_trace('Receive data from[' . self.id . ']:' . a:msg)
 	let self.buffer = self.buffer . a:msg
 	while jsonrpc#contain_header(self.buffer)
-		" call log#log_debug('Analyze buffer data: ' . self.buffer)
 		let l:parts = jsonrpc#split_header(self.buffer)
-		" call log#log_debug('Split header: ' . string(l:parts))
 		let l:header = jsonrpc#parse_header(l:parts[0])
-		" call log#log_debug('Header: ' . string(l:header))
 		let l:length = l:header['Content-Length']
 		let l:content = l:parts[1][0 : l:length - 1]
-		" call log#log_debug('Match content: ' . l:content)
-		" call log#log_debug('Match content length: ' . len(l:content))
 		if len(l:content) == l:length
 			let self.buffer = l:parts[1][l:length : -1]
-			" call log#log_debug('Enough message: ' . l:content)
-			" call log#log_debug('Enough message length: ' . len(l:content))
 			call self.callback(l:content)
-			" call log#log_debug('Remaining buffer: ' . self.buffer)
-			" call log#log_debug('Remaining buffer length: ' . len(self.buffer))
 		else
-			" call log#log_debug('Not enough message: ' . self.buffer)
-			" call log#log_debug('Not enough message length: ' . len(self.buffer))
 			break
 		endif
 	endwhile
