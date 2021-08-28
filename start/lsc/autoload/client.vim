@@ -251,25 +251,22 @@ endfunction
 
 function s:fn.textDocument_publishDiagnostics(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-
-    let l:file = util#uri2path(a:message['params']['uri'])
-    " let l:buf = util#path2buf(l:file)
-    " let l:winid = bufwinid(l:buf)
-
-    " TODO mod to event target buffer with filename
-    " call textprop#clear('%')
-
     let l:location = []
-    for l:value in a:message['params']['diagnostics']
-        let l:lnum = l:value['range']['start']['line']
-        let l:col = l:value['range']['start']['character']
-        let l:nr = get(l:value, 'code', v:none)
-        let l:text = l:value['message']
-        let l:type = get(l:value, 'severity', v:none)
+    let l:file = util#uri2path(a:message['params']['uri'])
+    let l:buf = util#path2buf(l:file)
+    " let l:winid = bufwinid(l:buf)
+    call textprop#clear(l:buf)
+    let l:diagnostics = a:message['params']['diagnostics']
+    for l:diagnostic in l:diagnostics
+        let l:lnum = l:diagnostic['range']['start']['line']
+        let l:col = l:diagnostic['range']['start']['character']
+        let l:nr = get(l:diagnostic, 'code', v:none)
+        let l:text = l:diagnostic['message']
+        let l:type = get(l:diagnostic, 'severity', v:none)
         call add(l:location, quickfix#location(l:file, l:lnum, l:col, l:nr, l:text, l:type))
-        " let l:start = l:value['range']['start']
-        " let l:end = l:value['range']['end']
-        " call textprop#add(l:start, l:end, l:type)
+        let l:start = l:diagnostic['range']['start']
+        let l:end = l:diagnostic['range']['end']
+        call textprop#add(l:buf, l:start, l:end, l:type)
     endfor
     call quickfix#set_quickfix(l:location, l:file)
 endfunction

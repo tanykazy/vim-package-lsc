@@ -32,29 +32,23 @@ let s:hint['combine'] = v:true
 let s:hint['start_incl'] = v:true
 let s:hint['end_incl'] = v:true
 
-function textprop#setup_proptypes()
+function textprop#setup_proptypes(buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !s:has_textprop
-        return
-    endif
     call s:type_add('Error', s:error)
     call s:type_add('Warning', s:warning)
     call s:type_add('Information', s:information)
     call s:type_add('Hint', s:hint)
 endfunction
 
-function textprop#add(startpos, endpos, severity)
+function textprop#add(buf, startpos, endpos, severity)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !s:has_textprop
-        return
-    endif
     let l:lnum = a:startpos['line'] + 1
     let l:col = a:startpos['character'] + 1
     let l:props = {}
     " let l:props['length']
     let l:props['end_lnum'] = a:endpos['line'] + 1
     let l:props['end_col'] = a:endpos['character'] + 1
-    " let l:props['bufnr']
+    let l:props['bufnr'] = a:buf
     " let l:props['id']
     if a:severity == 1
         let l:props['type'] = 'Error'
@@ -65,30 +59,50 @@ function textprop#add(startpos, endpos, severity)
     elseif a:severity == 4
         let l:props['type'] = 'Hint'
     endif
-    return prop_add(l:lnum, l:col, l:props)
+    return s:prop_add(l:lnum, l:col, l:props)
 endfunction
 
 function textprop#clear(buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !s:has_textprop
-        return
-    endif
-    let l:bufinfo = getbufinfo(a:buf)
     let l:props = {}
-    let l:props['bufnr'] = bufname(a:buf)
-    " call log#log_error(string(l:bufinfo))
-    return prop_clear(1, line('$'), l:props)
-    " return prop_clear(1, l:bufinfo[0]['linecount'], l:props)
+    let l:props['bufnr'] = a:buf
+    return s:prop_clear(1, line('$'), l:props)
 endfunction
 
 function s:type_add(name, props)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !s:has_textprop
-        return
-    endif
-    if empty(prop_type_get(a:name, a:props))
-        return prop_type_add(a:name, a:props)
+    if empty(s:prop_type_get(a:name, a:props))
+        return s:prop_type_add(a:name, a:props)
     else
         call log#log_error('Property type ' . a:name . ' already defined')
     endif
+endfunction
+
+function s:prop_add(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if s:has_textprop
+        return call('prop_add', a:000)
+    endif
+endfunction
+
+function s:prop_clear(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if s:has_textprop
+        return call('prop_clear', a:000)
+    endif
+endfunction
+
+function s:prop_type_add(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if s:has_textprop
+        return call('prop_type_add', a:000)
+    endif
+endfunction
+
+function s:prop_type_get(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if s:has_textprop
+        return call('prop_type_get', a:000)
+    endif
+    return {}
 endfunction

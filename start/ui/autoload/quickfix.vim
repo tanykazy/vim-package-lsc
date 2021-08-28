@@ -1,20 +1,21 @@
 let s:has_quickfix = has('quickfix')
 
-function quickfix#set_quickfix(list, file, ...)
+let s:quickfixes = {}
+
+function quickfix#set_quickfix(list, file)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:what = {}
-    let l:what.title = a:file
-    let l:what.items = a:list
-    let l:context = get(a:, 1, v:none)
-    if util#isNone(l:context)
-        let l:what.context = {}
-        let l:what.context.filename = a:file
-    else
-        let l:what.context = l:context
-    endif
-    " return s:setqflist([], ' ', l:what)
-    let l:result = s:setqflist([], ' ', l:what)
-    call log_error(l:result)
+
+    call s:setqflist([], 'r')
+
+    let s:quickfixes[a:file] = a:list
+    for [key, value] in items(s:quickfixes)
+        let l:what = {}
+        " let l:what.title = key
+        let l:what.items = value
+        " let l:what.context = {}
+        " let l:what.context.filename = key
+        call s:setqflist([], 'a', l:what)
+    endfor
 endfunction
 
 function quickfix#location(filename, lnum, col, nr, text, type)
@@ -42,16 +43,16 @@ function quickfix#location(filename, lnum, col, nr, text, type)
     return l:location
 endfunction
 
-function s:setqflist(list, action, what)
+function s:setqflist(...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if s:has_quickfix
-        return setqflist(a:list, a:action, a:what)
+        return call('setqflist', a:000)
     endif
 endfunction
 
-function s:setloclist(nr, list, action, what)
+function s:setloclist(...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if s:has_quickfix
-        return setloclist(a:nr, a:list, a:action, a:what)
+        return call('setloclist', a:000)
     endif
 endfunction

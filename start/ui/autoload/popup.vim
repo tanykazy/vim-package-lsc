@@ -7,7 +7,7 @@ function popup#hover(title, text, options)
         return
     endif
     if !util#isNone(b:hover_id)
-        call popup_close(b:hover_id)
+        call s:popup_close(b:hover_id)
     endif
     let l:opt = {}
     let l:opt.pos = 'botleft'
@@ -32,20 +32,28 @@ endfunction
 
 function popup#atcursor(what, options)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !s:has_popupwin
-        return
-    endif
-    if empty(a:what)
-        return
-    endif
     let l:opt = {}
     if !util#isNone(a:options)
         call extend(l:opt, a:options)
     endif
-    return popup_atcursor(a:what, l:opt)
+    return s:popup_atcursor(a:what, l:opt)
 endfunction
 
 function s:hover_close(id, result)
     let b:hover_id = v:none
     let b:hover_text = []
+endfunction
+
+function s:popup_atcursor(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if s:has_popupwin
+        return call('popup_atcursor', a:000)
+    endif
+endfunction
+
+function s:popup_close(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if s:has_popupwin
+        return call('popup_close', a:000)
+    endif
 endfunction

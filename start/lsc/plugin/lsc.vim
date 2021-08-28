@@ -29,6 +29,8 @@ set completeopt+=noinsert,menuone,noselect
 
 set completefunc=complete#completefunc
 
+call highlight#setup_highlight()
+call textprop#setup_proptypes(v:none)
 " call log#log_error(string(conf#getLangList()))
 " call conf#install('typescript')
 
@@ -37,8 +39,6 @@ set completefunc=complete#completefunc
 
 " call lsc#Lsc()
 " call autocmd#setup_autocmd()
-" call highlight#setup_highlight()
-" call textprop#setup_proptypes()
 
 " function s:test(...)
 " endfunction
