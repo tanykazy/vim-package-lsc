@@ -267,8 +267,8 @@ function s:fn.textDocument_publishDiagnostics(server, message, ...)
         let l:text = l:value['message']
         let l:type = get(l:value, 'severity', v:none)
         call add(l:location, quickfix#location(l:file, l:lnum, l:col, l:nr, l:text, l:type))
-        let l:start = l:value['range']['start']
-        let l:end = l:value['range']['end']
+        " let l:start = l:value['range']['start']
+        " let l:end = l:value['range']['end']
         " call textprop#add(l:start, l:end, l:type)
     endfor
     call quickfix#set_quickfix(l:location, l:file)

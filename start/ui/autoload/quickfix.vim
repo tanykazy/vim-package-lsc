@@ -12,7 +12,9 @@ function quickfix#set_quickfix(list, file, ...)
     else
         let l:what.context = l:context
     endif
-    return s:setqflist([], 'r', l:what)
+    " return s:setqflist([], ' ', l:what)
+    let l:result = s:setqflist([], ' ', l:what)
+    call log_error(l:result)
 endfunction
 
 function quickfix#location(filename, lnum, col, nr, text, type)
@@ -42,16 +44,14 @@ endfunction
 
 function s:setqflist(list, action, what)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !s:has_quickfix
-        return
+    if s:has_quickfix
+        return setqflist(a:list, a:action, a:what)
     endif
-    return setqflist(a:list, a:action, a:what)
 endfunction
 
 function s:setloclist(nr, list, action, what)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !s:has_quickfix
-        return
+    if s:has_quickfix
+        return setloclist(a:nr, a:list, a:action, a:what)
     endif
-    return setloclist(a:nr, a:list, a:action, a:what)
 endfunction
