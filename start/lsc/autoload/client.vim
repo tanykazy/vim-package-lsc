@@ -72,15 +72,21 @@ function client#document_change(buf, path, pos, char)
     if has_key(s:server_list, l:filetype)
         let l:server = s:server_list[l:filetype]
         if util#isContain(l:server['files'], a:path)
-            let l:range = v:none
+            " call log#log_error(typename(a:char))
+            " call log#log_error(string(a:char))
+            " call log#log_error(string(empty(a:char)))
+            " call log#log_error(len(a:char))
             if !empty(a:char)
                 let l:line = a:pos[1] - 1
                 let l:character = a:pos[2] - 1
                 let l:position = lsp#Position(l:line, l:character)
                 let l:range = lsp#Range(l:position, l:position)
+                let l:change = lsp#TextDocumentContentChangeEvent(l:range, a:char)
+            else
+                let l:text = util#getbuftext(a:buf)
+                let l:change = lsp#TextDocumentContentChangeEvent(v:none, l:text)
             endif
             let l:version = util#getchangedtick(a:buf)
-            let l:change = lsp#TextDocumentContentChangeEvent(l:range, a:char)
             let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
             call s:send_notification(l:server, 'textDocument/didChange', l:params)
         endif
@@ -225,10 +231,13 @@ function s:fn.initialize(server, message, ...)
 
         let l:bufinfolist = util#loadedbufinfolist()
         for l:bufinfo in l:bufinfolist
-            call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:bufinfo['name'])
-            " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
-            " call autocmd#add_event_listener()
-            call ui#set_buffer_cmd()
+            let l:buftype = util#getbuftype(l:bufinfo.bufnr)
+            if !util#isSpecialbuffers(l:buftype)
+                call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:bufinfo['name'])
+                " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
+                " call autocmd#add_event_listener()
+                call ui#set_buffer_cmd()
+            endif
         endfor
     endif
 endfunction
@@ -244,8 +253,8 @@ function s:fn.textDocument_publishDiagnostics(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 
     let l:file = util#uri2path(a:message['params']['uri'])
-    let l:buf = util#path2buf(l:file)
-    let l:winid = bufwinid(l:buf)
+    " let l:buf = util#path2buf(l:file)
+    " let l:winid = bufwinid(l:buf)
 
     " TODO mod to event target buffer with filename
     " call textprop#clear('%')
@@ -262,7 +271,7 @@ function s:fn.textDocument_publishDiagnostics(server, message, ...)
         let l:end = l:value['range']['end']
         " call textprop#add(l:start, l:end, l:type)
     endfor
-    call quickfix#set_location(l:winid, l:location, 'r')
+    call quickfix#set_quickfix(l:location, l:file)
 endfunction
 
 function s:fn.textDocument_hover(server, message, ...)

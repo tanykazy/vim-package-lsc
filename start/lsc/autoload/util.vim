@@ -74,9 +74,15 @@ function util#uri2components(uri)
 	endif
 	if stridx(l:tmp[1], '//') != -1
 		let l:tmp2 = util#split(l:tmp[1], '//', 2)
-		let l:tmp2 = util#split(l:tmp2[1], '/', 2)
-		let l:component.authority = l:tmp2[0]
-		let l:component.path = l:tmp2[1]
+		" call log#log_error(string(l:tmp2))
+		" let l:tmp2 = util#split(l:tmp2[1], '/', 2)
+		" let l:component.authority = l:tmp2[0]
+		" let l:component.path = l:tmp2[1]
+		if stridx(l:tmp2[1], '/') != -1
+			let l:tmp3 = util#split(l:tmp2[1], '/', 2)
+			let l:component.authority = l:tmp3[0]
+			let l:component.path = l:tmp3[1]
+		endif
 	else
 		let l:component.path = l:tmp[1]
 	endif
@@ -153,6 +159,11 @@ function util#getbuftext(buf)
 	let l:lines = getbufline(a:buf, 1, '$')
 	let l:text = join(l:lines, "\n")
 	return l:text
+endfunction
+
+function util#getbuftype(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	return getbufvar(a:buf, '&buftype')
 endfunction
 
 function util#buf2path(buf)
