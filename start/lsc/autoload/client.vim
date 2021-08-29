@@ -313,40 +313,48 @@ endfunction
 
 function s:fn.textDocument_definition(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !util#isNull(a:message.result)
-        let l:definitions = []
-        if type(a:message.result) == v:t_list
-            " interface Location[]
-            let l:locations = a:message.result
-            for l:location in l:locations
-                let l:path = util#uri2path(l:location.uri)
-                let l:range = l:location.range
-
-                " let l:buf = bufadd(l:path)
-                " call execute(l:buf . 'buffer', 'silent')
-                " call cursor(l:range.start.line + 1, l:range.start.character + 1)
-
-                let l:pos = [l:range.start.line + 1, l:range.start.character + 1]
-                call add(l:definitions, [l:path, l:pos])
-            endfor
-            
-
-        elseif type(a:message.result) == v:t_dict
-            " interface Location
-            let l:location = a:message.result
-            let l:path = util#uri2path(l:location.uri)
-            let l:range = l:location.range
-
-            " let l:buf = bufadd(l:path)
-            " call execute(l:buf . 'buffer', 'silent')
-            " call cursor(l:range.start.line + 1, l:range.start.character + 1)
-
-            let l:pos = [l:range.start.line + 1, l:range.start.character + 1]
-            call add(l:definitions, [l:path, l:pos])
-        endif
-        let l:result = dialog#select('definition!', l:definitions)
-        call dialog#info(l:result)
+    if util#isNull(a:message.result)
+        return
     endif
+    if type(a:message.result) == v:t_list
+        " interface Location[]
+        let l:locations = a:message.result
+    elseif type(a:message.result) == v:t_dict
+        " interface Location
+        let l:locations = [a:message.result]
+    endif
+    let l:definitions = []
+    let l:msgs = []
+    for l:location in l:locations
+        let l:path = util#uri2path(l:location.uri)
+        let l:range = l:location.range
+        let l:pos = [l:range.start.line + 1, l:range.start.character + 1]
+        let l:text = join([util#relativize_path(l:path), join([l:pos[0], 'col', l:pos[1]], ' ')], '|')
+        let l:context = {}
+        let l:context.text = l:text
+        let l:context.path = l:path
+        let l:context.pos = l:pos
+        call add(l:definitions, l:context)
+        call add(l:msgs, l:text)
+
+        " Implemented with tag function 
+        " URL - https://vim-jp.org/vimdoc-ja/tagsrch.html
+
+    endfor
+    if len(l:definitions) == 0
+        return
+    elseif len(l:definitions) == 1
+        let l:path = l:definitions[0].path
+        let l:pos = l:definitions[0].pos
+    elseif len(l:definitions) > 1
+        let l:result = dialog#select(l:msgs)
+        if util#isNone(l:result)
+            return
+        endif
+        let l:path = l:definitions[l:result].path
+        let l:pos = l:definitions[l:result].pos
+    endif
+    call s:goto_definition(l:path, l:pos[0], l:pos[1])
 endfunction
 
 function s:fn.textDocument_completion(server, message, ...)

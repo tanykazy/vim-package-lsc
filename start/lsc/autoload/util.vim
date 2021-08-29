@@ -12,6 +12,11 @@ function util#split(str, pattern, max)
 	return l:first
 endfunction
 
+function util#relativize_path(path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	return fnamemodify(a:path, ':~:.')
+endfunction
+
 function util#build_path(...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return simplify(join(a:000, '/'))
