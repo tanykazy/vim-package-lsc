@@ -1,4 +1,4 @@
-function dialog#select_definition()
+function dialog#select_definition(definitions)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     return dialog#select()
 endfunction
