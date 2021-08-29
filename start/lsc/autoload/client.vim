@@ -314,6 +314,7 @@ endfunction
 function s:fn.textDocument_definition(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !util#isNull(a:message.result)
+        let l:definitions = []
         if type(a:message.result) == v:t_list
             " interface Location[]
             let l:locations = a:message.result
@@ -321,9 +322,12 @@ function s:fn.textDocument_definition(server, message, ...)
                 let l:path = util#uri2path(l:location.uri)
                 let l:range = l:location.range
 
-                let l:buf = bufadd(l:path)
-                call execute(l:buf . 'buffer', 'silent')
-                call cursor(l:range.start.line + 1, l:range.start.character + 1)
+                " let l:buf = bufadd(l:path)
+                " call execute(l:buf . 'buffer', 'silent')
+                " call cursor(l:range.start.line + 1, l:range.start.character + 1)
+
+                let l:pos = [l:range.start.line + 1, l:range.start.character + 1]
+                call add(l:definitions, [l:path, l:pos])
             endfor
             
 
@@ -333,10 +337,15 @@ function s:fn.textDocument_definition(server, message, ...)
             let l:path = util#uri2path(l:location.uri)
             let l:range = l:location.range
 
-            let l:buf = bufadd(l:path)
-            call execute(l:buf . 'buffer', 'silent')
-            call cursor(l:range.start.line + 1, l:range.start.character + 1)
+            " let l:buf = bufadd(l:path)
+            " call execute(l:buf . 'buffer', 'silent')
+            " call cursor(l:range.start.line + 1, l:range.start.character + 1)
+
+            let l:pos = [l:range.start.line + 1, l:range.start.character + 1]
+            call add(l:definitions, [l:path, l:pos])
         endif
+        let l:result = dialog#select('definition!', l:definitions)
+        call dialog#info(l:result)
     endif
 endfunction
 
@@ -447,6 +456,12 @@ function s:start_server(lang)
         endif
     endif
     return s:server_list[a:lang]
+endfunction
+
+function s:goto_definition(path, lnum, col)
+    let l:buf = bufadd(a:path)
+    call execute(l:buf . 'buffer', 'silent')
+    call cursor(a:lnum, a:col)
 endfunction
 
 " function client#bufchange_listener(bufnr, start, end, added, changes)
