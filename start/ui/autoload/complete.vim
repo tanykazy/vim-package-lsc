@@ -1,11 +1,10 @@
-let s:save_completeopt = &completeopt
-
 function complete#set_completeopt()
+    let s:save_completeopt = &completeopt
     set completeopt+=menu,menuone,preview,noselect
 endfunction
 
-function complete#set_completefunc()
-    setlocal completefunc=complete#completefunc
+function complete#set_completefunc(buf)
+    call setbufvar(a:buf, '&completefunc', 'complete#completefunc')
 endfunction
 
 function complete#completefunc(findstart, base)

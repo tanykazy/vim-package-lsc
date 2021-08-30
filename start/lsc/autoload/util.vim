@@ -205,6 +205,15 @@ function util#loadedbufinfolist()
 	return l:bufinfolist
 endfunction
 
+function util#listedbufinfolist()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	let l:bufinfolist = getbufinfo({'buflisted': 1})
+	if empty(l:bufinfolist)
+        call log#log_error('Not found loaded buffer')
+	endif
+	return l:bufinfolist
+endfunction
+
 function util#getbufinfolist(buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:bufinfolist = getbufinfo(a:buf)
@@ -279,4 +288,8 @@ endfunction
 
 function util#sleep(ms)
 	execute 'sleep' a:ms . 'm'
+endfunction
+
+function util#set_autocmd_buflocal(buf, event, cmd)
+	execute 'autocmd' a:event '<buffer=' . a:buf . '>' a:cmd
 endfunction

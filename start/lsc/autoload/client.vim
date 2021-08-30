@@ -48,6 +48,7 @@ function client#document_open(buf, path)
         if !util#isContain(l:server['files'], a:path)
             call s:send_textDocument_didOpen(l:server, a:buf, a:path)
 
+            call textprop#setup_proptypes(a:buf)
             call ui#set_buffer_cmd()
         endif
     endif
@@ -225,14 +226,16 @@ function s:fn.initialize(server, message, ...)
         let l:params = lsp#InitializedParams()
         call s:send_notification(a:server, 'initialized', l:params)
 
-        let l:bufinfolist = util#loadedbufinfolist()
+        let l:bufinfolist = util#listedbufinfolist()
         for l:bufinfo in l:bufinfolist
             let l:buftype = util#getbuftype(l:bufinfo.bufnr)
             if !util#isSpecialbuffers(l:buftype)
                 call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:bufinfo['name'])
                 " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
                 " call autocmd#add_event_listener()
-                call ui#set_buffer_cmd()
+                call ui#set_buffer_cmd(l:bufinfo['bufnr'])
+                call complete#set_completefunc(l:bufinfo['bufnr'])
+                call textprop#setup_proptypes(l:bufinfo['bufnr'])
             endif
         endfor
     endif

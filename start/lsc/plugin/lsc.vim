@@ -20,7 +20,6 @@ call complete#set_completeopt()
 call cmd#setup_command()
 
 call highlight#setup_highlight()
-call textprop#setup_proptypes(v:none)
 
 
 let &cpoptions = s:save_cpoptions

@@ -1,7 +1,6 @@
 let s:has_textprop = has('textprop')
 
 let s:error= {}
-" let s:error['bufnr'] = bufnr('%')
 let s:error['highlight'] = 'ErrorMsg'
 let s:error['priority'] = 4
 let s:error['combine'] = v:true
@@ -9,7 +8,6 @@ let s:error['start_incl'] = v:true
 let s:error['end_incl'] = v:true
 
 let s:warning = {}
-" let s:warning['bufnr'] = bufnr('%')
 let s:warning['highlight'] = 'WarningMsg'
 let s:warning['priority'] = 3
 let s:warning['combine'] = v:true
@@ -17,7 +15,6 @@ let s:warning['start_incl'] = v:true
 let s:warning['end_incl'] = v:true
 
 let s:information = {}
-" let s:information['bufnr'] = bufnr('%')
 let s:information['highlight'] = 'Underlined'
 let s:information['priority'] = 2
 let s:information['combine'] = v:true
@@ -25,7 +22,6 @@ let s:information['start_incl'] = v:true
 let s:information['end_incl'] = v:true
 
 let s:hint = {}
-" let s:hint['bufnr'] = bufnr('%')
 let s:hint['highlight'] = 'Diagnostic'
 let s:hint['priority'] = 1
 let s:hint['combine'] = v:true
@@ -34,10 +30,10 @@ let s:hint['end_incl'] = v:true
 
 function textprop#setup_proptypes(buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call s:type_add('Error', s:error)
-    call s:type_add('Warning', s:warning)
-    call s:type_add('Information', s:information)
-    call s:type_add('Hint', s:hint)
+    call s:type_add(a:buf, 'Error', s:error)
+    call s:type_add(a:buf, 'Warning', s:warning)
+    call s:type_add(a:buf, 'Information', s:information)
+    call s:type_add(a:buf, 'Hint', s:hint)
 endfunction
 
 function textprop#add(buf, startpos, endpos, severity)
@@ -69,8 +65,9 @@ function textprop#clear(buf)
     return s:prop_clear(1, line('$'), l:props)
 endfunction
 
-function s:type_add(name, props)
+function s:type_add(buf, name, props)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let a:props['bufnr'] = a:buf
     if empty(s:prop_type_get(a:name, a:props))
         return s:prop_type_add(a:name, a:props)
     else
