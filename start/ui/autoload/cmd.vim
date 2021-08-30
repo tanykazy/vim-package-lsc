@@ -7,7 +7,7 @@ endfunction
 function cmd#setup_command()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     command -nargs=? -complete=filetype LscStart call cmd#start(<f-args>)
-    command -nargs=? -complete=filetype LscStop call cmd#stop(<f-args>)
+    command -nargs=? -complete=custom,s:completion_running_server LscStop call cmd#stop(<f-args>)
     command -nargs=? -complete=buffer LscOpen call cmd#open(<f-args>)
     command -nargs=? -complete=buffer LscClose call cmd#close(<f-args>)
     command -nargs=? -complete=buffer LscChange call cmd#change(<f-args>)
@@ -18,15 +18,17 @@ function cmd#setup_autocmd()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	augroup vim_package_lsc
 		autocmd BufRead * LscOpen
+		autocmd BufReadPost * LscOpen
+		autocmd BufWinEnter * LscOpen
+		autocmd BufEnter * LscOpen
 		autocmd VimLeave * LscStop
 	augroup END
 endfunction
 
 function cmd#setup_buffercmd(buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_debug('set up buffer autocmd')
+    call log#log_debug('set up buffer autocmd: ' . a:buf)
 	augroup vim_package_lsc
-        call util#set_autocmd_buflocal(a:buf, 'BufDelete', 'call cmd#close()')
 		call util#set_autocmd_buflocal(a:buf, 'BufDelete', 'call cmd#close()')
 		call util#set_autocmd_buflocal(a:buf, 'TextChanged', 'call cmd#change()')
 		call util#set_autocmd_buflocal(a:buf, 'InsertLeave', 'call cmd#change()')
@@ -36,6 +38,11 @@ function cmd#setup_buffercmd(buf)
 		call util#set_autocmd_buflocal(a:buf, 'BufWrite', 'call cmd#save()')
 		call util#set_autocmd_buflocal(a:buf, 'SafeState', 'call cmd#hover()')
 	augroup END
+endfunction
+
+function s:completion_running_server(arglead, cmdline, cursorpos)
+    let l:list = client#get_running_server()
+    return join(l:list, "\n")
 endfunction
 
 function s:completion_support_lang(arglead, cmdline, cursorpos)
@@ -56,8 +63,7 @@ function cmd#start(...) abort
         let l:filetype = &filetype
     endif
     let l:bufnr = bufnr('%')
-    let l:cwd = util#getcwd(l:bufnr)
-    call client#start(l:filetype, l:bufnr, l:cwd)
+    call client#start(l:filetype, l:bufnr)
 endfunction
 
 function cmd#stop(...) abort

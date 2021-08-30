@@ -1,18 +1,24 @@
 let s:server_list = {}
 
-function client#start(lang, buf, cwd)
+function client#get_running_server()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !has_key(s:server_list, a:lang)
-        if setting#isSupport(a:lang)
-            let l:server = s:start_server(a:lang)
+    return keys(s:server_list)
+endfunction
 
-            let l:winid = bufwinid(a:buf)
-            let l:cwd = getcwd(l:winid)
-            let l:workspaceFolder = lsp#WorkspaceFolder(l:cwd, l:cwd)
-            let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder], v:none)
-            call s:send_request(l:server, 'initialize', l:params)
-        endif
+function client#start(lang, buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if has_key(s:server_list, a:lang)
+        return
     endif
+    if !setting#isSupport(a:lang)
+        return
+    endif
+    let l:server = s:start_server(a:lang)
+    let l:winid = bufwinid(a:buf)
+    let l:cwd = getcwd(l:winid)
+    let l:workspaceFolder = lsp#WorkspaceFolder(l:cwd, l:cwd)
+    let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder], v:none)
+    call s:send_request(l:server, 'initialize', l:params)
 endfunction
 
 function client#stop(filetype)
@@ -30,109 +36,106 @@ endfunction
 
 function client#document_open(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-
     let l:filetype = util#getfiletype(a:buf)
-
     if !has_key(s:server_list, l:filetype)
-        if setting#isSupport(l:filetype)
-            let l:server = s:start_server(l:filetype)
-
-            let l:winid = bufwinid(a:buf)
-            let l:cwd = getcwd(l:winid)
-            let l:workspaceFolder = lsp#WorkspaceFolder(l:cwd, l:cwd)
-            let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder], v:none)
-            call s:send_request(l:server, 'initialize', l:params)
-        endif
-    else
-        let l:server = s:server_list[l:filetype]
-        if !util#isContain(l:server['files'], a:path)
-            call s:send_textDocument_didOpen(l:server, a:buf, a:path)
-
-            call textprop#setup_proptypes(a:buf)
-            call ui#set_buffer_cmd()
-        endif
+        return client#start(l:filetype, a:buf)
     endif
+    let l:server = s:server_list[l:filetype]
+    if util#isContain(l:server['files'], a:path)
+        return
+    endif
+    call s:send_textDocument_didOpen(l:server, a:buf, a:path)
+    call textprop#setup_proptypes(a:buf)
+    call ui#set_buffer_cmd(a:buf)
 endfunction
 
 function client#document_close(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
-    if has_key(s:server_list, l:filetype)
-        let l:server = s:server_list[l:filetype]
-        if util#isContain(l:server['files'], a:path)
-            let l:params = lsp#DidCloseTextDocumentParams(util#encode_uri(a:path))
-            call s:send_notification(l:server, 'textDocument/didClose', l:params)
-            call filter(l:server['files'], {idx, val -> val != a:path})
-        endif
+    if !has_key(s:server_list, l:filetype)
+        return
     endif
+    let l:server = s:server_list[l:filetype]
+    if !util#isContain(l:server['files'], a:path)
+        return
+    endif
+    let l:params = lsp#DidCloseTextDocumentParams(util#encode_uri(a:path))
+    call s:send_notification(l:server, 'textDocument/didClose', l:params)
+    call filter(l:server['files'], {idx, val -> val != a:path})
 endfunction
 
 function client#document_change(buf, path, pos, char)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
-    if has_key(s:server_list, l:filetype)
-        let l:server = s:server_list[l:filetype]
-        if util#isContain(l:server['files'], a:path)
-            if !empty(a:char)
-                let l:line = a:pos[1] - 1
-                let l:character = a:pos[2] - 1
-                let l:position = lsp#Position(l:line, l:character)
-                let l:range = lsp#Range(l:position, l:position)
-                let l:change = lsp#TextDocumentContentChangeEvent(l:range, a:char)
-            else
-                let l:text = util#getbuftext(a:buf)
-                let l:change = lsp#TextDocumentContentChangeEvent(v:none, l:text)
-            endif
-            let l:version = util#getchangedtick(a:buf)
-            let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
-            call s:send_notification(l:server, 'textDocument/didChange', l:params)
-        endif
+    if !has_key(s:server_list, l:filetype)
+        return
     endif
+    let l:server = s:server_list[l:filetype]
+    if !util#isContain(l:server['files'], a:path)
+        return
+    endif
+    if !empty(a:char)
+        let l:line = a:pos[1] - 1
+        let l:character = a:pos[2] - 1
+        let l:position = lsp#Position(l:line, l:character)
+        let l:range = lsp#Range(l:position, l:position)
+        let l:change = lsp#TextDocumentContentChangeEvent(l:range, a:char)
+    else
+        let l:text = util#getbuftext(a:buf)
+        let l:change = lsp#TextDocumentContentChangeEvent(v:none, l:text)
+    endif
+    let l:version = util#getchangedtick(a:buf)
+    let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
+    call s:send_notification(l:server, 'textDocument/didChange', l:params)
 endfunction
 
 function client#document_save(buf, path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
-    if has_key(s:server_list, l:filetype)
-        let l:server = s:server_list[l:filetype]
-        if util#isContain(l:server['files'], a:path)
-            call s:send_textDocument_didSave(l:server, a:buf, a:path)
-        endif
+    if !has_key(s:server_list, l:filetype)
+        return
     endif
+    let l:server = s:server_list[l:filetype]
+    if !util#isContain(l:server['files'], a:path)
+        return
+    endif
+    call s:send_textDocument_didSave(l:server, a:buf, a:path)
 endfunction
 
 function client#document_hover(buf, pos)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
-    if has_key(s:server_list, l:filetype)
-        let l:server = s:server_list[l:filetype]
-        let l:path = util#buf2path(a:buf)
-        " if util#isContain(l:server['files'], l:path)
-            let l:lnum = a:pos[1]
-            let l:col = a:pos[2]
-
-            let l:position = lsp#Position(l:lnum - 1, l:col - 1)
-            let l:params = lsp#HoverParams(util#encode_uri(l:path), l:position, v:none)
-            call s:send_request(l:server, 'textDocument/hover', l:params)
-        " endif
+    if !has_key(s:server_list, l:filetype)
+        return
     endif
+    let l:server = s:server_list[l:filetype]
+    let l:path = util#buf2path(a:buf)
+    if !util#isContain(l:server['files'], l:path)
+        return
+    endif
+    let l:lnum = a:pos[1]
+    let l:col = a:pos[2]
+    let l:position = lsp#Position(l:lnum - 1, l:col - 1)
+    let l:params = lsp#HoverParams(util#encode_uri(l:path), l:position, v:none)
+    call s:send_request(l:server, 'textDocument/hover', l:params)
 endfunction
 
 function client#goto_definition(buf, pos)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
-    if has_key(s:server_list, l:filetype)
-        let l:server = s:server_list[l:filetype]
-        let l:path = util#buf2path(a:buf)
-        " if util#isContain(l:server['files'], l:path)
-            let l:lnum = a:pos[1]
-            let l:col = a:pos[2]
-
-            let l:position = lsp#Position(l:lnum - 1, l:col - 1)
-            let l:params = lsp#DefinitionParams(util#encode_uri(l:path), l:position, v:none, v:none)
-            call s:send_request(l:server, 'textDocument/definition', l:params)
-        " endif
+    if !has_key(s:server_list, l:filetype)
+        return
     endif
+    let l:server = s:server_list[l:filetype]
+    let l:path = util#buf2path(a:buf)
+    if !util#isContain(l:server['files'], l:path)
+        return
+    endif
+    let l:lnum = a:pos[1]
+    let l:col = a:pos[2]
+    let l:position = lsp#Position(l:lnum - 1, l:col - 1)
+    let l:params = lsp#DefinitionParams(util#encode_uri(l:path), l:position, v:none, v:none)
+    call s:send_request(l:server, 'textDocument/definition', l:params)
 endfunction
 
 let s:wait_completion = v:none
@@ -169,9 +172,11 @@ function client#document_completion(buf, path, pos, char)
 endfunction
 
 function client#completion_resolve(buf, item)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 endfunction
 
 function client#completion_status(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
     let l:status = v:false
     if has_key(s:server_list, l:filetype)
@@ -184,6 +189,7 @@ function client#completion_status(buf)
 endfunction
 
 function client#get_completion(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
     let l:items = []
     if has_key(s:server_list, l:filetype)
@@ -226,7 +232,10 @@ function s:fn.initialize(server, message, ...)
         let l:params = lsp#InitializedParams()
         call s:send_notification(a:server, 'initialized', l:params)
 
-        let l:bufinfolist = util#listedbufinfolist()
+        call cmd#setup_autocmd()
+        call map#setup_buffermap()
+
+        let l:bufinfolist = util#loadedbufinfolist()
         for l:bufinfo in l:bufinfolist
             let l:buftype = util#getbuftype(l:bufinfo.bufnr)
             if !util#isSpecialbuffers(l:buftype)
@@ -462,6 +471,7 @@ function s:start_server(lang)
 endfunction
 
 function s:goto_definition(path, lnum, col)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:tag = expand('<cword>')
     let l:pos = [bufnr()] + getcurpos()[1 : ]
     let l:item = {'bufnr': l:pos[0], 'from': l:pos, 'tagname': l:tag}

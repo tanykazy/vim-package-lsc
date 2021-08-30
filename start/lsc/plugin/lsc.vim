@@ -16,8 +16,9 @@ call log#log_debug('load: plugin/lsc.vim')
 call log#log_error('load: plugin/lsc.vim')
 
 call cmd#setup_install_cmd()
-call complete#set_completeopt()
 call cmd#setup_command()
+
+call complete#set_completeopt()
 
 call highlight#setup_highlight()
 
