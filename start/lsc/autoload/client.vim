@@ -72,10 +72,6 @@ function client#document_change(buf, path, pos, char)
     if has_key(s:server_list, l:filetype)
         let l:server = s:server_list[l:filetype]
         if util#isContain(l:server['files'], a:path)
-            " call log#log_error(typename(a:char))
-            " call log#log_error(string(a:char))
-            " call log#log_error(string(empty(a:char)))
-            " call log#log_error(len(a:char))
             if !empty(a:char)
                 let l:line = a:pos[1] - 1
                 let l:character = a:pos[2] - 1
@@ -336,10 +332,6 @@ function s:fn.textDocument_definition(server, message, ...)
         let l:context.pos = l:pos
         call add(l:definitions, l:context)
         call add(l:msgs, l:text)
-
-        " Implemented with tag function 
-        " URL - https://vim-jp.org/vimdoc-ja/tagsrch.html
-
     endfor
     if len(l:definitions) == 0
         return
@@ -467,9 +459,14 @@ function s:start_server(lang)
 endfunction
 
 function s:goto_definition(path, lnum, col)
-    let l:buf = bufadd(a:path)
-    call execute(l:buf . 'buffer', 'silent')
-    call cursor(a:lnum, a:col)
+    let l:tag = expand('<cword>')
+    let l:pos = [bufnr()] + getcurpos()[1 : ]
+    let l:item = {'bufnr': l:pos[0], 'from': l:pos, 'tagname': l:tag}
+    call quickfix#preview(a:path, a:lnum)
+    let l:winid = win_getid()
+    let l:stack = gettagstack(l:winid)
+    let l:stack['items'] = [l:item]
+    call settagstack(l:winid, l:stack, 'a')
 endfunction
 
 " function client#bufchange_listener(bufnr, start, end, added, changes)

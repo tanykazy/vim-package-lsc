@@ -43,6 +43,20 @@ function quickfix#location(filename, lnum, col, nr, text, type)
     return l:location
 endfunction
 
+function quickfix#preview(file, lnum)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    return s:pedit('+' . a:lnum, a:file)
+endfunction
+
+function s:pedit(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if s:has_quickfix
+        execute 'pedit' join(a:000, ' ')
+    else
+        execute 'split' join(a:000, ' ')
+    endif
+endfunction
+
 function s:setqflist(...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if s:has_quickfix
