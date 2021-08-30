@@ -36,7 +36,7 @@ function cmd#setup_buffercmd(buf)
 		call util#set_autocmd_buflocal(a:buf, 'InsertCharPre', 'call cmd#complement()')
 		call util#set_autocmd_buflocal(a:buf, 'CompleteDonePre', 'call cmd#change()')
 		call util#set_autocmd_buflocal(a:buf, 'BufWrite', 'call cmd#save()')
-		call util#set_autocmd_buflocal(a:buf, 'SafeState', 'call cmd#hover()')
+		" call util#set_autocmd_buflocal(a:buf, 'SafeState', 'call cmd#hover()')
 	augroup END
 endfunction
 
@@ -137,7 +137,14 @@ function cmd#save(...) abort
 endfunction
 
 function cmd#hover()
-    return client#document_hover(bufnr('%'), getpos('.'))
+    let l:cursorcharpos = getcursorcharpos()
+    let b:hover_cursorcharpos  = get(b:, 'hover_cursorcharpos', [])
+    if l:cursorcharpos == b:hover_cursorcharpos
+        return
+    endif
+    let b:hover_cursorcharpos = l:cursorcharpos
+    let l:buf = bufnr('%')
+    return client#document_hover(l:buf, l:cursorcharpos)
 endfunction
 
 function cmd#complement(...) abort

@@ -207,47 +207,47 @@ function s:fn.initialize(server, message, ...)
     if has_key(a:message, 'error')
         call s:print_error(a:message['error'])
         call s:send_request(a:server, 'shutdown', v:none)
-    else
-        let a:server['capabilities'] = get(a:message['result'], 'capabilities', {})
-        let a:server['serverInfo'] = get(a:message['result'], 'serverInfo', {})
-        call log#log_debug('Update server info ' . string(a:server))
-
-        " let l:serverCapabilities = a:server['capabilities']
-        " call log#log_error(string(l:serverCapabilities))
-        " let l:completionProvider = l:serverCapabilities['completionProvider']
-        " call log#log_error(string(l:completionProvider))
-        " let l:triggerCharacters = l:completionProvider['triggerCharacters']
-        " call log#log_error(string(l:triggerCharacters))
-
-        " for l:triggerCharacter in l:triggerCharacters
-            " call log#log_error(l:triggerCharacter)
-
-            " let maplocalleader = l:triggerCharacter
-            " call log#log_error(maplocalleader)
-            " call s:defmap(l:triggerCharacter)
-            " imap <buffer><nowait> <LocalLeader>a <Esc>:<C-u>call dialog#info('trigger characters!')<CR>
-        " endfor
-
-
-        let l:params = lsp#InitializedParams()
-        call s:send_notification(a:server, 'initialized', l:params)
-
-        call cmd#setup_autocmd()
-        call map#setup_buffermap()
-
-        let l:bufinfolist = util#loadedbufinfolist()
-        for l:bufinfo in l:bufinfolist
-            let l:buftype = util#getbuftype(l:bufinfo.bufnr)
-            if !util#isSpecialbuffers(l:buftype)
-                call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:bufinfo['name'])
-                " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
-                " call autocmd#add_event_listener()
-                call ui#set_buffer_cmd(l:bufinfo['bufnr'])
-                call complete#set_completefunc(l:bufinfo['bufnr'])
-                call textprop#setup_proptypes(l:bufinfo['bufnr'])
-            endif
-        endfor
+        return
     endif
+    let a:server['capabilities'] = get(a:message['result'], 'capabilities', {})
+    let a:server['serverInfo'] = get(a:message['result'], 'serverInfo', {})
+    call log#log_debug('Update server info ' . string(a:server))
+
+    " let l:serverCapabilities = a:server['capabilities']
+    " call log#log_error(string(l:serverCapabilities))
+    " let l:completionProvider = l:serverCapabilities['completionProvider']
+    " call log#log_error(string(l:completionProvider))
+    " let l:triggerCharacters = l:completionProvider['triggerCharacters']
+    " call log#log_error(string(l:triggerCharacters))
+
+    " for l:triggerCharacter in l:triggerCharacters
+        " call log#log_error(l:triggerCharacter)
+
+        " let maplocalleader = l:triggerCharacter
+        " call log#log_error(maplocalleader)
+        " call s:defmap(l:triggerCharacter)
+        " imap <buffer><nowait> <LocalLeader>a <Esc>:<C-u>call dialog#info('trigger characters!')<CR>
+    " endfor
+
+
+    let l:params = lsp#InitializedParams()
+    call s:send_notification(a:server, 'initialized', l:params)
+
+    call cmd#setup_autocmd()
+    call map#setup_buffermap()
+
+    let l:bufinfolist = util#loadedbufinfolist()
+    for l:bufinfo in l:bufinfolist
+        let l:buftype = util#getbuftype(l:bufinfo.bufnr)
+        if !util#isSpecialbuffers(l:buftype)
+            call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:bufinfo['name'])
+            " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
+            " call autocmd#add_event_listener()
+            call ui#set_buffer_cmd(l:bufinfo['bufnr'])
+            call complete#set_completefunc(l:bufinfo['bufnr'])
+            call textprop#setup_proptypes(l:bufinfo['bufnr'])
+        endif
+    endfor
 endfunction
 
 function s:fn.shutdown(server, message, ...)
@@ -281,42 +281,46 @@ endfunction
 
 function s:fn.textDocument_hover(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !util#isNull(a:message.result)
-        let l:contents = a:message.result.contents
-        if type(l:contents) == v:t_list
-            let l:values = []
-            for l:content in l:contents
-                if type(l:content) == v:t_dict
-                    if has_key(l:content, 'value')
-                        for l:line in split(l:content.value, "\n")
-                            call add(l:values, l:line)
-                        endfor
-                    endif
-                else
-                    for l:line in split(l:content, "\n")
+    if util#isNull(a:message.result)
+        return
+    endif
+    let l:contents = a:message.result.contents
+    if empty(l:contents)
+        return
+    endif
+    if type(l:contents) == v:t_list
+        let l:values = []
+        for l:content in l:contents
+            if type(l:content) == v:t_dict
+                if has_key(l:content, 'value')
+                    for l:line in split(l:content.value, "\n")
                         call add(l:values, l:line)
                     endfor
                 endif
-            endfor
-        elseif type(l:contents) == v:t_dict 
-            if has_key(l:contents, 'value')
-                let l:values = split(l:contents.value, "\n")
+            else
+                for l:line in split(l:content, "\n")
+                    call add(l:values, l:line)
+                endfor
             endif
-        else
-            let l:values = split(l:contents, "\n")
+        endfor
+    elseif type(l:contents) == v:t_dict 
+        if has_key(l:contents, 'value')
+            let l:values = split(l:contents.value, "\n")
         endif
-        let l:opt = v:none
-        if has_key(a:message.result, 'range')
-            let l:range = a:message.result.range
-            let l:screenpos = screenpos(bufwinid('%'), l:range.start.line + 1, l:range.start.character + 1)
-            let l:opt = {}
-            let l:opt.col = l:screenpos.col
-            let l:opt.moved = [l:range.start.character + 1, l:range.end.character + 1]
-        endif
-        call filter(l:values, {idx, val -> !empty(val)})
-        call map(l:values, {key, val -> trim(val, v:none, 2)})
-        call popup#hover(v:none, l:values, l:opt)
+    else
+        let l:values = split(l:contents, "\n")
     endif
+    let l:opt = v:none
+    if has_key(a:message.result, 'range')
+        let l:range = a:message.result.range
+        let l:screenpos = screenpos(bufwinid('%'), l:range.start.line + 1, l:range.start.character + 1)
+        let l:opt = {}
+        let l:opt.col = l:screenpos.col
+        let l:opt.moved = [l:range.start.character + 1, l:range.end.character + 1]
+    endif
+    call filter(l:values, {idx, val -> !empty(val)})
+    call map(l:values, {key, val -> trim(val, v:none, 2)})
+    call popup#hover(a:server.lang, l:values, l:opt)
 endfunction
 
 function s:fn.textDocument_definition(server, message, ...)
@@ -366,38 +370,38 @@ function s:fn.textDocument_completion(server, message, ...)
     let l:complete_items = []
     if util#isNull(a:message.result)
         let a:server['complete-items'] = l:complete_items
-    else
-        let l:result = a:message.result
-        if has_key(l:result, 'isIncomplete')
-            if l:result.isIncomplete
-                let l:items = l:result.items
-            else
-                let l:items = l:result.items
-            endif
-        elseif type(l:result) == v:t_list
-            let l:items = l:result
-        endif
-        for l:item in l:items
-            let l:complete_item = {}
-            let l:complete_item.word = l:item.label
-            if has_key(l:item, 'detail')
-                let l:complete_item.menu = l:item.detail
-            endif
-            if has_key(l:item, 'documentation')
-                let l:complete_item.info = l:item.documentation
-            endif
-            if has_key(l:item, 'kind')
-                let l:complete_item.kind = util#lsp_kind2vim_kind(l:item.kind)
-            endif
-            call add(l:complete_items, l:complete_item)
-        endfor
-        if util#isNone(s:wait_completion)
-            let a:server['complete-items'] = l:complete_items
+        return
+    endif
+    let l:result = a:message.result
+    if has_key(l:result, 'isIncomplete')
+        if l:result.isIncomplete
+            let l:items = l:result.items
         else
-            let l:col = col('.')
-            call complete(l:col + 1, l:complete_items)
-            let s:wait_completion = v:none
+            let l:items = l:result.items
         endif
+    elseif type(l:result) == v:t_list
+        let l:items = l:result
+    endif
+    for l:item in l:items
+        let l:complete_item = {}
+        let l:complete_item.word = l:item.label
+        if has_key(l:item, 'detail')
+            let l:complete_item.menu = l:item.detail
+        endif
+        if has_key(l:item, 'documentation')
+            let l:complete_item.info = l:item.documentation
+        endif
+        if has_key(l:item, 'kind')
+            let l:complete_item.kind = util#lsp_kind2vim_kind(l:item.kind)
+        endif
+        call add(l:complete_items, l:complete_item)
+    endfor
+    if util#isNone(s:wait_completion)
+        let a:server['complete-items'] = l:complete_items
+    else
+        let l:col = col('.')
+        call complete(l:col + 1, l:complete_items)
+        let s:wait_completion = v:none
     endif
 endfunction
 
