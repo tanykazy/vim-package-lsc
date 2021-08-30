@@ -25,7 +25,8 @@ call cmd#setup_install_cmd()
 call cmd#setup_command()
 
 let s:save_completeopt = &completeopt
-set completeopt+=noinsert,menuone,noselect
+" set completeopt+=noinsert,menuone,noselect
+set completeopt+=menu,menuone,preview,noselect
 
 set completefunc=complete#completefunc
 

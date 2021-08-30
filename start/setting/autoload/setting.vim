@@ -3,8 +3,6 @@ let s:client_setting_file = expand('<sfile>:p:h:h') . '/client.json'
 let s:install_path = expand('<sfile>:p:h:h') . '/servers'
 let s:settings = util#parse_json_file(s:server_setting_file)
 
-let setting#install_path = s:install_path
-
 function setting#get_install_path()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return s:install_path

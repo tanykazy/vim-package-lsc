@@ -16,17 +16,16 @@ function complete#completefunc(findstart, base)
         " Find matches starting with a:base.
         call util#wait({-> client#completion_status(l:buf) || complete_check()})
         let l:items = client#get_completion(l:buf)
-        " let l:result = []
+        let l:result = []
         for l:item in l:items
             if stridx(l:item.word, a:base) == 0
                 call complete_add(l:item)
-                " call add(l:result, l:item)
+                call add(l:result, l:item)
             endif
             if complete_check()
                 return -3
             endif
         endfor
-        " return {'words': l:result, 'refresh': 'always'}
-        return []
+        return {'words': l:result, 'refresh': 'always'}
 	endif
 endfunction

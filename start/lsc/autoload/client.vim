@@ -352,7 +352,9 @@ endfunction
 function s:fn.textDocument_completion(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:complete_items = []
-    if !util#isNull(a:message.result)
+    if util#isNull(a:message.result)
+        let a:server['complete-items'] = l:complete_items
+    else
         let l:result = a:message.result
         if has_key(l:result, 'isIncomplete')
             if l:result.isIncomplete
@@ -384,8 +386,6 @@ function s:fn.textDocument_completion(server, message, ...)
             call complete(l:col + 1, l:complete_items)
             let s:wait_completion = v:none
         endif
-    else
-        let a:server['complete-items'] = l:complete_items
     endif
 endfunction
 
