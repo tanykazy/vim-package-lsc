@@ -40,8 +40,8 @@ function popup#atcursor(what, options)
 endfunction
 
 function s:hover_close(id, result)
-    let b:hover_id = v:none
-    let b:hover_text = []
+    unlet! b:hover_id
+    unlet! b:hover_text
 endfunction
 
 function s:popup_atcursor(...)

@@ -1,3 +1,13 @@
+let s:save_completeopt = &completeopt
+
+function complete#set_completeopt()
+    set completeopt+=menu,menuone,preview,noselect
+endfunction
+
+function complete#set_completefunc()
+    setlocal completefunc=complete#completefunc
+endfunction
+
 function complete#completefunc(findstart, base)
     let l:buf = bufnr('%')
 	if a:findstart

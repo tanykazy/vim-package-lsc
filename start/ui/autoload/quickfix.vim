@@ -51,7 +51,7 @@ endfunction
 function s:pedit(...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if s:has_quickfix
-        execute 'pedit' join(a:000, ' ')
+        execute 'pedit!' join(a:000, ' ')
     else
         execute 'split' join(a:000, ' ')
     endif
