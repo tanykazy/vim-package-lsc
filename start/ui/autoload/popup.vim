@@ -27,10 +27,14 @@ function popup#hover(title, text, options)
     let l:opt.maxheight = 5
     if l:opt.maxheight > l:len
         let l:opt.minheight = l:len
+    else
+        let l:opt.minheight = l:opt.maxheight
     endif
     let l:opt.maxwidth = winwidth(0)
     if l:opt.maxwidth > l:maxwidth
         let l:opt.minwidth = l:maxwidth
+    else
+        let l:opt.minwidth = l:opt.maxwidth
     endif
     let l:opt.scrollbar = v:true
     let l:opt.filter = funcref('s:hover_filter')
@@ -48,18 +52,28 @@ endfunction
 
 function s:hover_filter(winid, key)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:pos = popup_getpos(a:winid)
-    let l:firstline = l:pos.firstline
     if a:key == "\<C-N>"
-        let l:firstline += 1
-        call popup_setoptions(a:winid, {'firstline': l:firstline})
+        call s:hover_down(a:winid)
         return popup_filter_menu(a:winid, a:key)
     elseif a:key == "\<C-P>"
-        let l:firstline -= 1
-        call popup_setoptions(a:winid, {'firstline': l:firstline})
+        call s:hover_up(a:winid)
         return popup_filter_menu(a:winid, a:key)
     endif
     return v:false
+endfunction
+
+function s:hover_up(winid)
+    let l:pos = popup_getpos(a:winid)
+    call s:setoptions_firstline(a:winid, l:pos.firstline - 1)
+endfunction
+
+function s:hover_down(winid)
+    let l:pos = popup_getpos(a:winid)
+    call s:setoptions_firstline(a:winid, l:pos.firstline + 1)
+endfunction
+
+function s:setoptions_firstline(winid, line)
+    return popup_setoptions(a:winid, {'firstline': a:line})
 endfunction
 
 function popup#atcursor(what, options)
