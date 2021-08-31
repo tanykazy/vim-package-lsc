@@ -1,1 +1,1 @@
-# vim-package-lsp
+# vim-package-lsc
