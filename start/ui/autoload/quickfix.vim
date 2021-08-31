@@ -53,7 +53,7 @@ function s:pedit(...)
     if s:has_quickfix
         execute 'pedit!' join(a:000, ' ')
     else
-        execute 'split' join(a:000, ' ')
+        execute 'split' '+' . a:lnum a:path
     endif
 endfunction
 

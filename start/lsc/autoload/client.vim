@@ -120,7 +120,7 @@ function client#document_hover(buf, pos)
     call s:send_request(l:server, 'textDocument/hover', l:params)
 endfunction
 
-function client#goto_definition(buf, pos)
+function client#goto_definition(buf, pos, preview)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
     if !has_key(s:server_list, l:filetype)
@@ -131,11 +131,33 @@ function client#goto_definition(buf, pos)
     if !util#isContain(l:server['files'], l:path)
         return
     endif
+    let l:server.preview = a:preview
     let l:lnum = a:pos[1]
     let l:col = a:pos[2]
     let l:position = lsp#Position(l:lnum - 1, l:col - 1)
     let l:params = lsp#DefinitionParams(util#encode_uri(l:path), l:position, v:none, v:none)
     call s:send_request(l:server, 'textDocument/definition', l:params)
+endfunction
+
+function client#find_references(buf, pos, preview)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    " call log#log_error('find ref')
+    let l:filetype = util#getfiletype(a:buf)
+    if !has_key(s:server_list, l:filetype)
+        return
+    endif
+    let l:server = s:server_list[l:filetype]
+    let l:path = util#buf2path(a:buf)
+    if !util#isContain(l:server['files'], l:path)
+        return
+    endif
+    let l:server.preview = a:preview
+    let l:lnum = a:pos[1]
+    let l:col = a:pos[2]
+    let l:position = lsp#Position(l:lnum - 1, l:col - 1)
+    let l:context = lsp#ReferenceContext(v:false)
+    let l:params = lsp#ReferenceParams(util#encode_uri(l:path), l:position, l:context, v:none, v:none)
+    call s:send_request(l:server, 'textDocument/references', l:params)
 endfunction
 
 let s:wait_completion = v:none
@@ -362,7 +384,45 @@ function s:fn.textDocument_definition(server, message, ...)
         let l:path = l:definitions[l:result].path
         let l:pos = l:definitions[l:result].pos
     endif
-    call s:goto_definition(l:path, l:pos[0], l:pos[1])
+    call s:goto_definition(l:path, l:pos[0], l:pos[1], a:server.preview)
+endfunction
+
+function s:fn.textDocument_references(server, message, ...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if util#isNull(a:message.result)
+        return
+    endif
+    " interface Location[]
+    let l:locations = a:message.result
+    let l:references = []
+    let l:msgs = []
+    for l:location in l:locations
+        let l:path = util#uri2path(l:location.uri)
+        let l:range = l:location.range
+        let l:pos = [l:range.start.line + 1, l:range.start.character + 1]
+        let l:text = join([util#relativize_path(l:path), join([l:pos[0], 'col', l:pos[1]], ' ')], '|')
+        let l:context = {}
+        let l:context.text = l:text
+        let l:context.path = l:path
+        let l:context.pos = l:pos
+        call add(l:references, l:context)
+        call add(l:msgs, l:text)
+    endfor
+    call log#log_error(string(l:references))
+    if len(l:references) == 0
+        return
+    elseif len(l:references) == 1
+        let l:path = l:references[0].path
+        let l:pos = l:references[0].pos
+    elseif len(l:references) > 1
+        let l:result = dialog#select(l:msgs)
+        if util#isNone(l:result)
+            return
+        endif
+        let l:path = l:references[l:result].path
+        let l:pos = l:references[l:result].pos
+    endif
+    call s:goto_definition(l:path, l:pos[0], l:pos[1], a:server.preview)
 endfunction
 
 function s:fn.textDocument_completion(server, message, ...)
@@ -418,6 +478,7 @@ let s:listener['shutdown'] = s:fn.shutdown
 let s:listener['textDocument/publishDiagnostics'] = s:fn.textDocument_publishDiagnostics
 let s:listener['textDocument/hover'] = s:fn.textDocument_hover
 let s:listener['textDocument/definition'] = s:fn.textDocument_definition
+let s:listener['textDocument/references'] = s:fn.textDocument_references
 let s:listener['textDocument/completion'] = s:fn.textDocument_completion
 " let s:listener['unknown'] = funcref('s:fn.response_error')
 
@@ -474,12 +535,20 @@ function s:start_server(lang)
     return s:server_list[a:lang]
 endfunction
 
-function s:goto_definition(path, lnum, col)
+function s:goto_definition(path, lnum, col, preview)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:tag = expand('<cword>')
     let l:pos = [bufnr()] + getcurpos()[1 : ]
     let l:item = {'bufnr': l:pos[0], 'from': l:pos, 'tagname': l:tag}
-    call quickfix#preview(a:path, a:lnum)
+    if a:preview
+        call quickfix#preview(a:path, a:lnum)
+    else
+        " execute 'split' '+' . a:lnum a:path
+        let l:buf = bufadd(a:path)
+        call execute(l:buf . 'buffer!', 'silent')
+        call cursor(a:lnum, a:col)
+        redraw
+    endif
     let l:winid = win_getid()
     let l:stack = gettagstack(l:winid)
     let l:stack['items'] = [l:item]
