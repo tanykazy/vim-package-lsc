@@ -1,6 +1,8 @@
 let s:has_popupwin = has('popupwin')
 
 function popup#hover(title, text, options)
+    call log#log_error(string(a:title))
+    call log#log_error(string(a:text))
     let b:hover_id = get(b:, 'hover_id', v:none)
     let b:hover_text = get(b:, 'hover_text', [])
     if b:hover_text ==# a:text
@@ -17,12 +19,13 @@ function popup#hover(title, text, options)
             let l:maxwidth = l:width
         endif
     endfor
+    call log#log_error(string(l:maxwidth))
     let l:opt = {}
     let l:opt.pos = 'botleft'
     let l:opt.line = 'cursor-1'
     let l:opt.col = 'cursor'
     let l:opt.moved = 'WORD'
-    let l:opt.fixed = v:true
+    let l:opt.fixed = v:false
     let l:opt.mapping = v:false
     let l:opt.maxheight = 5
     if l:opt.maxheight > l:len
@@ -73,7 +76,9 @@ function s:hover_down(winid)
 endfunction
 
 function s:setoptions_firstline(winid, line)
-    return popup_setoptions(a:winid, {'firstline': a:line})
+    " redraw!
+    call popup_setoptions(a:winid, {'firstline': a:line})
+    redraw!
 endfunction
 
 function popup#atcursor(what, options)
@@ -88,6 +93,7 @@ endfunction
 function s:hover_close(id, result)
     unlet! b:hover_id
     unlet! b:hover_text
+    redraw!
 endfunction
 
 function s:popup_atcursor(...)

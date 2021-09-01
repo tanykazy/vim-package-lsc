@@ -307,42 +307,62 @@ function s:fn.textDocument_hover(server, message, ...)
         return
     endif
     let l:contents = a:message.result.contents
-    if empty(l:contents)
-        return
+    " if empty(l:contents)
+    "     return
+    " endif
+    let l:values = []
+    let l:title = v:none
+    if type(l:contents) != v:t_list
+        " MarkedString
+        if type(l:contents) == v:t_string
+            let l:contents = [l:contents]
+        else
+            if has_key(l:contents, 'language') && has_key(l:contents, 'value')
+                let l:contents = [l:contents]
+            endif
+        endif
     endif
     if type(l:contents) == v:t_list
-        let l:values = []
+        " MarkedString[]
         for l:content in l:contents
-            if type(l:content) == v:t_dict
-                if has_key(l:content, 'value')
-                    for l:line in split(l:content.value, "\n")
-                        call add(l:values, l:line)
-                    endfor
-                endif
+            if type(l:content) == v:t_string
+                let l:values += [l:content]
             else
-                for l:line in split(l:content, "\n")
-                    call add(l:values, l:line)
-                endfor
+                if has_key(l:content, 'language') && has_key(l:content, 'value')
+                    let l:title = l:content.language . ': ' . l:content.value
+                endif
             endif
         endfor
     elseif type(l:contents) == v:t_dict 
-        if has_key(l:contents, 'value')
-            let l:values = split(l:contents.value, "\n")
+        " MarkupContent
+        if has_key(l:contents, 'kind')
+            call log#log_debug('MarkupKind: ' . l:contents.kind)
         endif
-    else
-        let l:values = split(l:contents, "\n")
+        if has_key(l:contents, 'value')
+            let l:values += [l:contents.value]
+        endif
     endif
     let l:opt = v:none
     if has_key(a:message.result, 'range')
         let l:range = a:message.result.range
         let l:screenpos = screenpos(bufwinid('%'), l:range.start.line + 1, l:range.start.character + 1)
         let l:opt = {}
-        let l:opt.col = l:screenpos.col
+        " let l:opt.col = l:screenpos.col
         let l:opt.moved = [l:range.start.character + 1, l:range.end.character + 1]
     endif
-    call filter(l:values, {idx, val -> !empty(val)})
-    call map(l:values, {key, val -> trim(val, v:none, 2)})
-    call popup#hover(a:server.lang, l:values, l:opt)
+    call log#log_error(string(l:values))
+    let l:lines = []
+    for l:value in l:values
+        let l:line = util#split(l:value, '\(\n\n\|\n\|\r\n\)', 0)
+        let l:lines += l:line
+    endfor
+    " call filter(l:lines, {idx, val -> !empty(val)})
+    " call map(l:lines, {idx, val -> substitute(val, "\r\n", ' ', 'g')})
+    call map(l:lines, {idx, val -> trim(val, v:none, 2)})
+    call log#log_error(string(l:lines))
+    let l:title = substitute(l:title, '[\n\r]', '', 'g')
+    call popup#hover(l:title, l:lines, l:opt)
+    " call popup#hover(l:title, l:values, l:opt)
 endfunction
 
 function s:fn.textDocument_definition(server, message, ...)

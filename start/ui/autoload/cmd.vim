@@ -36,7 +36,7 @@ function cmd#setup_buffercmd(buf)
 		call util#set_autocmd_buflocal(a:buf, 'InsertCharPre', 'call cmd#complement()')
 		call util#set_autocmd_buflocal(a:buf, 'CompleteDonePre', 'call cmd#change()')
 		call util#set_autocmd_buflocal(a:buf, 'BufWrite', 'call cmd#save()')
-		" call util#set_autocmd_buflocal(a:buf, 'SafeState', 'call cmd#hover()')
+		call util#set_autocmd_buflocal(a:buf, 'SafeState', 'call cmd#hover()')
 	augroup END
 endfunction
 

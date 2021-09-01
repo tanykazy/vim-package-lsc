@@ -64,10 +64,6 @@ function s:server.recv(data) dict
     if jsonrpc#isRequest(l:content)
         let l:event = l:content.method
     elseif jsonrpc#isResponse(l:content)
-        if jsonrpc#isResponseError(l:content)
-            call log#log_error('Request fails: ' . string(l:content))
-            " call dialog#error(l:content.error.message)
-        endif
         for l:wait in self.wait_res
             if l:wait.id == l:content.id
                 let l:event = l:wait.method
@@ -75,6 +71,10 @@ function s:server.recv(data) dict
                 break
             endif
         endfor
+        if jsonrpc#isResponseError(l:content)
+            call log#log_error('Request fails: ' . string(l:content))
+            " call dialog#error(l:content.error.message)
+        endif
     elseif jsonrpc#isNotification(l:content)
         let l:event = l:content.method
     else
