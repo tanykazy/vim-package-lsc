@@ -1,10 +1,10 @@
 # vim-package-lsc
 
 "vim-package-lsc" is a package for vim that implements the Language server protocol.
-Its simple implementation makes it easy to keep up with changes in the specifications of that protocol.
 
 
 ## Description
+Its simple implementation makes it easy to keep up with changes in the specifications of that protocol.
 [Vim packages](https://vimhelp.org/repeat.txt.html#packages)
 
 [Language Server Protocol](https://microsoft.github.io/language-server-protocol/)
