@@ -9,10 +9,14 @@
 
 ## Demo
 
-## VS. 
+## Feature
+A simple client that implements the Language server protocol, which aims to describe various settings in JSON format files.
 
 ## Requirement
+[vim](https://www.vim.org/)
 
 ## Usage
 
+
 ## Install
+
