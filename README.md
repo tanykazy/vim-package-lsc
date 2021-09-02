@@ -1,10 +1,10 @@
 # vim-package-lsc
 
-"vim-package-lsc" is a package for vim that implements the Language server protocol.
+"vim-package-lsc" is a plugin package for vim that implements the Language server protocol.
 
 
 ## Description
-This is a package for vim that implements the Language server protocol. It makes of pure vim script. Its simple implementation makes it easy to keep up with changes in the specifications of that protocol. Language server settings write in a JSON format file.
+This is a plugin package for vim that implements the Language server protocol. It makes of pure vim script. Its simple implementation makes it easy to keep up with changes in the specifications of that protocol. Language server settings write in a JSON format file.
 
 ### References
  - [Vim packages](https://vimhelp.org/repeat.txt.html#packages)
@@ -17,7 +17,7 @@ This is a package for vim that implements the Language server protocol. It makes
 
 ## Feature
 - Pure Vim Script
-- Easy to install as a Vim package
+- Easy to install
 - Write the configuration in a JSON format file
 
 
