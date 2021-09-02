@@ -22,7 +22,7 @@ This is a package for vim that implements the Language server protocol. It makes
 
 
 ## Requirement
-[vim](https://www.vim.org/)
+[Vim](https://www.vim.org/)
 
 
 ## Usage
