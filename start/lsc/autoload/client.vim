@@ -307,9 +307,9 @@ function s:fn.textDocument_hover(server, message, ...)
         return
     endif
     let l:contents = a:message.result.contents
-    " if empty(l:contents)
-    "     return
-    " endif
+    if empty(l:contents)
+        return
+    endif
     let l:values = []
     let l:title = v:none
     if type(l:contents) != v:t_list
@@ -329,7 +329,7 @@ function s:fn.textDocument_hover(server, message, ...)
                 let l:values += [l:content]
             else
                 if has_key(l:content, 'language') && has_key(l:content, 'value')
-                    let l:title = l:content.language . ': ' . l:content.value
+                    let l:values += [l:content.language . ': ' . l:content.value]
                 endif
             endif
         endfor
@@ -347,22 +347,15 @@ function s:fn.textDocument_hover(server, message, ...)
         let l:range = a:message.result.range
         let l:screenpos = screenpos(bufwinid('%'), l:range.start.line + 1, l:range.start.character + 1)
         let l:opt = {}
-        " let l:opt.col = l:screenpos.col
+        let l:opt.col = l:screenpos.col
         let l:opt.moved = [l:range.start.character + 1, l:range.end.character + 1]
     endif
-    call log#log_error(string(l:values))
     let l:lines = []
     for l:value in l:values
-        let l:line = util#split(l:value, '\(\n\n\|\n\|\r\n\)', 0)
-        let l:lines += l:line
+        let l:line = substitute(l:value, '\(\r\n\)', '\n', 'g')
+        let l:lines += util#split(l:line, '\n', 0)
     endfor
-    " call filter(l:lines, {idx, val -> !empty(val)})
-    " call map(l:lines, {idx, val -> substitute(val, "\r\n", ' ', 'g')})
-    call map(l:lines, {idx, val -> trim(val, v:none, 2)})
-    call log#log_error(string(l:lines))
-    let l:title = substitute(l:title, '[\n\r]', '', 'g')
     call popup#hover(l:title, l:lines, l:opt)
-    " call popup#hover(l:title, l:values, l:opt)
 endfunction
 
 function s:fn.textDocument_definition(server, message, ...)
