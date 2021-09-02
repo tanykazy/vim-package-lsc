@@ -10,6 +10,7 @@ This is a package for vim that implements the Language server protocol. It makes
 
 [Language Server Protocol](https://microsoft.github.io/language-server-protocol/)
 
+[JSON](https://www.json.org/)
 
 ## Demo
 
