@@ -29,4 +29,9 @@ This is a plugin package for vim that implements the Language server protocol. I
 
 
 ## Install
+```
+mkdir -p ~/.vim/pack
+cd ~/.vim/pack
+git clone https://github.com/tanykazy/vim-package-lsc.git
+```
 
