@@ -4,22 +4,6 @@ let lsp#DiagnosticSeverity['Warning'] = 2
 let lsp#DiagnosticSeverity['Information'] = 3
 let lsp#DiagnosticSeverity['Hint'] = 4
 
-" let lsp#ErrorCodes = {
-" 	\ 'ParseError': -32700,
-" 	\ 'InvalidRequest': -32600,
-" 	\ 'MethodNotFound': -32601,
-" 	\ 'InvalidParams': -32602,
-" 	\ 'InternalError': -32603,
-" 	\ 'jsonrpcReservedErrorRangeStart': -32099,
-" 	\ 'ServerNotInitialized': -32002,
-" 	\ 'UnknownErrorCode': -32001,
-" 	\ 'jsonrpcReservedErrorRangeEnd': -32000,
-" 	\ 'lspReservedErrorRangeStart': -32899,
-" 	\ 'ServerCancelled': -32802,
-" 	\ 'ContentModified': -32801,
-" 	\ 'RequestCancelled': -32800,
-" 	\ 'lspReservedErrorRangeEnd': -32800}
-
 let lsp#ErrorCodes = {}
 let lsp#ErrorCodes['ParseError'] = -32700
 let lsp#ErrorCodes['InvalidRequest'] = -32600
@@ -38,17 +22,10 @@ let lsp#ErrorCodes['ContentModified'] = -32801
 let lsp#ErrorCodes['RequestCancelled'] = -32800
 let lsp#ErrorCodes['lspReservedErrorRangeEnd'] = -32800
 
-let s:CompletionTriggerKind = {
-	\ 'Invoked': 1,
-	\ 'TriggerCharacter': 2,
-	\ 'TriggerForIncompleteCompletions': 3}
-
 let lsp#CompletionTriggerKind = {}
 let lsp#CompletionTriggerKind['Invoked'] = 1
 let lsp#CompletionTriggerKind['TriggerCharacter'] = 2
 let lsp#CompletionTriggerKind['TriggerForIncompleteCompletions'] = 3
-
-let lsp#testvar = 2
 
 function lsp#InitializeParams(initializationOptions, workspaceFolders, token)
 	let l:params = {}
