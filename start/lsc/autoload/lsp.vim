@@ -158,6 +158,14 @@ function lsp#ReferenceParams(path, position, context, workDoneToken, partialResu
 	return l:params
 endfunction
 
+function lsp#ImplementationParams(path, position, workDoneToken, partialResultToken)
+	let l:params = {}
+	call extend(l:params, lsp#TextDocumentPositionParams(a:path, a:position))
+	call extend(l:params, lsp#WorkDoneProgressParams(a:workDoneToken))
+	call extend(l:params, lsp#PartialResultParams(a:partialResultToken))
+	return l:params
+endfunction
+
 function lsp#ReferenceContext(includeDeclaration)
 	let l:params = {}
 	let l:params['includeDeclaration'] = a:includeDeclaration
@@ -185,6 +193,14 @@ function lsp#CompletionContext(triggerKind, triggerCharacter)
 endfunction
 
 function lsp#CompletionItem()
+endfunction
+
+function lsp#CodeLensParams(path, workDoneToken, partialResultToken)
+	let l:params = {}
+	call extend(l:params, lsp#WorkDoneProgressParams(a:workDoneToken))
+	call extend(l:params, lsp#PartialResultParams(a:partialResultToken))
+	let l:params['textDocument'] = lsp#TextDocumentIdentifier(a:path)
+	return l:params
 endfunction
 
 function lsp#WorkDoneProgressParams(workDoneToken)

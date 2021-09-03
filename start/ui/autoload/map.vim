@@ -1,7 +1,9 @@
 function map#setup_buffermap()
     call log#log_debug('call map#setup_buffermap()')
     nmap <silent> <F3> :<C-u>call client#document_hover(bufnr('%'), getpos('.'))<CR>
+    nmap <silent> <F11> :<C-u>call client#code_lens(bufnr('%'))<CR>
     nmap <silent> <F12> :<C-u>call client#goto_definition(bufnr('%'), getpos('.'), v:false)<CR>
+    nmap <silent> <C-F12> :<C-u>call client#goto_implementation(bufnr('%'), getpos('.'), v:false)<CR>
     nmap <silent> <S-F12> :<C-u>call client#find_references(bufnr('%'), getpos('.'), v:false)<CR>
     " nmap <silent> <C-k> :<C-u>call client#goto_definition(bufnr('%'), getpos('.'), v:false)<CR>
 

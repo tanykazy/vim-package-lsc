@@ -141,7 +141,6 @@ endfunction
 
 function client#find_references(buf, pos, preview)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    " call log#log_error('find ref')
     let l:filetype = util#getfiletype(a:buf)
     if !has_key(s:server_list, l:filetype)
         return
@@ -158,6 +157,40 @@ function client#find_references(buf, pos, preview)
     let l:context = lsp#ReferenceContext(v:false)
     let l:params = lsp#ReferenceParams(util#encode_uri(l:path), l:position, l:context, v:none, v:none)
     call s:send_request(l:server, 'textDocument/references', l:params)
+endfunction
+
+function client#goto_implementation(buf, pos, preview)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:filetype = util#getfiletype(a:buf)
+    if !has_key(s:server_list, l:filetype)
+        return
+    endif
+    let l:server = s:server_list[l:filetype]
+    let l:path = util#buf2path(a:buf)
+    if !util#isContain(l:server['files'], l:path)
+        return
+    endif
+    let l:server.preview = a:preview
+    let l:lnum = a:pos[1]
+    let l:col = a:pos[2]
+    let l:position = lsp#Position(l:lnum - 1, l:col - 1)
+    let l:params = lsp#ImplementationParams(util#encode_uri(l:path), l:position, v:none, v:none)
+    call s:send_request(l:server, 'textDocument/implementation', l:params)
+endfunction
+
+function client#code_lens(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:filetype = util#getfiletype(a:buf)
+    if !has_key(s:server_list, l:filetype)
+        return
+    endif
+    let l:server = s:server_list[l:filetype]
+    let l:path = util#buf2path(a:buf)
+    if !util#isContain(l:server['files'], l:path)
+        return
+    endif
+    let l:params = lsp#CodeLensParams(util#encode_uri(l:path), v:none, v:none)
+    call s:send_request(l:server, 'textDocument/codeLens', l:params)
 endfunction
 
 let s:wait_completion = v:none
@@ -438,6 +471,48 @@ function s:fn.textDocument_references(server, message, ...)
     call s:goto_definition(l:path, l:pos[0], l:pos[1], a:server.preview)
 endfunction
 
+function s:fn.textDocument_implementation(server, message, ...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if util#isNull(a:message.result)
+        return
+    endif
+    if type(a:message.result) == v:t_list
+        " interface Location[]
+        let l:locations = a:message.result
+    elseif type(a:message.result) == v:t_dict
+        " interface Location
+        let l:locations = [a:message.result]
+    endif
+    let l:definitions = []
+    let l:msgs = []
+    for l:location in l:locations
+        let l:path = util#uri2path(l:location.uri)
+        let l:range = l:location.range
+        let l:pos = [l:range.start.line + 1, l:range.start.character + 1]
+        let l:text = join([util#relativize_path(l:path), join([l:pos[0], 'col', l:pos[1]], ' ')], '|')
+        let l:context = {}
+        let l:context.text = l:text
+        let l:context.path = l:path
+        let l:context.pos = l:pos
+        call add(l:definitions, l:context)
+        call add(l:msgs, l:text)
+    endfor
+    if len(l:definitions) == 0
+        return
+    elseif len(l:definitions) == 1
+        let l:path = l:definitions[0].path
+        let l:pos = l:definitions[0].pos
+    elseif len(l:definitions) > 1
+        let l:result = dialog#select(l:msgs)
+        if util#isNone(l:result)
+            return
+        endif
+        let l:path = l:definitions[l:result].path
+        let l:pos = l:definitions[l:result].pos
+    endif
+    call s:goto_definition(l:path, l:pos[0], l:pos[1], a:server.preview)
+endfunction
+
 function s:fn.textDocument_completion(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:complete_items = []
@@ -492,6 +567,7 @@ let s:listener['textDocument/publishDiagnostics'] = s:fn.textDocument_publishDia
 let s:listener['textDocument/hover'] = s:fn.textDocument_hover
 let s:listener['textDocument/definition'] = s:fn.textDocument_definition
 let s:listener['textDocument/references'] = s:fn.textDocument_references
+let s:listener['textDocument/implementation'] = s:fn.textDocument_implementation
 let s:listener['textDocument/completion'] = s:fn.textDocument_completion
 " let s:listener['unknown'] = funcref('s:fn.response_error')
 
