@@ -16,8 +16,8 @@ This is a plugin package for vim that implements the Language server protocol. I
 
 
 ## Feature
-- Pure Vim Script
 - Easy to install
+- Pure Vim Script
 - Write the configuration in a JSON format file
 
 
