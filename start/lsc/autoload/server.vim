@@ -31,7 +31,7 @@ endfunction
 
 function s:server.start() dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let self.channel = channel#open(self.cmd, self.cwd, funcref('self.recv', self))
+    let self.channel = lib#channel#open(self.cmd, self.cwd, funcref('self.recv', self))
     let self.running = v:true
 endfunction
 

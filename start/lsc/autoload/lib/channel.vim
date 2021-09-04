@@ -1,7 +1,7 @@
 let s:has_channel = has('channel')
 let s:has_job = has('job')
 
-function channel#open(cmd, cwd, cb)
+function lib#channel#open(cmd, cwd, cb)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:ch = s:channel.new()
 
