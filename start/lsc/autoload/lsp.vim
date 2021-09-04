@@ -22,10 +22,13 @@ let lsp#ErrorCodes['ContentModified'] = -32801
 let lsp#ErrorCodes['RequestCancelled'] = -32800
 let lsp#ErrorCodes['lspReservedErrorRangeEnd'] = -32800
 
-let lsp#CompletionTriggerKind = {}
-let lsp#CompletionTriggerKind['Invoked'] = 1
-let lsp#CompletionTriggerKind['TriggerCharacter'] = 2
-let lsp#CompletionTriggerKind['TriggerForIncompleteCompletions'] = 3
+function lsp#CompletionTriggerKind()
+	let l:CompletionTriggerKind = {}
+	let l:CompletionTriggerKind['Invoked'] = 1
+	let l:CompletionTriggerKind['TriggerCharacter'] = 2
+	let l:CompletionTriggerKind['TriggerForIncompleteCompletions'] = 3
+	return l:CompletionTriggerKind
+endfunction
 
 function lsp#InitializeParams(initializationOptions, workspaceFolders, token)
 	let l:params = {}

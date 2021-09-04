@@ -193,8 +193,6 @@ function client#code_lens(buf)
     call s:send_request(l:server, 'textDocument/codeLens', l:params)
 endfunction
 
-let s:wait_completion = v:none
-
 function client#document_completion(buf, path, pos, char)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
@@ -218,8 +216,6 @@ function client#document_completion(buf, path, pos, char)
         let l:context = lsp#CompletionContext(l:kind, a:char)
         let l:params = lsp#CompletionParams(l:context, util#encode_uri(a:path), l:position, v:none, v:none)
         call s:send_request(l:server, 'textDocument/completion', l:params)
-
-        let s:wait_completion = a:char
 
         return v:true
     endif
@@ -544,12 +540,14 @@ function s:fn.textDocument_completion(server, message, ...)
         endif
         call add(l:complete_items, l:complete_item)
     endfor
-    if util#isNone(s:wait_completion)
-        let a:server['complete-items'] = l:complete_items
-    else
-        let l:col = col('.')
-        call complete(l:col + 1, l:complete_items)
-        let s:wait_completion = v:none
+    let l:request = get(a:, 1, v:none)
+    if has_key(l:request.params, 'context')
+        if l:request.params.context.triggerKind == lsp#CompletionTriggerKind().TriggerCharacter
+            let l:col = col('.')
+            call complete(l:col + 1, l:complete_items)
+        else
+            let a:server['complete-items'] = l:complete_items
+        endif
     endif
 endfunction
 
