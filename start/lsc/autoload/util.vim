@@ -242,6 +242,10 @@ function util#isNull(none)
 	return (type(a:none) == v:t_none) && (string(a:none) == 'v:null')
 endfunction
 
+function util#isNormal()
+	return mode(1) == 'n'
+endfunction
+
 function util#read_text_file(path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:file = expand(a:path)

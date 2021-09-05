@@ -27,7 +27,6 @@ endfunction
 
 function cmd#setup_buffercmd(buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    " call log#log_debug('set up buffer autocmd: ' . a:buf)
 	augroup vim_package_lsc
 		call util#set_autocmd_buflocal(a:buf, 'BufDelete', 'call cmd#close()')
 		call util#set_autocmd_buflocal(a:buf, 'TextChanged', 'call cmd#change()')
@@ -36,7 +35,8 @@ function cmd#setup_buffercmd(buf)
 		call util#set_autocmd_buflocal(a:buf, 'InsertCharPre', 'call cmd#complement()')
 		call util#set_autocmd_buflocal(a:buf, 'CompleteDonePre', 'call cmd#change()')
 		call util#set_autocmd_buflocal(a:buf, 'BufWrite', 'call cmd#save()')
-		call util#set_autocmd_buflocal(a:buf, 'SafeState', 'call cmd#hover()')
+		call util#set_autocmd_buflocal(a:buf, 'CursorHold', 'call cmd#hover()')
+		call util#set_autocmd_buflocal(a:buf, 'InsertEnter', 'call popup#close_hover()')
 	augroup END
 endfunction
 
@@ -137,6 +137,9 @@ function cmd#save(...) abort
 endfunction
 
 function cmd#hover()
+    if !util#isNormal()
+        return
+    endif
     let l:cursorcharpos = getcursorcharpos()
     let b:hover_cursorcharpos  = get(b:, 'hover_cursorcharpos', [])
     if l:cursorcharpos == b:hover_cursorcharpos

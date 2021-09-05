@@ -55,8 +55,17 @@ function popup#hover(title, text, options)
     let b:hover_text = a:text
 endfunction
 
+function popup#close_hover()
+    let b:hover_id = get(b:, 'hover_id', v:none)
+    if !util#isNone(b:hover_id)
+        call s:popup_close(b:hover_id)
+    endif
+endfunction
+
 function s:hover_filter(winid, key)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if !util#isNormal()
+    endif
     let l:pos = popup_getpos(a:winid)
     if a:key == "\<Esc>"
         return popup_filter_menu(a:winid, a:key)
