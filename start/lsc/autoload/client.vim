@@ -46,7 +46,7 @@ function client#document_open(buf, path)
     endif
     call s:send_textDocument_didOpen(l:server, a:buf, a:path)
     call textprop#setup_proptypes(a:buf)
-    call ui#set_buffer_cmd(a:buf)
+    call cmd#setup_buffercmd(a:buf)
 endfunction
 
 function client#document_close(buf, path)
@@ -268,7 +268,7 @@ function s:fn.initialize(server, message, ...)
             call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:bufinfo['name'])
             " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
             " call autocmd#add_event_listener()
-            call ui#set_buffer_cmd(l:bufinfo['bufnr'])
+            call cmd#setup_buffercmd(l:bufinfo['bufnr'])
             call complete#set_completefunc(l:bufinfo['bufnr'])
             call textprop#setup_proptypes(l:bufinfo['bufnr'])
         endif

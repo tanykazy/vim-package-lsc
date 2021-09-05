@@ -27,6 +27,22 @@ function dialog#info(...)
     echohl Normal
 endfunction
 
+function dialog#notice(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    redraw
+    echohl Title
+    echomsg join(a:000)
+    echohl Normal
+endfunction
+
+function dialog#warning(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    redraw
+    echohl WarningMsg
+    echomsg join(a:000)
+    echohl Normal
+endfunction
+
 function dialog#error(...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     redraw
