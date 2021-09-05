@@ -23,8 +23,8 @@ function complete#completefunc(findstart, base)
 		return l:match
 	else
         " Find matches starting with a:base.
-        call util#wait({-> client#completion_status(l:buf) || complete_check()})
-        let l:items = client#get_completion(l:buf)
+        call util#wait({-> exists('b:completion_list') || complete_check()})
+        let l:items = b:completion_list
         let l:result = []
         for l:item in l:items
             if stridx(l:item.word, a:base) == 0
@@ -35,6 +35,11 @@ function complete#completefunc(findstart, base)
                 return -3
             endif
         endfor
+        unlet b:completion_list
         return {'words': l:result, 'refresh': 'always'}
 	endif
+endfunction
+
+function complete#set_completion(list)
+    let b:completion_list = a:list
 endfunction

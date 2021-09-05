@@ -226,32 +226,6 @@ function client#completion_resolve(buf, item)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 endfunction
 
-function client#completion_status(buf)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:filetype = util#getfiletype(a:buf)
-    let l:status = v:false
-    if has_key(s:server_list, l:filetype)
-        let l:server = s:server_list[l:filetype]
-        if has_key(l:server, 'complete-items')
-            let l:status = v:true
-        endif
-    endif
-    return l:status
-endfunction
-
-function client#get_completion(buf)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:filetype = util#getfiletype(a:buf)
-    let l:items = []
-    if has_key(s:server_list, l:filetype)
-        let l:server = s:server_list[l:filetype]
-        if has_key(l:server, 'complete-items')
-            let l:items = remove(l:server, 'complete-items')
-        endif
-    endif
-    return l:items
-endfunction
-
 let s:fn = {}
 function s:fn.initialize(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
@@ -546,7 +520,7 @@ function s:fn.textDocument_completion(server, message, ...)
             let l:col = col('.')
             call complete(l:col + 1, l:complete_items)
         else
-            let a:server['complete-items'] = l:complete_items
+            call complete#set_completion(l:complete_items)
         endif
     endif
 endfunction
