@@ -44,7 +44,13 @@ function client#document_open(buf, path)
     if util#isContain(l:server['files'], a:path)
         return
     endif
-    call s:send_textDocument_didOpen(l:server, a:buf, a:path)
+    let l:text = util#getbuftext(a:buf)
+    let l:changedtick = util#getchangedtick(a:buf)
+    let l:params = lsp#DidOpenTextDocumentParams(util#encode_uri(a:path), util#getfiletype(a:buf), l:changedtick, l:text)
+    call add(l:server['files'], a:path)
+    call s:send_notification(l:server, 'textDocument/didOpen', l:params)
+
+    call complete#set_completefunc(a:buf)
     call textprop#setup_proptypes(a:buf)
     call cmd#setup_buffercmd(a:buf)
 endfunction
@@ -99,7 +105,9 @@ function client#document_save(buf, path)
     if !util#isContain(l:server['files'], a:path)
         return
     endif
-    call s:send_textDocument_didSave(l:server, a:buf, a:path)
+    let l:text = util#getbuftext(a:buf)
+    let l:params = lsp#DidSaveTextDocumentParams(util#encode_uri(a:path), l:text)
+    return s:send_notification(l:server, 'textDocument/didSave', l:params)
 endfunction
 
 function client#document_hover(buf, pos)
@@ -254,7 +262,6 @@ function s:fn.initialize(server, message, ...)
         " imap <buffer><nowait> <LocalLeader>a <Esc>:<C-u>call dialog#info('trigger characters!')<CR>
     " endfor
 
-
     let l:params = lsp#InitializedParams()
     call s:send_notification(a:server, 'initialized', l:params)
 
@@ -265,12 +272,9 @@ function s:fn.initialize(server, message, ...)
     for l:bufinfo in l:bufinfolist
         let l:buftype = util#getbuftype(l:bufinfo.bufnr)
         if !util#isSpecialbuffers(l:buftype)
-            call s:send_textDocument_didOpen(a:server, l:bufinfo['bufnr'], l:bufinfo['name'])
+            call client#document_open(l:bufinfo['bufnr'], l:bufinfo['name'])
             " call listener_add(funcref('s:bufchange_listener'), l:bufnr)
             " call autocmd#add_event_listener()
-            call cmd#setup_buffercmd(l:bufinfo['bufnr'])
-            call complete#set_completefunc(l:bufinfo['bufnr'])
-            call textprop#setup_proptypes(l:bufinfo['bufnr'])
         endif
     endfor
 endfunction
@@ -368,39 +372,28 @@ function s:fn.textDocument_definition(server, message, ...)
     endif
     if type(a:message.result) == v:t_list
         " interface Location[]
-        let l:locations = a:message.result
+        let l:results = a:message.result
     elseif type(a:message.result) == v:t_dict
         " interface Location
-        let l:locations = [a:message.result]
+        let l:results = [a:message.result]
     endif
-    let l:definitions = []
-    let l:msgs = []
-    for l:location in l:locations
-        let l:path = util#uri2path(l:location.uri)
-        let l:range = l:location.range
-        let l:pos = [l:range.start.line + 1, l:range.start.character + 1]
-        let l:text = join([util#relativize_path(l:path), join([l:pos[0], 'col', l:pos[1]], ' ')], '|')
-        let l:context = {}
-        let l:context.text = l:text
-        let l:context.path = l:path
-        let l:context.pos = l:pos
-        call add(l:definitions, l:context)
-        call add(l:msgs, l:text)
+    let l:locations = []
+    for l:result in l:results
+        let l:path = util#uri2path(l:result.uri)
+        let l:range = l:result.range
+        let l:lnum = l:range.start.line
+        let l:col = l:range.start.character
+        let l:locations += [quickfix#location(l:path, l:lnum, l:col, v:none, v:none, v:none)]
     endfor
-    if len(l:definitions) == 0
+    if empty(l:locations)
         return
-    elseif len(l:definitions) == 1
-        let l:path = l:definitions[0].path
-        let l:pos = l:definitions[0].pos
-    elseif len(l:definitions) > 1
-        let l:result = dialog#select(l:msgs)
-        if util#isNone(l:result)
-            return
-        endif
-        let l:path = l:definitions[l:result].path
-        let l:pos = l:definitions[l:result].pos
     endif
-    call s:goto_definition(l:path, l:pos[0], l:pos[1], a:server.preview)
+    call quickfix#set_loclist(win_getid(), l:locations)
+    if len(l:locations) == 1
+        execute 'll!'
+    else
+        execute 'lopen'
+    endif
 endfunction
 
 function s:fn.textDocument_references(server, message, ...)
@@ -409,36 +402,24 @@ function s:fn.textDocument_references(server, message, ...)
         return
     endif
     " interface Location[]
-    let l:locations = a:message.result
-    let l:references = []
-    let l:msgs = []
-    for l:location in l:locations
-        let l:path = util#uri2path(l:location.uri)
-        let l:range = l:location.range
-        let l:pos = [l:range.start.line + 1, l:range.start.character + 1]
-        let l:text = join([util#relativize_path(l:path), join([l:pos[0], 'col', l:pos[1]], ' ')], '|')
-        let l:context = {}
-        let l:context.text = l:text
-        let l:context.path = l:path
-        let l:context.pos = l:pos
-        call add(l:references, l:context)
-        call add(l:msgs, l:text)
+    let l:results = a:message.result
+    let l:locations = []
+    for l:result in l:results
+        let l:path = util#uri2path(l:result.uri)
+        let l:range = l:result.range
+        let l:lnum = l:range.start.line
+        let l:col = l:range.start.character
+        let l:locations += [quickfix#location(l:path, l:lnum, l:col, v:none, v:none, v:none)]
     endfor
-    call log#log_error(string(l:references))
-    if len(l:references) == 0
+    if empty(l:locations)
         return
-    elseif len(l:references) == 1
-        let l:path = l:references[0].path
-        let l:pos = l:references[0].pos
-    elseif len(l:references) > 1
-        let l:result = dialog#select(l:msgs)
-        if util#isNone(l:result)
-            return
-        endif
-        let l:path = l:references[l:result].path
-        let l:pos = l:references[l:result].pos
     endif
-    call s:goto_definition(l:path, l:pos[0], l:pos[1], a:server.preview)
+    call quickfix#set_loclist(win_getid(), l:locations)
+    if len(l:locations) == 1
+        execute 'll!'
+    else
+        execute 'lopen'
+    endif
 endfunction
 
 function s:fn.textDocument_implementation(server, message, ...)
@@ -448,39 +429,28 @@ function s:fn.textDocument_implementation(server, message, ...)
     endif
     if type(a:message.result) == v:t_list
         " interface Location[]
-        let l:locations = a:message.result
+        let l:results = a:message.result
     elseif type(a:message.result) == v:t_dict
         " interface Location
-        let l:locations = [a:message.result]
+        let l:results = [a:message.result]
     endif
-    let l:definitions = []
-    let l:msgs = []
-    for l:location in l:locations
-        let l:path = util#uri2path(l:location.uri)
-        let l:range = l:location.range
-        let l:pos = [l:range.start.line + 1, l:range.start.character + 1]
-        let l:text = join([util#relativize_path(l:path), join([l:pos[0], 'col', l:pos[1]], ' ')], '|')
-        let l:context = {}
-        let l:context.text = l:text
-        let l:context.path = l:path
-        let l:context.pos = l:pos
-        call add(l:definitions, l:context)
-        call add(l:msgs, l:text)
+    let l:locations = []
+    for l:result in l:results
+        let l:path = util#uri2path(l:result.uri)
+        let l:range = l:result.range
+        let l:lnum = l:range.start.line
+        let l:col = l:range.start.character
+        let l:locations += [quickfix#location(l:path, l:lnum, l:col, v:none, v:none, v:none)]
     endfor
-    if len(l:definitions) == 0
+    if empty(l:locations)
         return
-    elseif len(l:definitions) == 1
-        let l:path = l:definitions[0].path
-        let l:pos = l:definitions[0].pos
-    elseif len(l:definitions) > 1
-        let l:result = dialog#select(l:msgs)
-        if util#isNone(l:result)
-            return
-        endif
-        let l:path = l:definitions[l:result].path
-        let l:pos = l:definitions[l:result].pos
     endif
-    call s:goto_definition(l:path, l:pos[0], l:pos[1], a:server.preview)
+    call quickfix#set_loclist(win_getid(), l:locations)
+    if len(l:locations) == 1
+        execute 'll!'
+    else
+        execute 'lopen'
+    endif
 endfunction
 
 function s:fn.textDocument_completion(server, message, ...)
@@ -543,22 +513,6 @@ let s:listener['textDocument/implementation'] = s:fn.textDocument_implementation
 let s:listener['textDocument/completion'] = s:fn.textDocument_completion
 " let s:listener['unknown'] = funcref('s:fn.response_error')
 
-function s:send_textDocument_didOpen(server, buf, path)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:text = util#getbuftext(a:buf)
-    let l:changedtick = util#getchangedtick(a:buf)
-    let l:params = lsp#DidOpenTextDocumentParams(util#encode_uri(a:path), &filetype, l:changedtick, l:text)
-    call add(a:server['files'], a:path)
-    call s:send_notification(a:server, 'textDocument/didOpen', l:params)
-endfunction
-
-function s:send_textDocument_didSave(server, buf, path)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:text = util#getbuftext(a:buf)
-    let l:params = lsp#DidSaveTextDocumentParams(util#encode_uri(a:path), l:text)
-    return s:send_notification(a:server, 'textDocument/didSave', l:params)
-endfunction
-
 function s:send_request(server, method, params)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:message = jsonrpc#request_message(a:server.id, a:method, a:params)
@@ -594,26 +548,6 @@ function s:start_server(lang)
         endif
     endif
     return s:server_list[a:lang]
-endfunction
-
-function s:goto_definition(path, lnum, col, preview)
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:tag = expand('<cword>')
-    let l:pos = [bufnr()] + getcurpos()[1 : ]
-    let l:item = {'bufnr': l:pos[0], 'from': l:pos, 'tagname': l:tag}
-    if a:preview
-        call quickfix#preview(a:path, a:lnum)
-    else
-        " execute 'split' '+' . a:lnum a:path
-        let l:buf = bufadd(a:path)
-        call execute(l:buf . 'buffer!', 'silent')
-        call cursor(a:lnum, a:col)
-        redraw
-    endif
-    let l:winid = win_getid()
-    let l:stack = gettagstack(l:winid)
-    let l:stack['items'] = [l:item]
-    call settagstack(l:winid, l:stack, 'a')
 endfunction
 
 " function client#bufchange_listener(bufnr, start, end, added, changes)

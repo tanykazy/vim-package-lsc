@@ -19,21 +19,24 @@ function quickfix#set_quickfix(list, file)
     endfor
 endfunction
 
-function quickfix#set_loclist(nr, list, file)
+function quickfix#set_loclist(nr, list)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 
     call s:setloclist(a:nr, [], 'r')
+    let l:what = {}
+    let l:what.items = a:list
+    call s:setloclist(a:nr, [], 'a', l:what)
 
-    let s:locations[a:nr] = get(s:locations, a:nr, {})
-    let s:locations[a:nr][a:file] = a:list
-    for [key, value] in items(s:locations[a:nr])
-        let l:what = {}
-        " let l:what.title = key
-        let l:what.items = value
-        " let l:what.context = {}
-        " let l:what.context.filename = key
-        call s:setloclist([], 'a', l:what)
-    endfor
+    " let s:locations[a:nr] = get(s:locations, a:nr, {})
+    " let s:locations[a:nr][a:file] = a:list
+    " for [key, value] in items(s:locations[a:nr])
+    "     let l:what = {}
+    "     " let l:what.title = key
+    "     let l:what.items = value
+    "     " let l:what.context = {}
+    "     " let l:what.context.filename = key
+    "     call s:setloclist([], 'a', l:what)
+    " endfor
 endfunction
 
 function quickfix#location(filename, lnum, col, nr, text, type)
