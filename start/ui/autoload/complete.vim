@@ -39,6 +39,9 @@ endfunction
 
 function complete#set_completion(list)
     let b:completion_list = a:list
+    " for l:item in b:completion_list
+    "     call complete_add(l:item)
+    " endfor
 endfunction
 
 function s:ready_completion()

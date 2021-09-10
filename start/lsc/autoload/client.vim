@@ -456,10 +456,10 @@ endfunction
 function s:fn.textDocument_completion(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:complete_items = []
-    if util#isNull(a:message.result)
-        let a:server['complete-items'] = l:complete_items
-        return
-    endif
+    " if util#isNull(a:message.result)
+    "     let a:server['complete-items'] = l:complete_items
+    "     return
+    " endif
     let l:result = a:message.result
     if has_key(l:result, 'isIncomplete')
         if l:result.isIncomplete
