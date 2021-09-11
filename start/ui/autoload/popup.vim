@@ -26,7 +26,7 @@ function popup#hover(title, text, options)
     else
         let l:opt.minheight = l:opt.maxheight
     endif
-    let l:opt.maxwidth = l:winwidth
+    let l:opt.maxwidth = l:winwidth / 2
     if l:opt.maxwidth > l:maxwidth
         let l:opt.minwidth = l:maxwidth
     else

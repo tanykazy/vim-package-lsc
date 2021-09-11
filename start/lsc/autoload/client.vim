@@ -455,11 +455,6 @@ endfunction
 
 function s:fn.textDocument_completion(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:complete_items = []
-    " if util#isNull(a:message.result)
-    "     let a:server['complete-items'] = l:complete_items
-    "     return
-    " endif
     let l:result = a:message.result
     if has_key(l:result, 'isIncomplete')
         if l:result.isIncomplete
@@ -470,29 +465,10 @@ function s:fn.textDocument_completion(server, message, ...)
     elseif type(l:result) == v:t_list
         let l:items = l:result
     endif
-    for l:item in l:items
-        let l:complete_item = {}
-        let l:complete_item.word = l:item.label
-        if has_key(l:item, 'detail')
-            let l:complete_item.menu = l:item.detail
-        endif
-        if has_key(l:item, 'documentation')
-            let l:complete_item.info = l:item.documentation
-        endif
-        if has_key(l:item, 'kind')
-            let l:complete_item.kind = util#lsp_kind2vim_kind(l:item.kind)
-        endif
-        call add(l:complete_items, l:complete_item)
-    endfor
     let l:request = get(a:, 1, v:none)
-    if has_key(l:request.params, 'context')
-        if l:request.params.context.triggerKind == lsp#CompletionTriggerKind().TriggerCharacter
-            let l:col = col('.')
-            call complete(l:col + 1, l:complete_items)
-        else
-            call complete#set_completion(l:complete_items)
-        endif
-    endif
+    let l:params = l:request.params
+    let l:position = l:params.position
+    call complete#complete(l:position, l:items)
 endfunction
 
 " function s:fn.response_error(server, message, ...)
