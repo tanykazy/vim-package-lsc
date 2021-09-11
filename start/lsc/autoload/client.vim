@@ -230,6 +230,9 @@ function client#document_completion(buf, path, pos, char)
     return v:false
 endfunction
 
+function client#code_action()
+endfunction
+
 function client#completion_resolve(buf, item)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 endfunction
@@ -294,6 +297,10 @@ function s:fn.textDocument_publishDiagnostics(server, message, ...)
     " let l:winid = bufwinid(l:buf)
     call textprop#clear(l:buf)
     let l:diagnostics = a:message['params']['diagnostics']
+
+    " Save diagnostics
+    let b:diagnostics = l:diagnostics
+
     for l:diagnostic in l:diagnostics
         let l:lnum = l:diagnostic['range']['start']['line']
         let l:col = l:diagnostic['range']['start']['character']
