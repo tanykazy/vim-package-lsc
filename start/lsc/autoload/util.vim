@@ -12,6 +12,19 @@ function util#split(str, pattern, max)
 	return l:first
 endfunction
 
+function util#getcursorcharpos(...) " [{winid}]
+	let l:winid = get(a:, 1, win_getid())
+	let l:buf = winbufnr(l:winid)
+	let l:pos = getcursorcharpos(l:winid)
+	let l:result = {}
+	let l:result.bufnum = l:buf
+	let l:result.lnum = l:pos[1]
+	let l:result.col = l:pos[2]
+	let l:result.off = l:pos[3]
+	let l:result.curswant = l:pos[4]
+	return l:result
+endfunction
+
 function util#relativize_path(path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return fnamemodify(a:path, ':~:.')
@@ -95,6 +108,7 @@ function util#uri2components(uri)
 endfunction
 
 function util#lsp_kind2vim_kind(kind)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	if a:kind == 1
 		return ''
 	elseif a:kind == 2
@@ -229,6 +243,7 @@ function util#getcwd(buf)
 endfunction
 
 function util#isContain(list, value)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return !(index(a:list, a:value) == -1)
 endfunction
 
@@ -243,6 +258,7 @@ function util#isNull(none)
 endfunction
 
 function util#isNormal()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return mode(1) == 'n'
 endfunction
 
@@ -273,6 +289,7 @@ function util#parse_json_file(path)
 endfunction
 
 function util#wait(condition, ...) " timeout
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:timeout = get(a:, 1, -1) / 1000.0
 	let l:start = reltime()
 	let l:progress = reltime(l:start)
@@ -291,9 +308,11 @@ function util#wait(condition, ...) " timeout
 endfunction
 
 function util#sleep(ms)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	execute 'sleep' a:ms . 'm'
 endfunction
 
 function util#set_autocmd_buflocal(buf, event, cmd)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	execute 'autocmd' a:event '<buffer=' . a:buf . '>' a:cmd
 endfunction

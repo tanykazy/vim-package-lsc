@@ -23,8 +23,6 @@ function complete#completefunc(findstart, base)
         endif
 		return l:match
 	else
-        call log#log_error(a:base)
-        let b:base = a:base
         " Find matches starting with a:base.
         let b:base = a:base
         " call util#wait({-> s:ready_completion() || complete_check()})
@@ -55,13 +53,37 @@ function complete#complete(position, completion_items)
         if has_key(l:completion_item, 'kind')
             let l:item.kind = util#lsp_kind2vim_kind(l:completion_item.kind)
         endif
+        let l:item.user_data = l:completion_item
         if stridx(l:item.word, get(b:, 'base', '')) == 0
             call add(l:items, l:item)
         endif
     endfor
-    let l:col = a:position.character + 1
-    call complete(l:col, l:items)
+    if !empty(l:items)
+        let l:col = a:position.character + 1
+        call complete(l:col, l:items)
+        call complete#onCompleteStart()
+    endif
     unlet! b:base
+endfunction
+
+function complete#onCompleteStart()
+	augroup vim_package_lsc
+		autocmd CompleteChanged <buffer> call complete#onCompleteChanged(bufnr('%'), v:event.completed_item)
+		autocmd CompleteDonePre <buffer> call complete#onCompleteDonePre()
+	augroup END
+endfunction
+
+function complete#onCompleteChanged(buf, item)
+    if !empty(a:item)
+        " call client#completion_resolve(a:buf, a:item)
+    endif
+endfunction
+
+function complete#onCompleteDonePre()
+	augroup vim_package_lsc
+		autocmd! CompleteChanged <buffer>
+		autocmd! CompleteDonePre <buffer>
+	augroup END
 endfunction
 
 " function complete#set_completion(list)

@@ -74,6 +74,7 @@ function cmd#stop(...) abort
         let l:filetype = v:none
     endif
     call client#stop(l:filetype)
+    call util#wait({-> empty(client#get_running_server())})
 endfunction
 
 function cmd#open(...) abort
@@ -160,7 +161,9 @@ function cmd#complement(...) abort
     if !util#isSpecialbuffers(&buftype)
         let l:path = expand('%:p')
         if !empty(l:path)
-            call client#document_completion(l:buffer, l:path, getpos('.'), v:char)
+            let l:pos = getpos('.')
+            let l:pos[2] += 1
+            call client#document_completion(l:buffer, l:path, l:pos, v:char)
         endif
     endif
 endfunction

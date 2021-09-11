@@ -7,15 +7,14 @@ endfunction
 
 function client#start(lang, buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if has_key(s:server_list, a:lang)
-        return
-    endif
     if !setting#isSupport(a:lang)
         return
     endif
+    if has_key(s:server_list, a:lang)
+        return
+    endif
     let l:server = s:start_server(a:lang)
-    let l:winid = bufwinid(a:buf)
-    let l:cwd = getcwd(l:winid)
+    let l:cwd = util#getcwd(a:buf)
     let l:workspaceFolder = lsp#WorkspaceFolder(l:cwd, l:cwd)
     let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder], v:none)
     call s:send_request(l:server, 'initialize', l:params)
@@ -208,26 +207,18 @@ function client#document_completion(buf, path, pos, char)
         return v:false
     endif
     let l:server = s:server_list[l:filetype]
-    if util#isNone(a:char)
-        let l:kind = 1
+    if util#isContain(l:server['capabilities']['completionProvider']['triggerCharacters'], a:char)
+        let l:kind = lsp#CompletionTriggerKind().TriggerCharacter
     else
-        let l:kind = 2
+        let l:kind = lsp#CompletionTriggerKind().Invoked
     endif
-    if util#isContain(l:server['capabilities']['completionProvider']['triggerCharacters'], a:char) || l:kind == 1
-        let l:line = a:pos[1] - 1
-        if util#isNone(a:char)
-            let l:character = a:pos[2] - 1
-        else
-            let l:character = a:pos[2]
-        endif
-        let l:position = lsp#Position(l:line, l:character)
-        let l:context = lsp#CompletionContext(l:kind, a:char)
-        let l:params = lsp#CompletionParams(l:context, util#encode_uri(a:path), l:position, v:none, v:none)
-        call s:send_request(l:server, 'textDocument/completion', l:params)
-
-        return v:true
-    endif
-    return v:false
+    let l:line = a:pos[1] - 1
+    let l:character = a:pos[2] - 1
+    let l:position = lsp#Position(l:line, l:character)
+    let l:context = lsp#CompletionContext(l:kind, a:char)
+    let l:params = lsp#CompletionParams(l:context, util#encode_uri(a:path), l:position, v:none, v:none)
+    call s:send_request(l:server, 'textDocument/completion', l:params)
+    return v:true
 endfunction
 
 function client#code_action()
@@ -235,6 +226,12 @@ endfunction
 
 function client#completion_resolve(buf, item)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:filetype = util#getfiletype(a:buf)
+    if !has_key(s:server_list, l:filetype)
+        return v:false
+    endif
+    let l:server = s:server_list[l:filetype]
+    call s:send_request(l:server, 'completionItem/resolve', a:item)
 endfunction
 
 let s:fn = {}
