@@ -8,33 +8,40 @@ function complete#set_completefunc(buf)
 endfunction
 
 function complete#completefunc(findstart, base)
-    let l:buf = bufnr('%')
 	if a:findstart
-        let l:path = expand('%:p')
-        let l:pos = getpos('.')
-        let l:char = v:none
-        let l:success = client#document_completion(l:buf, l:path, l:pos, l:char)
-        if !l:success
-            return -2
-        endif
         " Locate the start of the keyword.
+        let l:pos = getpos('.')
         let l:text = strpart(getline('.'), 0, l:pos[2] - 1)
         let l:match = match(l:text, '\k*$')
+
+        let l:buf = bufnr('%')
+        let l:path = expand('%:p')
+        let l:char = v:none
+        let l:pos[2] = l:match + 1
+        let l:success = client#document_completion(l:buf, l:path, l:pos, l:char)
+        if !l:success
+            return -3
+        endif
 		return l:match
 	else
+        call log#log_error(a:base)
+        let b:base = a:base
         " Find matches starting with a:base.
-        call util#wait({-> s:ready_completion() || complete_check()})
-        for l:item in b:completion_list
-            if stridx(l:item.word, a:base) == 0
-                call complete_add(l:item)
-            endif
-            if complete_check()
-                return -3
-            endif
-        endfor
-        unlet b:completion_list
+        " call util#wait({-> s:ready_completion() || complete_check()})
+        " for l:item in b:completion_list
+        "     if stridx(l:item.word, a:base) == 0
+        "         call complete_add(l:item)
+        "     endif
+        "     if complete_check()
+        "         return -3
+        "     endif
+        " endfor
+        " unlet b:completion_list
         return v:none
 	endif
+endfunction
+
+function complete#complete(completion_items)
 endfunction
 
 function complete#set_completion(list)

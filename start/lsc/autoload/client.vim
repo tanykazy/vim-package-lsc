@@ -455,21 +455,19 @@ endfunction
 
 function s:fn.textDocument_completion(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:complete_items = []
-    " if util#isNull(a:message.result)
-    "     let a:server['complete-items'] = l:complete_items
-    "     return
-    " endif
     let l:result = a:message.result
     if has_key(l:result, 'isIncomplete')
+        " interface CompletionList
         if l:result.isIncomplete
             let l:items = l:result.items
         else
             let l:items = l:result.items
         endif
     elseif type(l:result) == v:t_list
+        " CompletionItem[]
         let l:items = l:result
     endif
+    let l:complete_items = []
     for l:item in l:items
         let l:complete_item = {}
         let l:complete_item.word = l:item.label
@@ -485,14 +483,12 @@ function s:fn.textDocument_completion(server, message, ...)
         call add(l:complete_items, l:complete_item)
     endfor
     let l:request = get(a:, 1, v:none)
-    if has_key(l:request.params, 'context')
-        if l:request.params.context.triggerKind == lsp#CompletionTriggerKind().TriggerCharacter
-            let l:col = col('.')
-            call complete(l:col + 1, l:complete_items)
-        else
-            call complete#set_completion(l:complete_items)
-        endif
-    endif
+    let l:position = l:request.params.position
+    let l:col = l:position.character + 1
+    " call log#log_error(string(complete_info()))
+    call complete(l:col, l:complete_items)
+    " call log#log_error(string(complete_info()))
+    " call complete#set_completion(l:complete_items)
 endfunction
 
 " function s:fn.response_error(server, message, ...)
