@@ -183,6 +183,25 @@ function lsp#CodeLensParams(path, workDoneToken, partialResultToken)
 	return l:params
 endfunction
 
+function lsp#CodeActionParams(path, range, context, workDoneToken, partialResultToken)
+	let l:params = {}
+	call extend(l:params, lsp#WorkDoneProgressParams(a:workDoneToken))
+	call extend(l:params, lsp#PartialResultParams(a:partialResultToken))
+	let l:params['textDocument'] = lsp#TextDocumentIdentifier(a:path)
+	let l:params['range'] = a:range
+	let l:params['context'] = a:context
+	return l:params
+endfunction
+
+function lsp#CodeActionContext(diagnostics, kind)
+	let l:params = {}
+	let l:params['diagnostics'] = a:diagnostics
+	if !util#isNone(a:kind)
+		let l:params['only'] = a:kind
+	endif
+	return l:params
+endfunction
+
 function lsp#WorkDoneProgressParams(workDoneToken)
 	let l:workDoneProgressParams = {}
 	if !util#isNone(a:workDoneToken)

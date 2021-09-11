@@ -230,6 +230,9 @@ function client#document_completion(buf, path, pos, char)
     return v:false
 endfunction
 
+function client#code_action()
+endfunction
+
 function client#completion_resolve(buf, item)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 endfunction
@@ -294,6 +297,10 @@ function s:fn.textDocument_publishDiagnostics(server, message, ...)
     " let l:winid = bufwinid(l:buf)
     call textprop#clear(l:buf)
     let l:diagnostics = a:message['params']['diagnostics']
+
+    " Save diagnostics
+    let b:diagnostics = l:diagnostics
+
     for l:diagnostic in l:diagnostics
         let l:lnum = l:diagnostic['range']['start']['line']
         let l:col = l:diagnostic['range']['start']['character']
@@ -467,28 +474,10 @@ function s:fn.textDocument_completion(server, message, ...)
         " CompletionItem[]
         let l:items = l:result
     endif
-    let l:complete_items = []
-    for l:item in l:items
-        let l:complete_item = {}
-        let l:complete_item.word = l:item.label
-        if has_key(l:item, 'detail')
-            let l:complete_item.menu = l:item.detail
-        endif
-        if has_key(l:item, 'documentation')
-            let l:complete_item.info = l:item.documentation
-        endif
-        if has_key(l:item, 'kind')
-            let l:complete_item.kind = util#lsp_kind2vim_kind(l:item.kind)
-        endif
-        call add(l:complete_items, l:complete_item)
-    endfor
     let l:request = get(a:, 1, v:none)
-    let l:position = l:request.params.position
-    let l:col = l:position.character + 1
-    " call log#log_error(string(complete_info()))
-    call complete(l:col, l:complete_items)
-    " call log#log_error(string(complete_info()))
-    " call complete#set_completion(l:complete_items)
+    let l:params = l:request.params
+    let l:position = l:params.position
+    call complete#complete(l:position, l:items)
 endfunction
 
 " function s:fn.response_error(server, message, ...)
