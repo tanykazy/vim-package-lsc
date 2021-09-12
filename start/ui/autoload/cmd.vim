@@ -138,9 +138,6 @@ function cmd#save(...) abort
 endfunction
 
 function cmd#hover()
-    if !util#isNormal()
-        return
-    endif
     let l:cursorcharpos = getcursorcharpos()
     let b:hover_cursorcharpos  = get(b:, 'hover_cursorcharpos', [])
     if l:cursorcharpos == b:hover_cursorcharpos
