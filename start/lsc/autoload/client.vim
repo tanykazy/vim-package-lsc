@@ -212,6 +212,11 @@ function client#document_completion(buf, path, pos, char)
     else
         let l:kind = lsp#CompletionTriggerKind().Invoked
     endif
+    if l:kind != lsp#CompletionTriggerKind().TriggerCharacter
+        if !util#isNone(a:char)
+            return v:false
+        endif
+    endif
     let l:line = a:pos[1] - 1
     let l:character = a:pos[2] - 1
     let l:position = lsp#Position(l:line, l:character)
