@@ -64,10 +64,8 @@ endfunction
 
 function s:hover_filter(winid, key)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !util#isNormal()
-    endif
     let l:pos = popup_getpos(a:winid)
-    if a:key == "\<Esc>"
+    if a:key == "\<Esc>" || a:key == "\<C-C>"
         return popup_filter_menu(a:winid, a:key)
     elseif a:key == "\<C-N>"
         let l:buf = winbufnr(a:winid)

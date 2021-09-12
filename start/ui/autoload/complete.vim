@@ -58,11 +58,9 @@ function complete#complete(position, completion_items)
             call add(l:items, l:item)
         endif
     endfor
-    if !empty(l:items)
-        let l:col = a:position.character + 1
-        call complete(l:col, l:items)
-        call complete#onCompleteStart()
-    endif
+    let l:col = a:position.character + 1
+    call complete(l:col, l:items)
+    call complete#onCompleteStart()
     unlet! b:base
 endfunction
 
