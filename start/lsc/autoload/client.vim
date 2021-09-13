@@ -465,7 +465,9 @@ endfunction
 function s:fn.textDocument_completion(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:result = a:message.result
-    if has_key(l:result, 'isIncomplete')
+    if util#isNull(l:result)
+        return
+    elseif has_key(l:result, 'isIncomplete')
         " interface CompletionList
         if l:result.isIncomplete
             let l:items = l:result.items
