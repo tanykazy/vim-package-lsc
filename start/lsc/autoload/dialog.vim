@@ -58,5 +58,6 @@ function dialog#get(...)
 endfunction
 
 function s:confirm(...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     return call('confirm', a:000)
 endfunction

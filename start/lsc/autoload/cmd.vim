@@ -25,21 +25,25 @@ function cmd#setup_buffercmd(buf)
 endfunction
 
 function cmd#completion_running_server(arglead, cmdline, cursorpos)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:list = client#get_running_server()
     return join(l:list, "\n")
 endfunction
 
 function cmd#completion_support_lang(arglead, cmdline, cursorpos)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:list = setting#getLangList()
     return join(l:list, "\n")
 endfunction
 
 function cmd#completion_installed_lang(arglead, cmdline, cursorpos)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:list = setting#getInstalledList()
     return join(l:list, "\n")
 endfunction
 
 function cmd#start(...) abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_debug('command start' . string(a:000))
     if a:0 > 0
         let l:filetype = a:1
@@ -51,6 +55,7 @@ function cmd#start(...) abort
 endfunction
 
 function cmd#stop(...) abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_debug('command stop' . string(a:000))
     if a:0 > 0
         let l:filetype = a:1
@@ -62,6 +67,7 @@ function cmd#stop(...) abort
 endfunction
 
 function cmd#open(...) abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_debug('command open' . string(a:000))
     if a:0 > 0
         let l:buffer = bufnr(a:1)
@@ -77,6 +83,7 @@ function cmd#open(...) abort
 endfunction
 
 function cmd#close(...) abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_debug('command close' . string(a:000))
     if a:0 > 0
         let l:buffer = bufnr(a:1)
@@ -92,6 +99,7 @@ function cmd#close(...) abort
 endfunction
 
 function cmd#change(...) abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_debug('command change' . string(a:000))
     if a:0 > 0
         let l:buffer = bufnr(a:1)
@@ -107,6 +115,7 @@ function cmd#change(...) abort
 endfunction
 
 function cmd#save(...) abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_debug('command save' . string(a:000))
     if a:0 > 0
         let l:buffer = bufnr(a:1)
@@ -122,6 +131,7 @@ function cmd#save(...) abort
 endfunction
 
 function cmd#hover()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:cursorcharpos = getcursorcharpos()
     let b:hover_cursorcharpos  = get(b:, 'hover_cursorcharpos', [])
     if l:cursorcharpos == b:hover_cursorcharpos
@@ -133,6 +143,7 @@ function cmd#hover()
 endfunction
 
 function cmd#complement(...) abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_debug('command complement' . string(a:000))
     if a:0 > 0
         let l:buffer = bufnr(a:1)
