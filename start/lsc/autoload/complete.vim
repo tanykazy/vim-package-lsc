@@ -1,13 +1,20 @@
 function complete#set_completeopt()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let s:save_completeopt = &completeopt
     set completeopt+=menu,menuone,preview,noselect
 endfunction
 
 function complete#set_completefunc(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call setbufvar(a:buf, '&completefunc', 'complete#completefunc')
 endfunction
 
+function complete#findstart()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+endfunction
+
 function complete#completefunc(findstart, base)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	if a:findstart
         " Locate the start of the keyword.
         let l:pos = getpos('.')
@@ -40,6 +47,7 @@ function complete#completefunc(findstart, base)
 endfunction
 
 function complete#complete(position, completion_items)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:items = []
     for l:completion_item in a:completion_items
         let l:item = {}
@@ -65,6 +73,7 @@ function complete#complete(position, completion_items)
 endfunction
 
 function complete#onCompleteStart()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	augroup vim_package_lsc
 		autocmd CompleteChanged <buffer> call complete#onCompleteChanged(bufnr('%'), v:event.completed_item)
 		autocmd CompleteDonePre <buffer> call complete#onCompleteDonePre()
@@ -72,12 +81,14 @@ function complete#onCompleteStart()
 endfunction
 
 function complete#onCompleteChanged(buf, item)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !empty(a:item)
         " call client#completion_resolve(a:buf, a:item)
     endif
 endfunction
 
 function complete#onCompleteDonePre()
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	augroup vim_package_lsc
 		autocmd! CompleteChanged <buffer>
 		autocmd! CompleteDonePre <buffer>
