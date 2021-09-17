@@ -301,7 +301,7 @@ function s:fn.textDocument_publishDiagnostics(server, message, ...)
     let l:diagnostics = a:message['params']['diagnostics']
 
     " Save diagnostics
-    let b:diagnostics = l:diagnostics
+    call setbufvar(l:buf, 'diagnostics', l:diagnostics)
 
     for l:diagnostic in l:diagnostics
         let l:lnum = l:diagnostic['range']['start']['line']
