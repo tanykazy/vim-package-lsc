@@ -63,7 +63,11 @@ function cmd#stop(...) abort
         let l:filetype = v:none
     endif
     call client#stop(l:filetype)
-    call util#wait({-> empty(client#get_running_server())})
+    if util#isNone(l:filetype)
+        call util#wait({-> empty(client#get_running_server())})
+    else
+        call util#wait({-> !util#isContain(client#get_running_server(), l:filetype)})
+    endif
 endfunction
 
 function cmd#open(...) abort
@@ -74,7 +78,8 @@ function cmd#open(...) abort
     else
         let l:buffer = bufnr('%')
     endif
-    if !util#isSpecialbuffers(&buftype)
+    let l:buftype = util#getbuftype(l:buffer)
+    if !util#isSpecialbuffers(l:buftype)
         let l:path = expand('%:p')
         if !empty(l:path)
             call client#document_open(l:buffer, l:path)
@@ -90,7 +95,8 @@ function cmd#close(...) abort
     else
         let l:buffer = bufnr('%')
     endif
-    if !util#isSpecialbuffers(&buftype)
+    let l:buftype = util#getbuftype(l:buffer)
+    if !util#isSpecialbuffers(l:buftype)
         let l:path = expand('%:p')
         if !empty(l:path)
             call client#document_close(l:buffer, l:path)
@@ -106,7 +112,8 @@ function cmd#change(...) abort
     else
         let l:buffer = bufnr('%')
     endif
-    if !util#isSpecialbuffers(&buftype)
+    let l:buftype = util#getbuftype(l:buffer)
+    if !util#isSpecialbuffers(l:buftype)
         let l:path = expand('%:p')
         if !empty(l:path)
             call client#document_change(l:buffer, l:path, getpos('.'), v:char)
@@ -122,7 +129,8 @@ function cmd#save(...) abort
     else
         let l:buffer = bufnr('%')
     endif
-    if !util#isSpecialbuffers(&buftype)
+    let l:buftype = util#getbuftype(l:buffer)
+    if !util#isSpecialbuffers(l:buftype)
         let l:path = expand('%:p')
         if !empty(l:path)
             call client#document_save(l:buffer, l:path)
@@ -150,7 +158,8 @@ function cmd#complement(...) abort
     else
         let l:buffer = bufnr('%')
     endif
-    if !util#isSpecialbuffers(&buftype)
+    let l:buftype = util#getbuftype(l:buffer)
+    if !util#isSpecialbuffers(l:buftype)
         let l:path = expand('%:p')
         if !empty(l:path)
             let l:pos = getpos('.')
