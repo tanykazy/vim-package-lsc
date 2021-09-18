@@ -109,7 +109,7 @@ function client#document_save(buf, path)
     endif
     let l:text = util#getbuftext(a:buf)
     let l:params = lsp#DidSaveTextDocumentParams(util#encode_uri(a:path), l:text)
-    return s:send_notification(l:server, 'textDocument/didSave', l:params)
+    call s:send_notification(l:server, 'textDocument/didSave', l:params)
 endfunction
 
 function client#document_hover(buf, pos)
