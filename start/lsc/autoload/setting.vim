@@ -92,7 +92,6 @@ function s:install(path, commands, finished, ...)
 		call term_start(l:cmd, l:options)
     else
 		call log#log_debug('Finished install')
-		call dialog#notice('Installation finished.')
 		if type(a:finished) == v:t_func
 			call call(a:finished, [])
 		endif

@@ -13,5 +13,5 @@ function lsc#uninstall_server(lang) abort
 endfunction
 
 function s:post_install()
-	call log#log_debug('Install finished')
+	call dialog#notice('Installation finished.')
 endfunction
