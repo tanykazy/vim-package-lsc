@@ -13,15 +13,18 @@ let g:log_level = log#level_debug
 call log#init()
 " call log#start_chlog()
 
-command -nargs=1 -complete=custom,cmd#completion_support_lang LscInstallServer call lsc#install_server(<f-args>)
-command -nargs=1 -complete=custom,cmd#completion_installed_lang LscUninstallServer call lsc#uninstall_server(<f-args>)
-
+command -nargs=1 -complete=custom,cmd#completion_support_lang LscInstallServer call cmd#install(<f-args>)
+command -nargs=1 -complete=custom,cmd#completion_installed_lang LscUninstallServer call cmd#uninstall(<f-args>)
 command -nargs=? -complete=custom,cmd#completion_installed_lang LscStart call cmd#start(<f-args>)
 command -nargs=? -complete=custom,cmd#completion_running_server LscStop call cmd#stop(<f-args>)
 command -nargs=? -complete=buffer LscOpen call cmd#open(<f-args>)
 command -nargs=? -complete=buffer LscClose call cmd#close(<f-args>)
 command -nargs=? -complete=buffer LscChange call cmd#change(<f-args>)
 command -nargs=? -complete=buffer LscSave call cmd#save(<f-args>)
+
+" noremap <silent> <unique> <Plug>(lsc-hover)
+
+
 
 augroup vim_package_lsc
 	autocmd BufRead * LscOpen

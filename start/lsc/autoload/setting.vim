@@ -11,7 +11,8 @@ endfunction
 function setting#load_server_setting(lang)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	if !has_key(s:settings['language'], a:lang)
-		call log#log_error('Not found setting ' . a:lang . ' in ' . s:server_setting_file)
+		call log#log_error('Not found setting "' . a:lang . '" in ' . s:server_setting_file)
+		return {}
 	endif
 	return get(s:settings['language'], a:lang, {})
 endfunction
@@ -40,28 +41,28 @@ endfunction
 
 function setting#install(lang, finished) abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-
 	let l:server_path = util#build_path(s:install_path, a:lang)
+	let l:setting = setting#load_server_setting(a:lang)
+	if empty(l:setting)
+		return v:false
+	endif
 	if !isdirectory(l:server_path)
 		let l:result = mkdir(l:server_path, 'p')
 		if l:result
 			call log#log_debug('Create directory: ' . l:server_path)
 		else
 			call log#log_debug('Directory creation failure: ' . l:server_path)
-			call dialog#error('Directory creation failure:', l:server_path)
-			return
+			return v:false
 		endif
 	endif
-
-	let l:setting = setting#load_server_setting(a:lang)
 	let l:commands = []
 	if has_key(l:setting.command, 'dependents')
 		let l:commands += l:setting.command.dependents
 	endif
 	let l:commands += [l:setting.command.install]
-
 	call log#log_debug('Install language server: ' . join(l:commands, "\n"))
     call s:install(l:server_path, l:commands, a:finished)
+	return v:true
 endfunction
 
 function setting#uninstall(lang) abort
@@ -73,7 +74,6 @@ function setting#uninstall(lang) abort
 		call dialog#error('Failed to delete:', l:server_path)
 		return v:false
 	endif
-	call dialog#notice('Uninstall complete:', l:server_path)
 	return v:true
 endfunction
 

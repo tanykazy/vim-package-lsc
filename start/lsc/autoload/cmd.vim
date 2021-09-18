@@ -31,6 +31,36 @@ function cmd#completion_installed_lang(arglead, cmdline, cursorpos)
     return join(l:list, "\n")
 endfunction
 
+function cmd#install(lang) abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if !util#isContain(setting#getLangList(), a:lang)
+        call dialog#error('"' . a:lang . '" not found.')
+        return
+	endif
+    let l:result = setting#install(a:lang, funcref('s:post_install'))
+    if l:result
+        call dialog#notice('Install...')
+    else
+        call dialog#error('Installation failed.')
+    endif
+endfunction
+
+function cmd#uninstall(lang) abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if !util#isContain(setting#getInstalledList(), a:lang)
+        call dialog#error('"' . a:lang . '" not found.')
+        return
+	endif
+    let l:result = setting#uninstall(a:lang)
+    if l:result
+        call dialog#notice('Uninstall complete:', a:lang)
+    endif
+endfunction
+
+function s:post_install()
+	call dialog#notice('Installation finished.')
+endfunction
+
 function cmd#start(...) abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if a:0 > 0
