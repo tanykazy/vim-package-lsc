@@ -40,7 +40,7 @@ function s:channel.close() dict
 	call s:job_stop(self.job, 'term')
 	call log#log_debug('Job stop: ' . string(self.job))
 	call s:ch_close(self.handle)
-	call log#log_debug('Close channel: ' . string(self))
+	call log#log_trace('Close channel: ' . string(self))
 endfunction
 
 function s:channel.send(data) dict
