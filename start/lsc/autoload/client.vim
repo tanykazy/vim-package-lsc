@@ -22,14 +22,17 @@ endfunction
 
 function client#stop(filetype)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if has_key(s:server_list, a:filetype)
-        let l:server = s:server_list[a:filetype]
-        call s:send_request(l:server, 'shutdown', v:none)
-    endif
     if util#isNone(a:filetype)
         for l:server in values(s:server_list)
             call s:send_request(l:server, 'shutdown', v:none)
         endfor
+        call util#wait({-> empty(client#get_running_server())})
+    else
+        if has_key(s:server_list, a:filetype)
+            let l:server = s:server_list[a:filetype]
+            call s:send_request(l:server, 'shutdown', v:none)
+            call util#wait({-> !util#isContain(client#get_running_server(), a:filetype)})
+        endif
     endif
 endfunction
 

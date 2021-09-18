@@ -320,7 +320,7 @@ endfunction
 
 function lsp#DidChangeConfigurationClientCapabilities()
 	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
+	let l:params['dynamicRegistration'] = v:true
 	return l:params
 endfunction
 

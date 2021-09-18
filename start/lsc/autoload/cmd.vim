@@ -52,11 +52,6 @@ function cmd#stop(...) abort
         let l:filetype = v:none
     endif
     call client#stop(l:filetype)
-    if util#isNone(l:filetype)
-        call util#wait({-> empty(client#get_running_server())})
-    else
-        call util#wait({-> !util#isContain(client#get_running_server(), l:filetype)})
-    endif
 endfunction
 
 function cmd#open(...) abort
