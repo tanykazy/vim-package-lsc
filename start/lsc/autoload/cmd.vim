@@ -1,14 +1,3 @@
-function cmd#setup_autocmd()
-	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	augroup vim_package_lsc
-		autocmd BufRead * LscOpen
-		" autocmd BufReadPost * LscOpen
-		" autocmd BufWinEnter * LscOpen
-		autocmd BufEnter * LscOpen
-		autocmd VimLeave * LscStop
-	augroup END
-endfunction
-
 function cmd#setup_buffercmd(buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	augroup vim_package_lsc

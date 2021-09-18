@@ -1,7 +1,7 @@
-let s:server_setting_file = expand('<sfile>:p:h:h') . '/servers.json'
-let s:client_setting_file = expand('<sfile>:p:h:h') . '/client.json'
-let s:install_path = expand('<sfile>:p:h:h') . '/servers'
-let s:settings = util#parse_json_file(s:server_setting_file)
+const s:server_setting_file = expand('<sfile>:p:h:h') . '/servers.json'
+const s:client_setting_file = expand('<sfile>:p:h:h') . '/client.json'
+const s:install_path = expand('<sfile>:p:h:h') . '/servers'
+const s:settings = util#parse_json_file(s:server_setting_file)
 
 function setting#get_install_path()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))

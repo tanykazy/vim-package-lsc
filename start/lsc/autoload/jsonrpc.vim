@@ -1,8 +1,8 @@
-let s:terminater = "\r\n"
-let s:separator = ": "
-let s:content_length = "Content-Length"
-let s:content_type = "Content-Type"
-let s:encoding = 'utf-8'
+const s:terminater = "\r\n"
+const s:separator = ": "
+const s:content_length = "Content-Length"
+const s:content_type = "Content-Type"
+const s:encoding = 'utf-8'
 
 function jsonrpc#message()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))

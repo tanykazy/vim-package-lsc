@@ -1,4 +1,4 @@
-let s:has_quickfix = has('quickfix')
+const s:has_quickfix = has('quickfix')
 
 let s:quickfixes = {}
 let s:locations = {}

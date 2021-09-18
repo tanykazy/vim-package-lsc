@@ -270,7 +270,6 @@ function s:fn.initialize(server, message, ...)
     let l:params = lsp#InitializedParams()
     call s:send_notification(a:server, 'initialized', l:params)
 
-    call cmd#setup_autocmd()
     call map#setup_buffermap()
 
     let l:bufinfolist = util#loadedbufinfolist()

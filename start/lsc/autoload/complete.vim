@@ -1,6 +1,6 @@
 function complete#set_completeopt()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let s:save_completeopt = &completeopt
+    const s:save_completeopt = &completeopt
     set completeopt+=menu,menuone,preview,noselect
 endfunction
 

@@ -42,7 +42,7 @@ function util#uri2path(uri)
 	return util#decode_uri(l:path)
 endfunction
 
-let s:exclude_chars = '^[a-zA-Z0-9_.~/-]$'
+const s:exclude_chars = '^[a-zA-Z0-9_.~/-]$'
 
 function util#encode_uri(uri)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))

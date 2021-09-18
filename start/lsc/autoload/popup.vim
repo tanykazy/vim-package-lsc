@@ -1,4 +1,4 @@
-let s:has_popupwin = has('popupwin')
+const s:has_popupwin = has('popupwin')
 
 function popup#hover(title, text, options)
     let b:hover_id = get(b:, 'hover_id', v:none)

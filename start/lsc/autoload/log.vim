@@ -1,4 +1,4 @@
-let s:log_name = 'vim-package-lsc.log'
+const s:log_name = 'vim-package-lsc.log'
 
 let s:log_level = {}
 let s:log_level.trace = 0
@@ -6,10 +6,10 @@ let s:log_level.debug = 1
 let s:log_level.error = 2
 let s:log_level.none = 3
 
-let log#level_trace = s:log_level.trace
-let log#level_debug = s:log_level.debug
-let log#level_error = s:log_level.error
-let log#level_none = s:log_level.none
+const log#level_trace = s:log_level.trace
+const log#level_debug = s:log_level.debug
+const log#level_error = s:log_level.error
+const log#level_none = s:log_level.none
 
 let g:log_level = get(g:, 'log_level', s:log_level.none)
 let g:log_file = get(g:, 'log_file', expand('<sfile>:p:h:h') . '/' . s:log_name)

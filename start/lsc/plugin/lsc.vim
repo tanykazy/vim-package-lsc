@@ -1,9 +1,9 @@
 if exists("g:loaded_lsc")
 	finish
 endif
-let g:loaded_lsc = 1
+const g:loaded_lsc = 1
 
-let s:save_cpoptions = &cpoptions
+const s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
 
@@ -21,6 +21,14 @@ command -nargs=? -complete=buffer LscOpen call cmd#open(<f-args>)
 command -nargs=? -complete=buffer LscClose call cmd#close(<f-args>)
 command -nargs=? -complete=buffer LscChange call cmd#change(<f-args>)
 command -nargs=? -complete=buffer LscSave call cmd#save(<f-args>)
+
+augroup vim_package_lsc
+	autocmd BufRead * LscOpen
+	" autocmd BufReadPost * LscOpen
+	" autocmd BufWinEnter * LscOpen
+	autocmd BufEnter * LscOpen
+	autocmd VimLeave * LscStop
+augroup END
 
 call complete#set_completeopt()
 
