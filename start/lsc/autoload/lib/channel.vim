@@ -1,6 +1,14 @@
 const s:has_channel = has('channel')
 const s:has_job = has('job')
 
+function lib#channel#log(...)
+	call ch_log(join(a:000, '\n'))
+endfunction
+
+function lib#channel#logfile(logfile)
+	call ch_logfile(a:logfile, 'a')
+endfunction
+
 function lib#channel#open(cmd, cwd, cb)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:ch = s:channel.new()
@@ -40,7 +48,7 @@ function s:channel.close() dict
 	call s:job_stop(self.job, 'term')
 	call log#log_debug('Job stop: ' . string(self.job))
 	call s:ch_close(self.handle)
-	call log#log_trace('Close channel: ' . string(self))
+	call log#log_debug('Close channel: ' . string(self))
 endfunction
 
 function s:channel.send(data) dict
