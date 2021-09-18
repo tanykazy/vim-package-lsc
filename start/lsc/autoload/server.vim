@@ -85,8 +85,8 @@ function s:server.recv(data) dict
         call self.listener[l:event](self, l:content, l:origin)
     else
         call log#log_debug('Unimplemented listener function call')
-        call log#log_debug(string(self))
         call log#log_debug(l:event)
         call log#log_debug(string(a:data))
+        call log#log_trace(string(self))
     endif
 endfunction
