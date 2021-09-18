@@ -24,6 +24,10 @@ function log#stop_chlog()
     call lib#channel#logfile('')
 endfunction
 
+function log#init()
+    call delete(g:log_file)
+endfunction
+
 function log#log_trace(msg)
     if !(g:log_level > s:log_level.trace)
         call s:log('[TRACE]', a:msg)
