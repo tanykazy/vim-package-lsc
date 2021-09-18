@@ -10,7 +10,8 @@ set cpoptions&vim
 " let g:log_level = log#level_trace
 let g:log_level = log#level_debug
 " let g:log_level = log#level_error
-call log#start_log()
+call delete(g:log_file)
+" call log#start_chlog()
 
 command -nargs=1 -complete=custom,cmd#completion_support_lang LscInstallServer call lsc#install_server(<f-args>)
 command -nargs=1 -complete=custom,cmd#completion_installed_lang LscUninstallServer call lsc#uninstall_server(<f-args>)

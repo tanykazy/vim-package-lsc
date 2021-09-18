@@ -14,15 +14,14 @@ const log#level_none = s:log_level.none
 let g:log_level = get(g:, 'log_level', s:log_level.none)
 let g:log_file = get(g:, 'log_file', expand('<sfile>:p:h:h') . '/' . s:log_name)
 
-function log#start_log()
-    if g:log_level < s:log_level.error
-        call delete(g:log_file)
-        " call ch_logfile(g:log_file, 'w')
+function log#start_chlog()
+    if g:log_level < s:log_level.none
+        call lib#channel#logfile(g:log_file)
     endif
 endfunction
 
-function log#stop_log()
-    call ch_logfile('')
+function log#stop_chlog()
+    call lib#channel#logfile('')
 endfunction
 
 function log#log_trace(msg)
@@ -44,6 +43,5 @@ function log#log_error(msg)
 endfunction
 
 function s:log(level, msg)
-    " call ch_log(a:level . a:msg)
     call writefile([a:level . a:msg], g:log_file, 'as')
 endfunction
