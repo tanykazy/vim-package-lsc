@@ -1,5 +1,5 @@
-let s:has_channel = has('channel')
-let s:has_job = has('job')
+const s:has_channel = has('channel')
+const s:has_job = has('job')
 
 function lib#channel#open(cmd, cwd, cb)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
