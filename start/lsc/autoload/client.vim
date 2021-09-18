@@ -507,17 +507,20 @@ let s:listener['textDocument/completion'] = s:fn.textDocument_completion
 function s:send_request(server, method, params)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:message = jsonrpc#request_message(a:server.id, a:method, a:params)
+	call log#log_debug('Send request: ' . a:method)
     return a:server.send(l:message)
 endfunction
 
 function s:send_response(server, message)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	call log#log_debug('Send response: ' . a:method)
     return a:server.send(l:message)
 endfunction
 
 function s:send_notification(server, method, params)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:message = jsonrpc#notification_message(a:method, a:params)
+	call log#log_debug('Send notification: ' . a:method)
     return a:server.send(l:message)
 endfunction
 

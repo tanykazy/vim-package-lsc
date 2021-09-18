@@ -33,7 +33,6 @@ endfunction
 
 function cmd#start(...) abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_debug('command start' . string(a:000))
     if a:0 > 0
         let l:filetype = a:1
     else
@@ -45,7 +44,6 @@ endfunction
 
 function cmd#stop(...) abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_debug('command stop' . string(a:000))
     if a:0 > 0
         let l:filetype = a:1
     else
@@ -56,7 +54,6 @@ endfunction
 
 function cmd#open(...) abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_debug('command open' . string(a:000))
     if a:0 > 0
         let l:buffer = bufnr(a:1)
     else
@@ -73,7 +70,6 @@ endfunction
 
 function cmd#close(...) abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_debug('command close' . string(a:000))
     if a:0 > 0
         let l:buffer = bufnr(a:1)
     else
@@ -90,7 +86,6 @@ endfunction
 
 function cmd#change(...) abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_debug('command change' . string(a:000))
     if a:0 > 0
         let l:buffer = bufnr(a:1)
     else
@@ -107,7 +102,6 @@ endfunction
 
 function cmd#save(...) abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_debug('command save' . string(a:000))
     if a:0 > 0
         let l:buffer = bufnr(a:1)
     else
@@ -136,7 +130,6 @@ endfunction
 
 function cmd#complement(...) abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    call log#log_debug('command complement' . string(a:000))
     if a:0 > 0
         let l:buffer = bufnr(a:1)
     else

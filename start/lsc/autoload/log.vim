@@ -16,7 +16,8 @@ let g:log_file = get(g:, 'log_file', expand('<sfile>:p:h:h') . '/' . s:log_name)
 
 function log#start_log()
     if g:log_level < s:log_level.error
-        call ch_logfile(g:log_file, 'w')
+        call delete(g:log_file)
+        " call ch_logfile(g:log_file, 'w')
     endif
 endfunction
 
@@ -43,9 +44,6 @@ function log#log_error(msg)
 endfunction
 
 function s:log(level, msg)
-    if g:log_level < s:log_level.error
-        call ch_log(a:level . a:msg)
-    else
-        call writefile([a:level . a:msg], g:log_file)
-    endif
+    " call ch_log(a:level . a:msg)
+    call writefile([a:level . a:msg], g:log_file, 'as')
 endfunction
