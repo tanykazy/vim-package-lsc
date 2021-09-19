@@ -288,8 +288,6 @@ function s:fn.initialize(server, message, ...)
     let l:params = lsp#InitializedParams()
     call s:send_notification(a:server, 'initialized', l:params)
 
-    call map#setup_buffermap()
-
     let l:bufinfolist = util#loadedbufinfolist()
     for l:bufinfo in l:bufinfolist
         let l:buftype = util#getbuftype(l:bufinfo.bufnr)
