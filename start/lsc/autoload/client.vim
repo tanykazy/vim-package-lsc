@@ -241,7 +241,7 @@ function client#code_action(buf, start, end)
         return
     endif
     let l:start = lsp#Position(a:start - 1, 0)
-    let l:end = lsp#Position(a:end - 1, 0)
+    let l:end = lsp#Position(a:end - 1, util#getlinelength(a:end) - 1)
     let l:range = lsp#Range(l:start, l:end)
     let l:diagnostics = get(b:, 'diagnostics', [])
     let l:context = lsp#CodeActionContext(l:diagnostics, lsp#CodeActionKind().Empty)
@@ -516,6 +516,11 @@ function s:fn.textDocument_completion(server, message, ...)
     call complete#complete(l:position, l:items)
 endfunction
 
+function s:fn.textDocument_codeAction(server, message, ...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call log#log_debug(string(a:message))
+endfunction
+
 " function s:fn.response_error(server, message, ...)
 " 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 "     call log#log_error('Unknown event listener function call')
@@ -532,6 +537,7 @@ let s:listener['textDocument/definition'] = s:fn.textDocument_definition
 let s:listener['textDocument/references'] = s:fn.textDocument_references
 let s:listener['textDocument/implementation'] = s:fn.textDocument_implementation
 let s:listener['textDocument/completion'] = s:fn.textDocument_completion
+let s:listener['textDocument/codeAction'] = s:fn.textDocument_codeAction
 " let s:listener['unknown'] = funcref('s:fn.response_error')
 
 function s:send_request(server, method, params)

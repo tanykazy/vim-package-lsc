@@ -188,13 +188,6 @@ endfunction
 
 function cmd#code_action(...) range abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    " call log#log_error(string(a:000))
-    " call log#log_error(string(a:firstline))
-    " call log#log_error(string(a:lastline))
-    " call log#log_error(string(getcharpos("'<")))
-    " call log#log_error(string(getcharpos("'>")))
-    " call log#log_error(mode())
-    " call log#log_error(mode(1))
     if a:0 > 0
         let l:buffer = bufnr(a:1)
     else
