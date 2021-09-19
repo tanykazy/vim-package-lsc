@@ -175,3 +175,13 @@ function cmd#complement(...) abort
         endif
     endif
 endfunction
+
+function cmd#document_symbol(...) abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if a:0 > 0
+        let l:buffer = bufnr(a:1)
+    else
+        let l:buffer = bufnr('%')
+    endif
+    call client#document_symbol(l:buffer)
+endfunction

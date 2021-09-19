@@ -232,6 +232,21 @@ endfunction
 function client#code_action()
 endfunction
 
+function client#document_symbol(buf)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:filetype = util#getfiletype(a:buf)
+    if !has_key(s:server_list, l:filetype)
+        return v:false
+    endif
+    let l:server = s:server_list[l:filetype]
+    let l:path = util#buf2path(a:buf)
+    " if !util#isContain(l:server['files'], l:path)
+    "     return
+    " endif
+    let l:params = lsp#DocumentSymbolParams(util#encode_uri(l:path), v:none, v:none)
+    call s:send_request(l:server, 'textDocument/documentSymbol', l:params)
+endfunction
+
 function client#completion_resolve(buf, item)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)

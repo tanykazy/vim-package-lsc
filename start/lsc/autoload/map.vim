@@ -1,6 +1,7 @@
 function map#setup_buffermap()
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    nmap <silent> <F3> :<C-u>call client#document_hover(bufnr('%'), getpos('.'))<CR>
+    nmap <silent> <F3> <Plug>(lsc-hover)
+    nmap <silent> <F4> <Plug>(lsc-document-symbol)
     nmap <silent> <F11> :<C-u>call client#code_lens(bufnr('%'))<CR>
     nmap <silent> <F12> :<C-u>call client#goto_definition(bufnr('%'), getpos('.'), v:false)<CR>
     nmap <silent> <C-F12> :<C-u>call client#goto_implementation(bufnr('%'), getpos('.'), v:true)<CR>

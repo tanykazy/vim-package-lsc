@@ -202,6 +202,14 @@ function lsp#CodeActionContext(diagnostics, kind)
 	return l:params
 endfunction
 
+function lsp#DocumentSymbolParams(path, workDoneToken, partialResultToken)
+	let l:params = {}
+	call extend(l:params, lsp#WorkDoneProgressParams(a:workDoneToken))
+	call extend(l:params, lsp#PartialResultParams(a:partialResultToken))
+	let l:params['textDocument'] = lsp#TextDocumentIdentifier(a:path)
+	return l:params
+endfunction
+
 function lsp#WorkDoneProgressParams(workDoneToken)
 	let l:workDoneProgressParams = {}
 	if !util#isNone(a:workDoneToken)

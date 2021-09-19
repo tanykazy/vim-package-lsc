@@ -21,8 +21,11 @@ command -nargs=? -complete=buffer LscOpen call cmd#open(<f-args>)
 command -nargs=? -complete=buffer LscClose call cmd#close(<f-args>)
 command -nargs=? -complete=buffer LscChange call cmd#change(<f-args>)
 command -nargs=? -complete=buffer LscSave call cmd#save(<f-args>)
+command -nargs=? -complete=buffer LscDocumentSymbol call cmd#document_symbol(<f-args>)
+command -nargs=0 LscHover call cmd#hover()
 
-" noremap <silent> <unique> <Plug>(lsc-hover)
+noremap <silent> <unique> <Plug>(lsc-hover) :<C-u>LscHover<CR>
+noremap <silent> <unique> <Plug>(lsc-document-symbol) :<C-u>LscDocumentSymbol<CR>
 
 
 
