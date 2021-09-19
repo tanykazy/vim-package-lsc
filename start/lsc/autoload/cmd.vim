@@ -200,21 +200,21 @@ function cmd#goto_definition() abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:buffer = bufnr('%')
     let l:pos = getpos('.')
-    call client#goto_definition(l:buffer, l:pos, v:false)
+    call client#goto_definition(l:buffer, l:pos)
 endfunction
 
 function cmd#goto_implementation() abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:buffer = bufnr('%')
     let l:pos = getpos('.')
-    call client#goto_implementation(l:buffer, l:pos, v:false)
+    call client#goto_implementation(l:buffer, l:pos)
 endfunction
 
 function cmd#find_references() abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:buffer = bufnr('%')
     let l:pos = getpos('.')
-    call client#find_references(l:buffer, l:pos, v:false)
+    call client#find_references(l:buffer, l:pos)
 endfunction
 
 function cmd#document_symbol(...) abort

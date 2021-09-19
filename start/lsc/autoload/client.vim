@@ -130,7 +130,7 @@ function client#document_hover(buf, pos)
     call s:send_request(l:server, 'textDocument/hover', l:params)
 endfunction
 
-function client#goto_definition(buf, pos, preview)
+function client#goto_definition(buf, pos)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
     if !has_key(s:server_list, l:filetype)
@@ -141,7 +141,6 @@ function client#goto_definition(buf, pos, preview)
     if !util#isContain(l:server['files'], l:path)
         return
     endif
-    let l:server.preview = a:preview
     let l:lnum = a:pos[1]
     let l:col = a:pos[2]
     let l:position = lsp#Position(l:lnum - 1, l:col - 1)
@@ -149,7 +148,7 @@ function client#goto_definition(buf, pos, preview)
     call s:send_request(l:server, 'textDocument/definition', l:params)
 endfunction
 
-function client#find_references(buf, pos, preview)
+function client#find_references(buf, pos)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
     if !has_key(s:server_list, l:filetype)
@@ -160,7 +159,6 @@ function client#find_references(buf, pos, preview)
     if !util#isContain(l:server['files'], l:path)
         return
     endif
-    let l:server.preview = a:preview
     let l:lnum = a:pos[1]
     let l:col = a:pos[2]
     let l:position = lsp#Position(l:lnum - 1, l:col - 1)
@@ -169,7 +167,7 @@ function client#find_references(buf, pos, preview)
     call s:send_request(l:server, 'textDocument/references', l:params)
 endfunction
 
-function client#goto_implementation(buf, pos, preview)
+function client#goto_implementation(buf, pos)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
     if !has_key(s:server_list, l:filetype)
@@ -180,7 +178,6 @@ function client#goto_implementation(buf, pos, preview)
     if !util#isContain(l:server['files'], l:path)
         return
     endif
-    let l:server.preview = a:preview
     let l:lnum = a:pos[1]
     let l:col = a:pos[2]
     let l:position = lsp#Position(l:lnum - 1, l:col - 1)
@@ -521,13 +518,6 @@ function s:fn.textDocument_codeAction(server, message, ...)
     call log#log_debug(string(a:message))
 endfunction
 
-" function s:fn.response_error(server, message, ...)
-" 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-"     call log#log_error('Unknown event listener function call')
-"     call log#log_error(string(a:server))
-"     call log#log_error(string(a:message))
-" endfunction
-
 let s:listener = {}
 let s:listener['initialize'] = s:fn.initialize
 let s:listener['shutdown'] = s:fn.shutdown
@@ -538,7 +528,6 @@ let s:listener['textDocument/references'] = s:fn.textDocument_references
 let s:listener['textDocument/implementation'] = s:fn.textDocument_implementation
 let s:listener['textDocument/completion'] = s:fn.textDocument_completion
 let s:listener['textDocument/codeAction'] = s:fn.textDocument_codeAction
-" let s:listener['unknown'] = funcref('s:fn.response_error')
 
 function s:send_request(server, method, params)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
