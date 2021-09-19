@@ -21,6 +21,10 @@ command -nargs=? -complete=buffer LscOpen call cmd#open(<f-args>)
 command -nargs=? -complete=buffer LscClose call cmd#close(<f-args>)
 command -nargs=? -complete=buffer LscChange call cmd#change(<f-args>)
 command -nargs=? -complete=buffer LscSave call cmd#save(<f-args>)
+command -nargs=? -complete=buffer LscCodeLens call cmd#code_lens(<f-args>)
+command -nargs=0 LscGotoDefinition call cmd#goto_definition()
+command -nargs=0 LscGotoImplementation call cmd#goto_implementation()
+command -nargs=0 LscFindReferences call cmd#find_references()
 command -nargs=? -complete=buffer LscDocumentSymbol call cmd#document_symbol(<f-args>)
 command -nargs=0 LscHover call cmd#hover()
 
@@ -30,6 +34,10 @@ noremap <silent> <unique> <Plug>(lsc-open) :<C-u>LscOpen<CR>
 noremap <silent> <unique> <Plug>(lsc-close) :<C-u>LscClose<CR>
 noremap <silent> <unique> <Plug>(lsc-change) :<C-u>LscChange<CR>
 noremap <silent> <unique> <Plug>(lsc-save) :<C-u>LscSave<CR>
+noremap <silent> <unique> <Plug>(lsc-code-lens) :<C-u>LscCodeLens<CR>
+noremap <silent> <unique> <Plug>(lsc-goto-definition) :<C-u>LscGotoDefinition<CR>
+noremap <silent> <unique> <Plug>(lsc-goto-implementation) :<C-u>LscGotoImplementation<CR>
+noremap <silent> <unique> <Plug>(lsc-find-references) :<C-u>LscFindReferences<CR>
 noremap <silent> <unique> <Plug>(lsc-document-symbol) :<C-u>LscDocumentSymbol<CR>
 noremap <silent> <unique> <Plug>(lsc-hover) :<C-u>LscHover<CR>
 
@@ -46,16 +54,10 @@ call highlight#setup_highlight()
 
 nmap <silent> <F3> <Plug>(lsc-hover)
 nmap <silent> <F4> <Plug>(lsc-document-symbol)
-nmap <silent> <F11> :<C-u>call client#code_lens(bufnr('%'))<CR>
-nmap <silent> <F12> :<C-u>call client#goto_definition(bufnr('%'), getpos('.'), v:false)<CR>
-nmap <silent> <C-F12> :<C-u>call client#goto_implementation(bufnr('%'), getpos('.'), v:true)<CR>
-nmap <silent> <S-F12> :<C-u>call client#find_references(bufnr('%'), getpos('.'), v:false)<CR>
-" nmap <silent> <C-k> :<C-u>call client#goto_definition(bufnr('%'), getpos('.'), v:false)<CR>
-
-" 補完表示時のEnterで改行をしない
-" inoremap <expr><CR>  pumvisible() ? "<C-y>" : "<CR>"
-" inoremap <expr><C-n> pumvisible() ? "<Down>" : "<C-n>"
-" inoremap <expr><C-p> pumvisible() ? "<Up>" : "<C-p>"
+nmap <silent> <F11> <Plug>(lsc-code-lens)
+nmap <silent> <F12> <Plug>(lsc-goto-definition)
+nmap <silent> <C-F12> <Plug>(lsc-goto-implementation)
+nmap <silent> <S-F12> <Plug>(lsc-find-references)
 
 
 let &cpoptions = s:save_cpoptions

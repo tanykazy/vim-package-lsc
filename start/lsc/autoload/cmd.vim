@@ -176,6 +176,37 @@ function cmd#complement(...) abort
     endif
 endfunction
 
+function cmd#code_lens(...) abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    if a:0 > 0
+        let l:buffer = bufnr(a:1)
+    else
+        let l:buffer = bufnr('%')
+    endif
+    call client#code_lens(l:buffer)
+endfunction
+
+function cmd#goto_definition() abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:buffer = bufnr('%')
+    let l:pos = getpos('.')
+    call client#goto_definition(l:buffer, l:pos, v:false)
+endfunction
+
+function cmd#goto_implementation() abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:buffer = bufnr('%')
+    let l:pos = getpos('.')
+    call client#goto_implementation(l:buffer, l:pos, v:false)
+endfunction
+
+function cmd#find_references() abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:buffer = bufnr('%')
+    let l:pos = getpos('.')
+    call client#find_references(l:buffer, l:pos, v:false)
+endfunction
+
 function cmd#document_symbol(...) abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if a:0 > 0
