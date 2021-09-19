@@ -30,6 +30,19 @@ function lsp#CompletionTriggerKind()
 	return l:CompletionTriggerKind
 endfunction
 
+function lsp#CodeActionKind()
+	let l:CodeActionKind = {}
+	let l:CodeActionKind['Empty'] = ''
+	let l:CodeActionKind['QuickFix'] = 'quickfix'
+	let l:CodeActionKind['Refactor'] = 'refactor'
+	let l:CodeActionKind['RefactorExtract'] = 'refactor.extract'
+	let l:CodeActionKind['RefactorInline'] = 'refactor.inline'
+	let l:CodeActionKind['RefactorRewrite'] = 'refactor.rewrite'
+	let l:CodeActionKind['Source'] = 'source'
+	let l:CodeActionKind['SourceOrganizeImports'] = 'source.organizeImports'
+	return l:CodeActionKind
+endfunction
+
 function lsp#InitializeParams(initializationOptions, workspaceFolders, token)
 	let l:params = {}
 	call extend(l:params, lsp#WorkDoneProgressParams(a:token))

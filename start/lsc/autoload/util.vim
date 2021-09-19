@@ -25,6 +25,12 @@ function util#getcursorcharpos(...) " [{winid}]
 	return l:result
 endfunction
 
+function util#getselection()
+    let l:start = getcharpos("'<")
+    let l:end = getcharpos("'>")
+	return [l:start, l:end]
+endfunction
+
 function util#relativize_path(path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return fnamemodify(a:path, ':~:.')

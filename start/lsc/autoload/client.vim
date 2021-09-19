@@ -240,10 +240,12 @@ function client#code_action(buf, start, end)
     if !util#isContain(l:server['files'], l:path)
         return
     endif
-    " let l:range = lsp#Range()
+    let l:start = lsp#Position(a:start - 1, 0)
+    let l:end = lsp#Position(a:end - 1, 0)
+    let l:range = lsp#Range(l:start, l:end)
     let l:diagnostics = get(b:, 'diagnostics', [])
-    let l:context = lsp#CodeActionContext(l:diagnostics, v:none)
-    let l:params = lsp#CodeActionParams(util#encode_uri(l:path), l:position, v:none)
+    let l:context = lsp#CodeActionContext(l:diagnostics, lsp#CodeActionKind().Empty)
+    let l:params = lsp#CodeActionParams(util#encode_uri(l:path), l:range, l:context, v:none, v:none)
     call s:send_request(l:server, 'textDocument/codeAction', l:params)
 endfunction
 
