@@ -229,7 +229,22 @@ function client#document_completion(buf, path, pos, char)
     return v:true
 endfunction
 
-function client#code_action()
+function client#code_action(buf, start, end)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:filetype = util#getfiletype(a:buf)
+    if !has_key(s:server_list, l:filetype)
+        return
+    endif
+    let l:server = s:server_list[l:filetype]
+    let l:path = util#buf2path(a:buf)
+    if !util#isContain(l:server['files'], l:path)
+        return
+    endif
+    " let l:range = lsp#Range()
+    let l:diagnostics = get(b:, 'diagnostics', [])
+    let l:context = lsp#CodeActionContext(l:diagnostics, v:none)
+    let l:params = lsp#CodeActionParams(util#encode_uri(l:path), l:position, v:none)
+    call s:send_request(l:server, 'textDocument/codeAction', l:params)
 endfunction
 
 function client#document_symbol(buf)

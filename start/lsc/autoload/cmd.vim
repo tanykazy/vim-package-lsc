@@ -186,6 +186,19 @@ function cmd#code_lens(...) abort
     call client#code_lens(l:buffer)
 endfunction
 
+function cmd#code_action(...) range abort
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    call log#log_error(string(a:000))
+    call log#log_error(string(a:firstline))
+    call log#log_error(string(a:lastline))
+    if a:0 > 0
+        let l:buffer = bufnr(a:1)
+    else
+        let l:buffer = bufnr('%')
+    endif
+    " call client#code_action(l:buffer)
+endfunction
+
 function cmd#goto_definition() abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:buffer = bufnr('%')

@@ -22,6 +22,7 @@ command -nargs=? -complete=buffer LscClose call cmd#close(<f-args>)
 command -nargs=? -complete=buffer LscChange call cmd#change(<f-args>)
 command -nargs=? -complete=buffer LscSave call cmd#save(<f-args>)
 command -nargs=? -complete=buffer LscCodeLens call cmd#code_lens(<f-args>)
+command -nargs=* -range=% LscCodeAction call cmd#code_action(<f-args>)
 command -nargs=0 LscGotoDefinition call cmd#goto_definition()
 command -nargs=0 LscGotoImplementation call cmd#goto_implementation()
 command -nargs=0 LscFindReferences call cmd#find_references()
@@ -35,6 +36,7 @@ noremap <silent> <unique> <Plug>(lsc-close) :<C-u>LscClose<CR>
 noremap <silent> <unique> <Plug>(lsc-change) :<C-u>LscChange<CR>
 noremap <silent> <unique> <Plug>(lsc-save) :<C-u>LscSave<CR>
 noremap <silent> <unique> <Plug>(lsc-code-lens) :<C-u>LscCodeLens<CR>
+noremap <unique> <Plug>(lsc-code-action) :LscCodeAction<CR>
 noremap <silent> <unique> <Plug>(lsc-goto-definition) :<C-u>LscGotoDefinition<CR>
 noremap <silent> <unique> <Plug>(lsc-goto-implementation) :<C-u>LscGotoImplementation<CR>
 noremap <silent> <unique> <Plug>(lsc-find-references) :<C-u>LscFindReferences<CR>
@@ -52,9 +54,11 @@ augroup END
 call complete#set_completeopt()
 call highlight#setup_highlight()
 
-nmap <silent> <F3> <Plug>(lsc-hover)
-nmap <silent> <F4> <Plug>(lsc-document-symbol)
-nmap <silent> <F11> <Plug>(lsc-code-lens)
+" sample key mapping
+map <silent> <F3> <Plug>(lsc-hover)
+map <silent> <F4> <Plug>(lsc-document-symbol)
+map <silent> <F11> <Plug>(lsc-code-lens)
+map <silent> <C-F11> <Plug>(lsc-code-action)
 nmap <silent> <F12> <Plug>(lsc-goto-definition)
 nmap <silent> <C-F12> <Plug>(lsc-goto-implementation)
 nmap <silent> <S-F12> <Plug>(lsc-find-references)
