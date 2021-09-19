@@ -283,22 +283,6 @@ function s:fn.initialize(server, message, ...)
     let a:server['serverInfo'] = get(a:message['result'], 'serverInfo', {})
     call log#log_debug('Update server info ' . string(a:server))
 
-    " let l:serverCapabilities = a:server['capabilities']
-    " call log#log_error(string(l:serverCapabilities))
-    " let l:completionProvider = l:serverCapabilities['completionProvider']
-    " call log#log_error(string(l:completionProvider))
-    " let l:triggerCharacters = l:completionProvider['triggerCharacters']
-    " call log#log_error(string(l:triggerCharacters))
-
-    " for l:triggerCharacter in l:triggerCharacters
-        " call log#log_error(l:triggerCharacter)
-
-        " let maplocalleader = l:triggerCharacter
-        " call log#log_error(maplocalleader)
-        " call s:defmap(l:triggerCharacter)
-        " imap <buffer><nowait> <LocalLeader>a <Esc>:<C-u>call dialog#info('trigger characters!')<CR>
-    " endfor
-
     let l:params = lsp#InitializedParams()
     call s:send_notification(a:server, 'initialized', l:params)
 
