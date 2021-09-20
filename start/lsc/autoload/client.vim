@@ -319,14 +319,12 @@ function s:fn.textDocument_publishDiagnostics(server, message, ...)
     call setbufvar(l:buf, 'diagnostics', l:diagnostics)
 
     for l:diagnostic in l:diagnostics
-        let l:lnum = l:diagnostic['range']['start']['line']
-        let l:col = l:diagnostic['range']['start']['character']
+        let l:start = util#position2pos(l:buf, l:diagnostic['range']['start'])
+        let l:end = util#position2pos(l:buf, l:diagnostic['range']['end'])
         let l:nr = get(l:diagnostic, 'code', v:none)
         let l:text = l:diagnostic['message']
         let l:type = get(l:diagnostic, 'severity', v:none)
-        call add(l:location, quickfix#location(l:file, l:lnum, l:col, l:nr, l:text, l:type))
-        let l:start = l:diagnostic['range']['start']
-        let l:end = l:diagnostic['range']['end']
+        call add(l:location, quickfix#location(l:file, l:start[1], l:start[2], l:nr, l:text, l:type))
         call textprop#add(l:buf, l:start, l:end, l:type)
     endfor
     call quickfix#set_quickfix(l:location, l:file)
@@ -376,10 +374,12 @@ function s:fn.textDocument_hover(server, message, ...)
     let l:opt = v:none
     if has_key(a:message.result, 'range')
         let l:range = a:message.result.range
-        let l:screenpos = screenpos(bufwinid('%'), l:range.start.line + 1, l:range.start.character + 1)
+        let l:start = util#position2pos(0, l:range.start)
+        let l:end = util#position2pos(0, l:range.end)
+        let l:screenpos = screenpos(bufwinid('%'), l:start[1], l:range[2])
         let l:opt = {}
         let l:opt.col = l:screenpos.col
-        let l:opt.moved = [l:range.start.character + 1, l:range.end.character + 1]
+        let l:opt.moved = [l:start[2], l:end[2]]
     endif
     let l:lines = []
     for l:value in l:values
@@ -405,9 +405,8 @@ function s:fn.textDocument_definition(server, message, ...)
     for l:result in l:results
         let l:path = util#uri2path(l:result.uri)
         let l:range = l:result.range
-        let l:lnum = l:range.start.line
-        let l:col = l:range.start.character
-        let l:locations += [quickfix#location(l:path, l:lnum, l:col, v:none, v:none, v:none)]
+        let l:start = util#position2pos(0, l:range.start)
+        let l:locations += [quickfix#location(l:path, l:start[1], l:start[2], v:none, v:none, v:none)]
     endfor
     if empty(l:locations)
         return
@@ -431,9 +430,8 @@ function s:fn.textDocument_references(server, message, ...)
     for l:result in l:results
         let l:path = util#uri2path(l:result.uri)
         let l:range = l:result.range
-        let l:lnum = l:range.start.line
-        let l:col = l:range.start.character
-        let l:locations += [quickfix#location(l:path, l:lnum, l:col, v:none, v:none, v:none)]
+        let l:start = util#position2pos(0, l:range.start)
+        let l:locations += [quickfix#location(l:path, l:start[1], l:start[2], v:none, v:none, v:none)]
     endfor
     if empty(l:locations)
         return
@@ -462,9 +460,8 @@ function s:fn.textDocument_implementation(server, message, ...)
     for l:result in l:results
         let l:path = util#uri2path(l:result.uri)
         let l:range = l:result.range
-        let l:lnum = l:range.start.line
-        let l:col = l:range.start.character
-        let l:locations += [quickfix#location(l:path, l:lnum, l:col, v:none, v:none, v:none)]
+        let l:start = util#position2pos(0, l:range.start)
+        let l:locations += [quickfix#location(l:path, l:start[1], l:start[2], v:none, v:none, v:none)]
     endfor
     if empty(l:locations)
         return

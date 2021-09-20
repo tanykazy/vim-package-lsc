@@ -36,11 +36,12 @@ function util#getlinelength(lnum)
 endfunction
 
 function util#charpos2bytepos(pos)
-let l:bufnum = get(a:pos, 0, 0)
-let l:lnum = get(a:pos, 1, 0)
-let l:col = get(a:pos, 2, 0)
-let l:off = get(a:pos, 3, 0)
-let l:curswant = get(a:pos, 4, 0)
+	let a:pos[2] = byteidx(getbufline(a:pos[0], a:pos[1])[0], a:pos[2])
+	return a:pos
+endfunction
+
+function util#position2pos(buf, position)
+	return [a:buf, a:position.line + 1, a:position.character + 1]
 endfunction
 
 function util#relativize_path(path)

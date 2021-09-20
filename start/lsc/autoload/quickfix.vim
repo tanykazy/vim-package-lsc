@@ -45,10 +45,10 @@ function quickfix#location(filename, lnum, col, nr, text, type)
     " let l:location['bufnr']
     let l:location['filename'] = a:filename
     " let l:location['module']
-    let l:location['lnum'] = a:lnum + 1
+    let l:location['lnum'] = a:lnum
     " let l:location['pattern']
     if !util#isNone(a:col)
-        let l:location['col'] = a:col + 1
+        let l:location['col'] = a:col
     endif
     let l:location['vcol'] = 1
     if !util#isNone(a:nr)
