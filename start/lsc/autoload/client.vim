@@ -226,7 +226,7 @@ function client#document_completion(buf, path, pos, char)
     return v:true
 endfunction
 
-function client#code_action(buf, start, end)
+function client#code_action(buf, start, end, kind)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:filetype = util#getfiletype(a:buf)
     if !has_key(s:server_list, l:filetype)
@@ -241,7 +241,9 @@ function client#code_action(buf, start, end)
     let l:end = lsp#Position(a:end - 1, util#getlinelength(a:end) - 1)
     let l:range = lsp#Range(l:start, l:end)
     let l:diagnostics = get(b:, 'diagnostics', [])
-    let l:context = lsp#CodeActionContext(l:diagnostics, lsp#CodeActionKind().Empty)
+    " let l:kind = lsp#CodeActionKind()[a:kind]
+    let l:kind = get(lsp#CodeActionKind(), a:kind, v:none)
+    let l:context = lsp#CodeActionContext(l:diagnostics, l:kind)
     let l:params = lsp#CodeActionParams(util#encode_uri(l:path), l:range, l:context, v:none, v:none)
     call s:send_request(l:server, 'textDocument/codeAction', l:params)
 endfunction

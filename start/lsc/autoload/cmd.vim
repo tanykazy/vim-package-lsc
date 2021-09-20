@@ -31,6 +31,12 @@ function cmd#completion_installed_lang(arglead, cmdline, cursorpos)
     return join(l:list, "\n")
 endfunction
 
+function cmd#completion_code_action_kind(arglead, cmdline, cursorpos)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    let l:list = keys(lsp#CodeActionKind())
+    return join(l:list, "\n")
+endfunction
+
 function cmd#install(lang) abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !util#isContain(setting#getLangList(), a:lang)
@@ -188,12 +194,9 @@ endfunction
 
 function cmd#code_action(...) range abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if a:0 > 0
-        let l:buffer = bufnr(a:1)
-    else
-        let l:buffer = bufnr('%')
-    endif
-    call client#code_action(l:buffer, a:firstline, a:lastline)
+    let l:kind = get(a:, 1, v:none)
+    let l:buffer = bufnr('%')
+    call client#code_action(l:buffer, a:firstline, a:lastline, l:kind)
 endfunction
 
 function cmd#goto_definition() abort
