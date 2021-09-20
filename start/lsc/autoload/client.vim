@@ -508,6 +508,17 @@ function s:fn.textDocument_codeAction(server, message, ...)
     endfor
 endfunction
 
+function s:fn.textDocument_documentSymbol(server, message, ...)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+    " call log#log_debug(string(a:message))
+    let l:lines = []
+    for l:result in a:message.result
+        " call log#log_debug(string(l:result))
+        let l:lines += [l:result.name]
+    endfor
+    call popup_menu(l:lines, {})
+endfunction
+
 let s:listener = {}
 let s:listener['initialize'] = s:fn.initialize
 let s:listener['shutdown'] = s:fn.shutdown
@@ -518,6 +529,7 @@ let s:listener['textDocument/references'] = s:fn.textDocument_references
 let s:listener['textDocument/implementation'] = s:fn.textDocument_implementation
 let s:listener['textDocument/completion'] = s:fn.textDocument_completion
 let s:listener['textDocument/codeAction'] = s:fn.textDocument_codeAction
+let s:listener['textDocument/documentSymbol'] = s:fn.textDocument_documentSymbol
 
 function s:send_request(server, method, params)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
