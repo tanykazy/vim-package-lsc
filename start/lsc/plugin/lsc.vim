@@ -36,7 +36,7 @@ noremap <silent> <unique> <Plug>(lsc-close) :<C-u>LscClose<CR>
 noremap <silent> <unique> <Plug>(lsc-change) :<C-u>LscChange<CR>
 noremap <silent> <unique> <Plug>(lsc-save) :<C-u>LscSave<CR>
 noremap <silent> <unique> <Plug>(lsc-code-lens) :<C-u>LscCodeLens<CR>
-noremap <unique> <Plug>(lsc-code-action) :LscCodeAction<CR>
+noremap <silent> <unique> <Plug>(lsc-code-action) :LscCodeAction<CR>
 noremap <silent> <unique> <Plug>(lsc-goto-definition) :<C-u>LscGotoDefinition<CR>
 noremap <silent> <unique> <Plug>(lsc-goto-implementation) :<C-u>LscGotoImplementation<CR>
 noremap <silent> <unique> <Plug>(lsc-find-references) :<C-u>LscFindReferences<CR>
