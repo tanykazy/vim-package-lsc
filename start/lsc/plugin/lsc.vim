@@ -11,7 +11,7 @@ set cpoptions&vim
 let g:log_level = log#level_debug
 " let g:log_level = log#level_error
 call log#init()
-" call log#start_chlog()
+call log#start_chlog()
 
 command -nargs=1 -complete=custom,cmd#completion_support_lang LscInstallServer call cmd#install(<f-args>)
 command -nargs=1 -complete=custom,cmd#completion_installed_lang LscUninstallServer call cmd#uninstall(<f-args>)

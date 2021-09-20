@@ -484,6 +484,7 @@ function s:fn.textDocument_completion(server, message, ...)
         return
     elseif has_key(l:result, 'isIncomplete')
         " interface CompletionList
+        call log#log_debug('[textDocument/completion] result.isIncomplete: ' . string(l:result.isIncomplete))
         if l:result.isIncomplete
             let l:items = l:result.items
         else
@@ -502,6 +503,9 @@ endfunction
 function s:fn.textDocument_codeAction(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_debug(string(a:message))
+    for l:result in a:message.result
+        call log#log_debug(string(l:result))
+    endfor
 endfunction
 
 let s:listener = {}
