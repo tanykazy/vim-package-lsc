@@ -32,10 +32,6 @@ function popup#hover(title, text, options)
     else
         let l:opt.minwidth = l:opt.maxwidth
     endif
-    let l:opt.pos = 'botleft'
-    let l:opt.line = 'cursor-1'
-    let l:opt.col = 'cursor'
-    let l:opt.moved = 'WORD'
     let l:opt.fixed = v:false
     let l:opt.mapping = v:false
     let l:opt.scrollbar = v:true
