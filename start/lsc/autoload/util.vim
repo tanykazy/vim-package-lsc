@@ -35,6 +35,14 @@ function util#getlinelength(lnum)
 	return charcol([a:lnum, '$'])
 endfunction
 
+function util#charpos2bytepos(pos)
+let l:bufnum = get(a:pos, 0, 0)
+let l:lnum = get(a:pos, 1, 0)
+let l:col = get(a:pos, 2, 0)
+let l:off = get(a:pos, 3, 0)
+let l:curswant = get(a:pos, 4, 0)
+endfunction
+
 function util#relativize_path(path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	return fnamemodify(a:path, ':~:.')
