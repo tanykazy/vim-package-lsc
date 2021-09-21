@@ -74,6 +74,10 @@ function cmd#start(...) abort
     else
         let l:filetype = &filetype
     endif
+    if !util#isContain(setting#getInstalledList(), l:filetype)
+        call dialog#error('"' . l:filetype. '" not installed.')
+        return
+	endif
     let l:bufnr = bufnr('%')
     call client#start(l:filetype, l:bufnr)
 endfunction

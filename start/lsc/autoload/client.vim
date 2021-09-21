@@ -7,9 +7,13 @@ endfunction
 
 function client#start(lang, buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    if !setting#isSupport(a:lang)
+    " if !setting#isSupport(a:lang)
+    "     return
+    " endif
+    if !util#isContain(setting#getInstalledList(), a:lang)
+        call dialog#error('"' . a:lang. '" not installed.')
         return
-    endif
+	endif
     if has_key(s:server_list, a:lang)
         return
     endif
