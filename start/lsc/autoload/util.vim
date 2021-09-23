@@ -16,13 +16,15 @@ function util#getcursorcharpos(...) " [{winid}]
 	let l:winid = get(a:, 1, win_getid())
 	let l:buf = winbufnr(l:winid)
 	let l:pos = getcursorcharpos(l:winid)
-	let l:result = {}
-	let l:result.bufnum = l:buf
-	let l:result.lnum = l:pos[1]
-	let l:result.col = l:pos[2]
-	let l:result.off = l:pos[3]
-	let l:result.curswant = l:pos[4]
-	return l:result
+	let l:pos[0] = l:buf
+	" let l:result = {}
+	" let l:result.bufnum = l:buf
+	" let l:result.lnum = l:pos[1]
+	" let l:result.col = l:pos[2]
+	" let l:result.off = l:pos[3]
+	" let l:result.curswant = l:pos[4]
+	" return l:result
+	return l:pos
 endfunction
 
 function util#getselection()
@@ -36,13 +38,27 @@ function util#getlinelength(lnum)
 endfunction
 
 function util#charpos2bytepos(pos)
-	let a:pos[2] = byteidx(getbufline(a:pos[0], a:pos[1])[0], a:pos[2])
+	let l:line = getbufline(a:pos[0], a:pos[1])[0]
+	let l:col = byteidx(l:line, a:pos[2])
+	" let a:pos[2] = l:col == -1 ? strlen(l:line) : l:col
+	let a:pos[2] = l:col
+	return a:pos
+endfunction
+
+function util#bytepos2charpos(pos)
+	let a:pos[2] = charidx(getbufline(a:pos[0], a:pos[1])[0], a:pos[2])
 	return a:pos
 endfunction
 
 function util#position2pos(buf, position)
 	return [a:buf, a:position.line + 1, a:position.character + 1]
 endfunction
+
+" function util#pos2position(pos)
+" 	let l:charpos = util#bytepos2charpos(a:pos)
+" 	let l:position = lsp#Position()
+" 	return [a:buf, a:position.line + 1, a:position.character + 1]
+" endfunction
 
 function util#relativize_path(path)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))

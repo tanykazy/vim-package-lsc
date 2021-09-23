@@ -135,7 +135,8 @@ function cmd#change(...) abort
     if !util#isSpecialbuffers(l:buftype)
         let l:path = expand('%:p')
         if !empty(l:path)
-            call client#document_change(l:buffer, l:path, getpos('.'), v:char)
+            let l:pos = util#getcursorcharpos()
+            call client#document_change(l:buffer, l:path, l:pos, v:char)
         endif
     endif
 endfunction
@@ -179,7 +180,8 @@ function cmd#complement(...) abort
     if !util#isSpecialbuffers(l:buftype)
         let l:path = expand('%:p')
         if !empty(l:path)
-            let l:pos = getpos('.')
+            " let l:pos = getpos('.')
+            let l:pos = util#getcursorcharpos()
             let l:pos[2] += 1
             call client#document_completion(l:buffer, l:path, l:pos, v:char)
         endif
@@ -206,21 +208,24 @@ endfunction
 function cmd#goto_definition() abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:buffer = bufnr('%')
-    let l:pos = getpos('.')
+    " let l:pos = getpos('.')
+    let l:pos = util#getcursorcharpos()
     call client#goto_definition(l:buffer, l:pos)
 endfunction
 
 function cmd#goto_implementation() abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:buffer = bufnr('%')
-    let l:pos = getpos('.')
+    " let l:pos = getpos('.')
+    let l:pos = util#getcursorcharpos()
     call client#goto_implementation(l:buffer, l:pos)
 endfunction
 
 function cmd#find_references() abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:buffer = bufnr('%')
-    let l:pos = getpos('.')
+    " let l:pos = getpos('.')
+    let l:pos = util#getcursorcharpos()
     call client#find_references(l:buffer, l:pos)
 endfunction
 

@@ -7,9 +7,6 @@ endfunction
 
 function client#start(lang, buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    " if !setting#isSupport(a:lang)
-    "     return
-    " endif
     if !util#isContain(setting#getInstalledList(), a:lang)
         call dialog#error('"' . a:lang. '" not installed.')
         return
@@ -87,10 +84,9 @@ function client#document_change(buf, path, pos, char)
         return
     endif
     if !empty(a:char)
-        let l:line = a:pos[1] - 1
-        let l:character = a:pos[2] - 1
-        let l:position = lsp#Position(l:line, l:character)
-        let l:range = lsp#Range(l:position, l:position)
+        let l:start_position = lsp#Position(a:pos[1] - 1, a:pos[2] - 1)
+        let l:end_position = lsp#Position(a:pos[1] - 1, a:pos[2] - 1)
+        let l:range = lsp#Range(l:start_position, l:end_position)
         let l:change = lsp#TextDocumentContentChangeEvent(l:range, a:char)
     else
         let l:text = util#getbuftext(a:buf)
@@ -329,6 +325,7 @@ function s:fn.textDocument_publishDiagnostics(server, message, ...)
         let l:text = l:diagnostic['message']
         let l:type = get(l:diagnostic, 'severity', v:none)
         call add(l:location, quickfix#location(l:file, l:start[1], l:start[2], l:nr, l:text, l:type))
+        " call log#log_debug(util#getbuftext(l:buf))
         call textprop#add(l:buf, l:start, l:end, l:type)
     endfor
     call quickfix#set_quickfix(l:location, l:file)
@@ -380,7 +377,7 @@ function s:fn.textDocument_hover(server, message, ...)
         let l:range = a:message.result.range
         let l:start = util#position2pos(0, l:range.start)
         let l:end = util#position2pos(0, l:range.end)
-        let l:screenpos = screenpos(bufwinid('%'), l:start[1], l:range[2])
+        let l:screenpos = screenpos(bufwinid('%'), l:start[1], l:start[2])
         let l:opt = {}
         let l:opt.col = l:screenpos.col
         let l:opt.moved = [l:start[2], l:end[2]]

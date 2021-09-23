@@ -42,6 +42,8 @@ function textprop#add(buf, startpos, endpos, severity)
     " call log#log_debug(string(a:endpos))
     let l:startpos = util#charpos2bytepos(a:startpos)
     let l:endpos = util#charpos2bytepos(a:endpos)
+    " call log#log_debug(string(l:startpos))
+    " call log#log_debug(string(l:endpos))
     let l:props = {}
     " let l:props['length']
     let l:props['end_lnum'] = l:endpos[1]
