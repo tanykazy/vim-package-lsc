@@ -134,7 +134,11 @@ function lsp#base#ProgressParams(token, value)
 	return l:params
 endfunction
 
+
 " Basic Structures
+function lsp#base#DocumentUri()
+	return lib#uri#
+endfunction
 
 
 
