@@ -2,14 +2,14 @@
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#headerPart
 function lsp#base#Header(length, type)
-    let l:header = {}
-    " The length of the content part in bytes.
-    " This header is required.
-    let l:header['Content-Length'] = a:length
-    " The mime type of the content part.
-    " Defaults to application/vscode-jsonrpc; charset=utf-8
-    let l:header['Content-Type'] = a:type
-    return l:header
+	let l:header = {}
+	" The length of the content part in bytes.
+	" This header is required.
+	let l:header['Content-Length'] = a:length
+	" The mime type of the content part.
+	" Defaults to application/vscode-jsonrpc; charset=utf-8
+	let l:header['Content-Type'] = a:type
+	return l:header
 endfunction
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#contentPart
@@ -22,54 +22,54 @@ let s:version = '2.0'
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#message
 function lsp#base#Message()
-    let l:message = {}
-    let l:message['jsonrpc'] = s:version
-    return l:message
+	let l:message = {}
+	let l:message['jsonrpc'] = s:version
+	return l:message
 endfunction
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#requestMessage
 function lsp#base#RequestMessage(id, method, params)
-    let l:message = lsp#base#Message()
-    " The request id.
-    let l:message['id'] = a:id
-    " The method to be invoked.
-    let l:message['method'] = a:method
-    " The method's params.
-    if a:params != v:none
-        let l:message['params'] = a:params
-    endif
-    return l:message
+	let l:message = lsp#base#Message()
+	" The request id.
+	let l:message['id'] = a:id
+	" The method to be invoked.
+	let l:message['method'] = a:method
+	" The method's params.
+	if a:params != v:none
+		let l:message['params'] = a:params
+	endif
+	return l:message
 endfunction
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#responseMessage
 function lsp#base#ResponseMessage(id, result, error)
-    let l:message = lsp#base#Message()
-    " The request id.
-    let l:message['id'] = a:id
-    " The result of a request. This member is REQUIRED on success.
-    " This member MUST NOT exist if there was an error invoking the method.
-    if a:result != v:none
-        let l:message['result'] = a:result
-    endif
-    " The error object in case a request fails.
-    if a:error != v:none
-        let l:message['error'] = a:error
-    endif
-    return l:message
+	let l:message = lsp#base#Message()
+	" The request id.
+	let l:message['id'] = a:id
+	" The result of a request. This member is REQUIRED on success.
+	" This member MUST NOT exist if there was an error invoking the method.
+	if a:result != v:none
+		let l:message['result'] = a:result
+	endif
+	" The error object in case a request fails.
+	if a:error != v:none
+		let l:message['error'] = a:error
+	endif
+	return l:message
 endfunction
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#responseError
 function lsp#base#ResponseError(code, message, data)
-    let l:error = {}
-    " A number indicating the error type that occurred.
-    let l:error['code'] = a:code
-    " A string providing a short description of the error.
-    let l:error['message'] = a:message
-    " A primitive or structured value that contains additional information about the error. Can be omitted.
-    if a:data != v:none
-        let l:error['data'] = a:data
-    endif
-    return l:error
+	let l:error = {}
+	" A number indicating the error type that occurred.
+	let l:error['code'] = a:code
+	" A string providing a short description of the error.
+	let l:error['message'] = a:message
+	" A primitive or structured value that contains additional information about the error. Can be omitted.
+	if a:data != v:none
+		let l:error['data'] = a:data
+	endif
+	return l:error
 endfunction
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#errorCodes
@@ -106,39 +106,42 @@ let lsp#base#ErrorCodes['lspReservedErrorRangeEnd'] = -32800
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#notificationMessage
 function lsp#base#NotificationMessage(method, params)
-    let l:message = lsp#base#Message()
-    " The method to be invoked.
-    let l:message['method'] = a:method
-    " The notification's params.
-    if a:params != v:none
-        let l:message['params'] = a:params
-    endif
-    return l:message
+	let l:message = lsp#base#Message()
+	" The method to be invoked.
+	let l:message['method'] = a:method
+	" The notification's params.
+	if a:params != v:none
+		let l:message['params'] = a:params
+	endif
+	return l:message
 endfunction
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#cancelRequest
 function lsp#base#CancelParams(id)
-    let l:params = {}
-    " The request id to cancel.
-    let l:params['id'] = a:id
-    return l:params
+	let l:params = {}
+	" The request id to cancel.
+	let l:params['id'] = a:id
+	return l:params
 endfunction
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#progress
 function lsp#base#ProgressParams(token, value)
-    let l:params = {}
-    " The progress token provided by the client or server.
-    let l:params['token'] = a:token
-    " The progress data.
-    let l:params['value'] = a:value
-    return l:params
+	let l:params = {}
+	" The progress token provided by the client or server.
+	let l:params['token'] = a:token
+	" The progress data.
+	let l:params['value'] = a:value
+	return l:params
 endfunction
 
 
 " Basic Structures
+function lsp#base#DocumentUri()
+	return lib#uri#
+endfunction
 
 
 
 function s:serialize_content(content)
-    return json_encode(a:content)
+	return json_encode(a:content)
 endfunction
