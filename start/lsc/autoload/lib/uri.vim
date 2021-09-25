@@ -10,18 +10,28 @@ function lib#uri#format(uri)
     return s:format(a:uri)
 endfunction
 
+function lib#uri#file(path)
+    return s:file(a:path)
+endfunction
+
 let s:uri = {}
+
 let s:uri['scheme'] = ''
 let s:uri['authority'] = ''
 let s:uri['path'] = ''
 let s:uri['query'] = ''
 let s:uri['fragment'] = ''
+
 function s:uri.format() dict
     return s:format(self)
 endfunction
 
+function s:uri.fspath() dict
+    return s:fspath(self)
+endfunction
+
 function s:URI(scheme, authority, path, query, fragment)
-	let l:uri = {}
+	let l:uri = deepcopy(s:uri)
     let l:uri['scheme'] = a:scheme
     let l:uri['authority'] = a:authority
     let l:uri['path'] = a:path
@@ -60,6 +70,20 @@ function s:format(uri)
     if !empty(a:uri.fragment)
         let l:result .= '#'
         let l:result .= a:uri.fragment
+    endif
+    return l:result
+endfunction
+
+function s:file(path)
+    return s:URI('file', '', a:path, '', '')
+endfunction
+
+function s:fspath(uri)
+    let l:result = ''
+    if !empty(a:uri.authority) && !empty(a:uri.path) && a:uri.scheme == 'file'
+        let l:result = '//' . a:uri.authority . a:uri.path
+    else
+        let l:result = a:uri.path
     endif
     return l:result
 endfunction
