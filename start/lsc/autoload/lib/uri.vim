@@ -87,3 +87,33 @@ function s:fspath(uri)
     endif
     return l:result
 endfunction
+
+
+const s:exclude_chars = '^[a-zA-Z0-9_.~/-]$'
+
+function util#encode_uri(uri)
+	let l:result = ''
+    for l:index in range(len(a:uri))
+		let l:char = a:uri[l:index]
+		if match(l:char, s:exclude_chars) == -1
+			let l:result = l:result . util#encode_uri_char(l:char)
+        else
+            let l:result = l:result . l:char
+        endif
+    endfor
+    return l:result
+endfunction
+
+function util#decode_uri(uri)
+    return substitute(a:uri, '%\(\x\x\)', {m -> util#decode_uri_char(m[1])}, 'g')
+endfunction
+
+function util#encode_uri_char(char)
+	let l:code = char2nr(a:char)
+    return printf('%%%02X', l:code)
+endfunction
+
+function util#decode_uri_char(code)
+	let l:hex = str2nr(a:code, 16)
+	return printf('%c', l:hex)
+endfunction

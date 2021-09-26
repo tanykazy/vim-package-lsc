@@ -137,7 +137,7 @@ endfunction
 
 " Basic Structures
 function lsp#base#DocumentUri()
-	return lib#uri#
+	" return lib#uri#
 endfunction
 
 
