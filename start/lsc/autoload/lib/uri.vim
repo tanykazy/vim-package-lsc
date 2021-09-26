@@ -89,42 +89,76 @@ function s:fspath(uri)
 endfunction
 
 
-const s:exclude_chars = '^[a-zA-Z0-9_.~/-]$'
+" const s:exclude_chars = '^[a-zA-Z0-9_.~/-]$'
 
-function util#encode_uri(uri)
-	let l:result = ''
-    for l:index in range(len(a:uri))
-		let l:char = a:uri[l:index]
-		if match(l:char, s:exclude_chars) == -1
-			let l:result = l:result . util#encode_uri_char(l:char)
-        else
-            let l:result = l:result . l:char
-        endif
-    endfor
-    return l:result
-endfunction
+" function util#encode_uri(uri)
+" 	let l:result = ''
+"     for l:index in range(len(a:uri))
+" 		let l:char = a:uri[l:index]
+" 		if match(l:char, s:exclude_chars) == -1
+" 			let l:result = l:result . util#encode_uri_char(l:char)
+"         else
+"             let l:result = l:result . l:char
+"         endif
+"     endfor
+"     return l:result
+" endfunction
 
-function util#decode_uri(uri)
-    return substitute(a:uri, '%\(\x\x\)', {m -> util#decode_uri_char(m[1])}, 'g')
-endfunction
+" function util#decode_uri(uri)
+"     return substitute(a:uri, '%\(\x\x\)', {m -> util#decode_uri_char(m[1])}, 'g')
+" endfunction
 
-function util#encode_uri_char(char)
-	let l:code = char2nr(a:char)
-    return printf('%%%02X', l:code)
-endfunction
+" function util#encode_uri_char(char)
+" 	let l:code = char2nr(a:char)
+"     return printf('%%%02X', l:code)
+" endfunction
 
-function util#decode_uri_char(code)
-	let l:hex = str2nr(a:code, 16)
-	return printf('%c', l:hex)
-endfunction
+" function util#decode_uri_char(code)
+" 	let l:hex = str2nr(a:code, 16)
+" 	return printf('%c', l:hex)
+" endfunction
 
 function s:encodeURIComponent(component)
     let l:componentString = string(a:component)
 
 endfunction
 
-function s:encode(string, unescapedSet)
+function s:CodePointAt(string, position)
+    let l:size = strchars(a:string)
+    " let l:size = strlen(a:string)
+    " let l:size = len(a:string)
+    echo l:size
+    " let l:first = char2nr(strcharpart(a:string, a:position, 1))
+    " let l:first = char2nr(strpart(a:string, a:position, 1, 1))
+    let l:first = char2nr(a:string[a:position])
+    let l:cp = l:first
+    let l:cp = printf('%#x', l:cp)
+    if !(0xD800 <= l:first && l:first >= 0xDBFF) || !(0xDC00 <= l:first && l:first >= 0xDFFF)
+        echo 'a'
+        return {'CodePoint': l:cp, 'CodeUnitCount': 1, 'IsUnpairedSurrogate': v:false}
+    endif
+    if (0xDC00 <= l:first && l:first >= 0xDFFF) || ((a:position + 1) == l:size)
+        echo 'b'
+        return {'CodePoint': l:cp, 'CodeUnitCount': 1, 'IsUnpairedSurrogate': v:true}
+    endif
+    let l:second = char2nr(strcharpart(a:string, a:position + 1, 1))
+    if !(0xDC00 <= l:second && l:second >= 0xDFFF)
+        echo 'c'
+        return {'CodePoint': l:cp, 'CodeUnitCount': 1, 'IsUnpairedSurrogate': v:true}
+    endif
+    let l:cp = s:UTF16SurrogatePairToCodePoint(l:first, l:second)
+    let l:cp = printf('%#x', l:cp)
+        echo 'd'
+    return {'CodePoint': l:cp, 'CodeUnitCount': 2, 'IsUnpairedSurrogate': v:false}
+endfunction
+
+function s:Encode(string, unescapedSet)
     let l:r = ''
+
+    while 0
+    endwhile
+
+
     for l:k in range(strchars(a:string))
         let l:c = strcharpart(a:string, l:k, 1)
         if index(a:unescapedSet, l:c) != -1
@@ -137,18 +171,26 @@ function s:encode(string, unescapedSet)
     return l:r
 endfunction
 
-function! UTF16EncodeCodePoint(cp)
+function s:UTF16EncodeCodePoint(cp)
     if a:cp <= 0xFFFF
-        return nr2char(a:cp)
+        return printf('%X', a:cp)
     endif
-    let l:cu1 = floor((a:cp - 0x10000) / 0x400) + 0xD800
+    let l:cu1 = float2nr(floor((a:cp - 0x10000) / 0x400) + 0xD800)
     let l:cu2 = ((a:cp - 0x10000) % 0x400) + 0xDC00
-    echo l:cu1
-    echo l:cu2
-    return nr2char(float2nr(l:cu1 + l:cu2))
+    return printf('%X%X', l:cu1, l:cu2)
 endfunction
 
 function s:UTF16SurrogatePairToCodePoint(lead, trail)
     let l:cp = (a:lead - 0xD800) * 0x400 + (a:trail - 0xDC00) + 0x10000
     return l:cp
 endfunction
+
+let s:test = 'aあ𠮷b'
+let s:test = iconv(s:test, 'utf-8', 'utf-16')
+echo s:CodePointAt(s:test, 0)
+echo s:CodePointAt(s:test, 1)
+echo s:CodePointAt(s:test, 2)
+echo s:CodePointAt(s:test, 3)
+echo s:CodePointAt(s:test, 4)
+echo s:CodePointAt(s:test, 5)
+echo s:CodePointAt(s:test, 6)
