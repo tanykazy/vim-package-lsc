@@ -117,3 +117,38 @@ function util#decode_uri_char(code)
 	let l:hex = str2nr(a:code, 16)
 	return printf('%c', l:hex)
 endfunction
+
+function s:encodeURIComponent(component)
+    let l:componentString = string(a:component)
+
+endfunction
+
+function s:encode(string, unescapedSet)
+    let l:r = ''
+    for l:k in range(strchars(a:string))
+        let l:c = strcharpart(a:string, l:k, 1)
+        if index(a:unescapedSet, l:c) != -1
+            let l:r = l:r . l:c
+        else
+            let l:cp = char2nr(l:c)
+            let l:octets = printf('%02X', l:cp)
+        endif
+    endfor
+    return l:r
+endfunction
+
+function! UTF16EncodeCodePoint(cp)
+    if a:cp <= 0xFFFF
+        return nr2char(a:cp)
+    endif
+    let l:cu1 = floor((a:cp - 0x10000) / 0x400) + 0xD800
+    let l:cu2 = ((a:cp - 0x10000) % 0x400) + 0xDC00
+    echo l:cu1
+    echo l:cu2
+    return nr2char(float2nr(l:cu1 + l:cu2))
+endfunction
+
+function s:UTF16SurrogatePairToCodePoint(lead, trail)
+    let l:cp = (a:lead - 0xD800) * 0x400 + (a:trail - 0xDC00) + 0x10000
+    return l:cp
+endfunction

@@ -107,7 +107,11 @@ endfunction
 function util#decode_uri_char(code)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:hex = str2nr(a:code, 16)
-	return printf('%c', l:hex)
+	call log#log_debug(l:hex)
+	call log#log_debug(nr2char(l:hex))
+	call log#log_debug(printf('%c', l:hex))
+	return nr2char(l:hex)
+	" return printf('%c', l:hex)
 endfunction
 
 function util#uri2components(uri)
