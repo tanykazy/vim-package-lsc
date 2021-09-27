@@ -205,7 +205,7 @@ function s:UTF16SurrogatePairToCodePoint(lead, trail)
 endfunction
 
 let s:test = 'aあ𠮷b'
-let s:test = iconv(s:test, 'utf-8', 'utf-16')
+" let s:test = iconv(s:test, 'utf-8', 'utf-16')
 call s:Encode(s:test, s:uriUnescaped)
 
 " echo s:CodePointAt(s:test, 0)
