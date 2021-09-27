@@ -88,7 +88,6 @@ function s:fspath(uri)
     return l:result
 endfunction
 
-
 " const s:exclude_chars = '^[a-zA-Z0-9_.~/-]$'
 
 " function util#encode_uri(uri)
@@ -118,57 +117,77 @@ endfunction
 " 	return printf('%c', l:hex)
 " endfunction
 
+const s:uriAlpha="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const s:DecimalDigit = "0123456789"
+const s:uriMark = "-_.!~*'()"
+const s:uriUnescaped = s:uriAlpha . s:DecimalDigit . s:uriMark
+
 function s:encodeURIComponent(component)
     let l:componentString = string(a:component)
-
+    let l:unescapedURIComponentSet = 
+    return s:Encode(l:componentString, )
 endfunction
 
 function s:CodePointAt(string, position)
-    let l:size = strchars(a:string)
+    let l:cp = char2nr(strcharpart(a:string, a:position, 1))
+    return {'CodePoint': l:cp, 'CodeUnitCount': 1, 'IsUnpairedSurrogate': v:false}
+
+    " " let l:size = strchars(a:string)
     " let l:size = strlen(a:string)
-    " let l:size = len(a:string)
-    echo l:size
-    " let l:first = char2nr(strcharpart(a:string, a:position, 1))
-    " let l:first = char2nr(strpart(a:string, a:position, 1, 1))
-    let l:first = char2nr(a:string[a:position])
-    let l:cp = l:first
-    let l:cp = printf('%#x', l:cp)
-    if !(0xD800 <= l:first && l:first >= 0xDBFF) || !(0xDC00 <= l:first && l:first >= 0xDFFF)
-        echo 'a'
-        return {'CodePoint': l:cp, 'CodeUnitCount': 1, 'IsUnpairedSurrogate': v:false}
-    endif
-    if (0xDC00 <= l:first && l:first >= 0xDFFF) || ((a:position + 1) == l:size)
-        echo 'b'
-        return {'CodePoint': l:cp, 'CodeUnitCount': 1, 'IsUnpairedSurrogate': v:true}
-    endif
-    let l:second = char2nr(strcharpart(a:string, a:position + 1, 1))
-    if !(0xDC00 <= l:second && l:second >= 0xDFFF)
-        echo 'c'
-        return {'CodePoint': l:cp, 'CodeUnitCount': 1, 'IsUnpairedSurrogate': v:true}
-    endif
-    let l:cp = s:UTF16SurrogatePairToCodePoint(l:first, l:second)
-    let l:cp = printf('%#x', l:cp)
-        echo 'd'
-    return {'CodePoint': l:cp, 'CodeUnitCount': 2, 'IsUnpairedSurrogate': v:false}
+    " " let l:size = len(a:string)
+    " echo [l:size, a:position]
+    " " let l:first = char2nr(strcharpart(a:string, a:position, 1))
+    " echo strpart(a:string, a:position, 1)
+    " " echo strcharpart(a:string, a:position, 1)
+    " let l:first = char2nr(strpart(a:string, a:position, 1))
+    " " let l:first = char2nr(strcharpart(a:string, a:position, 1))
+    " " let l:first = char2nr(a:string[a:position])
+    " let l:cp = l:first
+    " let l:cp = printf('%#x', l:cp)
+    " if !(0xD800 <= l:first && l:first >= 0xDBFF) || !(0xDC00 <= l:first && l:first >= 0xDFFF)
+    "     echo 'a'
+    "     return {'CodePoint': l:cp, 'CodeUnitCount': 1, 'IsUnpairedSurrogate': v:false}
+    " endif
+    " if (0xDC00 <= l:first && l:first >= 0xDFFF) || ((a:position + 1) == l:size)
+    "     echo 'b'
+    "     return {'CodePoint': l:cp, 'CodeUnitCount': 1, 'IsUnpairedSurrogate': v:true}
+    " endif
+    " " let l:second = char2nr(strcharpart(a:string, a:position + 1, 1))
+    " let l:second = char2nr(strpart(a:string, a:position + 1))
+    " if !(0xDC00 <= l:second && l:second >= 0xDFFF)
+    "     echo 'c'
+    "     return {'CodePoint': l:cp, 'CodeUnitCount': 1, 'IsUnpairedSurrogate': v:true}
+    " endif
+    " let l:cp = s:UTF16SurrogatePairToCodePoint(l:first, l:second)
+    " let l:cp = printf('%#x', l:cp)
+    "     echo 'd'
+    " return {'CodePoint': l:cp, 'CodeUnitCount': 2, 'IsUnpairedSurrogate': v:false}
 endfunction
 
 function s:Encode(string, unescapedSet)
-    let l:r = ''
-
-    while 0
-    endwhile
-
-
-    for l:k in range(strchars(a:string))
-        let l:c = strcharpart(a:string, l:k, 1)
-        if index(a:unescapedSet, l:c) != -1
-            let l:r = l:r . l:c
-        else
-            let l:cp = char2nr(l:c)
-            let l:octets = printf('%02X', l:cp)
+    let l:strLen = strchars(a:string)
+    let l:R = ''
+    let l:k = 0
+    while v:true
+        if l:k == l:strLen
+            return l:R
         endif
-    endfor
-    return l:r
+        let l:C = strcharpart(a:string, l:k, 1)
+        echo l:C
+        if stridx(a:unescapedSet, l:C) != -1
+            let l:k = l:k + 1
+            let l:R = l:R . l:C
+        else
+            let l:cp = s:CodePointAt(a:string, l:k)
+            if l:cp.IsUnpairedSurrogate == v:true
+                throw 'URIError'
+            endif
+            let l:k = l:k + l:cp.CodeUnitCount
+            let l:Octets = [l:cp.CodePoint]
+            echo l:Octets
+            " for each element octet of Octets
+        endif
+    endwhile
 endfunction
 
 function s:UTF16EncodeCodePoint(cp)
@@ -187,10 +206,12 @@ endfunction
 
 let s:test = 'aあ𠮷b'
 let s:test = iconv(s:test, 'utf-8', 'utf-16')
-echo s:CodePointAt(s:test, 0)
-echo s:CodePointAt(s:test, 1)
-echo s:CodePointAt(s:test, 2)
-echo s:CodePointAt(s:test, 3)
-echo s:CodePointAt(s:test, 4)
-echo s:CodePointAt(s:test, 5)
-echo s:CodePointAt(s:test, 6)
+call s:Encode(s:test, s:uriUnescaped)
+
+" echo s:CodePointAt(s:test, 0)
+" echo s:CodePointAt(s:test, 1)
+" echo s:CodePointAt(s:test, 2)
+" echo s:CodePointAt(s:test, 3)
+" echo s:CodePointAt(s:test, 4)
+" echo s:CodePointAt(s:test, 5)
+" echo s:CodePointAt(s:test, 6)
