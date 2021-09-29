@@ -120,7 +120,14 @@ endfunction
 const s:uriAlpha="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const s:DecimalDigit = "0123456789"
 const s:uriMark = "-_.!~*'()"
+const s:uriReserved = ";/?:@&=+$,"
 const s:uriUnescaped = s:uriAlpha . s:DecimalDigit . s:uriMark
+
+function s:encodeURI(uri)
+    let l:uriString = a:uri
+    let l:unescapedURISet = s:uriReserved . s:uriUnescaped . '#'
+    return s:Encode(l:uriString, l:unescapedURISet)
+endfunction
 
 function s:encodeURIComponent(component)
     let l:componentString = string(a:component)
@@ -191,3 +198,4 @@ let s:test = 'http://日本語.jp/日本語.html?abc=いろは&def=にほへ#あ
 " let s:test = iconv(s:test, 'utf-8', 'utf-16')
 
 echo s:encodeURIComponent(s:test)
+echo s:encodeURI(s:test)
