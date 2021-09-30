@@ -150,7 +150,6 @@ function s:CodePointAt(string, position)
         return {'CodePoint': l:cp, 'CodeUnitCount': 1, 'IsUnpairedSurrogate': v:true}
     endif
     let l:cp = s:UTF16SurrogatePairToCodePoint(l:first, l:second)
-    let l:cp = printf('%#x', l:cp)
     return {'CodePoint': l:cp, 'CodeUnitCount': 2, 'IsUnpairedSurrogate': v:false}
 endfunction
 
@@ -197,5 +196,6 @@ endfunction
 let s:test = 'http://日本語.jp/日本語.html?abc=いろは&def=にほへ#あいうえお'
 " let s:test = iconv(s:test, 'utf-8', 'utf-16')
 
+echo s:parse(s:test)
 echo s:encodeURIComponent(s:test)
 echo s:encodeURI(s:test)
