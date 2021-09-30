@@ -123,6 +123,18 @@ const s:uriMark = "-_.!~*'()"
 const s:uriReserved = ";/?:@&=+$,"
 const s:uriUnescaped = s:uriAlpha . s:DecimalDigit . s:uriMark
 
+function s:decodeURI(encodedURI)
+    let l:uriString = a:encodedURI
+    let l:reservedURISet = s:uriReserved . '#'
+    return s:Decode(l:uriString, l:reservedURISet)
+endfunction
+
+function s:decodeURIComponent(encodedURIComponent)
+    let l:componentString = a:encodedURIComponent
+    let l:reservedURIComponentSet = ''
+    return s:Decode(l:componentString, l:reservedURIComponentSet)
+endfunction
+
 function s:encodeURI(uri)
     let l:uriString = a:uri
     let l:unescapedURISet = s:uriReserved . s:uriUnescaped . '#'
@@ -133,6 +145,20 @@ function s:encodeURIComponent(component)
     let l:componentString = string(a:component)
     let l:unescapedURIComponentSet = s:uriUnescaped
     return s:Encode(l:componentString, l:unescapedURIComponentSet)
+endfunction
+
+function s:UTF16EncodeCodePoint(cp)
+    if a:cp <= 0xFFFF
+        return nr2char(a:cp)
+    endif
+    let l:cu1 = float2nr(floor((a:cp - 0x10000) / 0x400) + 0xD800)
+    let l:cu2 = ((a:cp - 0x10000) % 0x400) + 0xDC00
+    return nr2char(l:cu1) . nr2char(l:cu2)
+endfunction
+
+function s:UTF16SurrogatePairToCodePoint(lead, trail)
+    let l:cp = (a:lead - 0xD800) * 0x400 + (a:trail - 0xDC00) + 0x10000
+    return l:cp
 endfunction
 
 function s:CodePointAt(string, position)
@@ -179,19 +205,86 @@ function s:Encode(string, unescapedSet)
     endwhile
 endfunction
 
-function s:UTF16EncodeCodePoint(cp)
-    if a:cp <= 0xFFFF
-        return nr2char(a:cp)
-    endif
-    let l:cu1 = float2nr(floor((a:cp - 0x10000) / 0x400) + 0xD800)
-    let l:cu2 = ((a:cp - 0x10000) % 0x400) + 0xDC00
-    return nr2char(l:cu1) . nr2char(l:cu2)
+function s:Decode(string, reservedSet)
+    let l:strLen = strlen(a:string)
+    let l:R = ''
+    let l:k = 0
+    while v:true
+        if l:k == l:strLen
+            return l:R
+        endif
+        let l:C = a:string[l:k]
+        if l:C != 0x0025
+            let l:S = l:C
+        else
+            let l:start = l:k
+            if l:k + 2 >= l:strLen
+                throw 'URIError'
+            endif
+            if a:string[l:k + 1] !~ '\x' || a:string[l:k + 2] !~ '\x'
+                throw 'URIError'
+            endif
+            let l:B = str2nr(a:string[l:k + 1] . a:string[l:k + 2], 16)
+            let l:k = l:k + 2
+            let l:n = s:numberOfLeading1bits(l:B)
+            if l:n == 0
+                let l:C = nr2char(l:B)
+                if stridx(a:reservedSet, l:C) == -1
+                    let l:S = l:C
+                else
+                    let l:S = a:string[l:start : l:k + 1]
+                endif
+            else
+                if l:n == 1 || l:n > 4
+                    throw 'URIError'
+                endif
+                if l:k + (3 * (l:n - 1)) >= l:strLen
+                    throw 'URIError'
+                endif
+                let l:Octets = [l:B]
+                let l:j = 1
+                while l:j < l:n
+                    let l:k = l:k + 1
+                    if a:string[l:k] != 0x0025
+                        throw 'URIError'
+                    endif
+                    if a:string[l:k + 1] !~ '\x' || a:string[l:k + 2] !~ '\x'
+                        throw 'URIError'
+                    endif
+                    let l:B = str2nr(a:string[l:k + 1] . a:string[l:k + 2], 16)
+                    let l:k = l:k + 2
+                    let l:Octets = l:Octets + [l:B]
+                    let l:j = l:j + 1
+                endwhile
+                if empty(l:Octets)
+                    throw 'URIError'
+                endif
+                let l:V = 0
+                for l:octet in l:Octets
+                    let l:V = l:V * 0x8 + l:octet
+                endfor
+                let l:S = s:UTF16EncodeCodePoint(l:V)
+            endif
+        endif
+        let l:R = l:R . l:S
+        let l:k = l:k + 1
+    endwhile
 endfunction
 
-function s:UTF16SurrogatePairToCodePoint(lead, trail)
-    let l:cp = (a:lead - 0xD800) * 0x400 + (a:trail - 0xDC00) + 0x10000
-    return l:cp
+function s:numberOfLeading1bits(bit)
+    let l:b = a:bit
+    let l:n = 0
+    while v:true
+        let l:lead = and(l:b, 0x80)
+        if l:lead > 0
+            let l:b = l:b * 0x2
+            let l:n = l:n + 1
+        else
+            return l:n
+        endif
+    endwhile
 endfunction
+" echo s:numberOfLeading1bits(0xff)
 
 let s:test = 'http://日本語.jp/日本語.html?abc=いろは&def=にほへ#あいうえお'
 " let s:test = iconv(s:test, 'utf-8', 'utf-16')
@@ -202,3 +295,6 @@ echo s:encodeURI(s:test)
 
 echo printf('%x', char2nr('𠮷'))
 echo s:encodeURI('𠮷')
+
+echo s:decodeURIComponent(s:encodeURIComponent(s:test))
+echo s:decodeURI(s:encodeURI(s:test))
