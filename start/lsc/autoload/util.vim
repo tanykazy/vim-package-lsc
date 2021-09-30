@@ -107,11 +107,7 @@ endfunction
 function util#decode_uri_char(code)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:hex = str2nr(a:code, 16)
-	call log#log_debug(l:hex)
-	call log#log_debug(nr2char(l:hex))
-	call log#log_debug(printf('%c', l:hex))
 	return nr2char(l:hex)
-	" return printf('%c', l:hex)
 endfunction
 
 function util#uri2components(uri)
@@ -131,10 +127,6 @@ function util#uri2components(uri)
 	endif
 	if stridx(l:tmp[1], '//') != -1
 		let l:tmp2 = util#split(l:tmp[1], '//', 2)
-		" call log#log_error(string(l:tmp2))
-		" let l:tmp2 = util#split(l:tmp2[1], '/', 2)
-		" let l:component.authority = l:tmp2[0]
-		" let l:component.path = l:tmp2[1]
 		if stridx(l:tmp2[1], '/') != -1
 			let l:tmp3 = util#split(l:tmp2[1], '/', 2)
 			let l:component.authority = l:tmp3[0]

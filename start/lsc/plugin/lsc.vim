@@ -7,8 +7,8 @@ const s:save_cpoptions = &cpoptions
 set cpoptions&vim
 
 
-" let g:log_level = log#level_trace
-let g:log_level = log#level_debug
+let g:log_level = log#level_trace
+" let g:log_level = log#level_debug
 " let g:log_level = log#level_error
 call log#init()
 call log#start_chlog()

@@ -199,3 +199,6 @@ let s:test = 'http://日本語.jp/日本語.html?abc=いろは&def=にほへ#あ
 echo s:parse(s:test)
 echo s:encodeURIComponent(s:test)
 echo s:encodeURI(s:test)
+
+echo printf('%x', char2nr('𠮷'))
+echo s:encodeURI('𠮷')
