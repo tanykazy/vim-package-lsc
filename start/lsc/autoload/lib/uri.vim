@@ -214,7 +214,7 @@ function s:Decode(string, reservedSet)
             return l:R
         endif
         let l:C = a:string[l:k]
-        if l:C != 0x0025
+        if l:C != '%'
             let l:S = l:C
         else
             let l:start = l:k
@@ -225,10 +225,15 @@ function s:Decode(string, reservedSet)
                 throw 'URIError'
             endif
             let l:B = str2nr(a:string[l:k + 1] . a:string[l:k + 2], 16)
+            " echo a:string[l:k + 1] . a:string[l:k + 2]
+            " echo printf('%02x', l:B)
+            " echo printf('%08b', l:B)
             let l:k = l:k + 2
             let l:n = s:numberOfLeading1bits(l:B)
+            " echo l:n
             if l:n == 0
                 let l:C = nr2char(l:B)
+                " echo l:C
                 if stridx(a:reservedSet, l:C) == -1
                     let l:S = l:C
                 else
@@ -245,7 +250,7 @@ function s:Decode(string, reservedSet)
                 let l:j = 1
                 while l:j < l:n
                     let l:k = l:k + 1
-                    if a:string[l:k] != 0x0025
+                    if a:string[l:k] != '%'
                         throw 'URIError'
                     endif
                     if a:string[l:k + 1] !~ '\x' || a:string[l:k + 2] !~ '\x'
@@ -256,16 +261,26 @@ function s:Decode(string, reservedSet)
                     let l:Octets = l:Octets + [l:B]
                     let l:j = l:j + 1
                 endwhile
+                " echo l:Octets
+                " for l:o in l:Octets
+                "     echo printf('%#x', l:o)
+                "     " echo nr2char(l:o)
+                " endfor
                 if empty(l:Octets)
                     throw 'URIError'
                 endif
                 let l:V = 0
                 for l:octet in l:Octets
-                    let l:V = l:V * 0x8 + l:octet
+                    " echo l:V
+                    let l:V = (l:V * 0x100) + l:octet
+                    " echo printf('%032b', l:V)
                 endfor
+                " echo printf('%04x', l:V)
                 let l:S = s:UTF16EncodeCodePoint(l:V)
+                " echo l:S
             endif
         endif
+        " echo l:S
         let l:R = l:R . l:S
         let l:k = l:k + 1
     endwhile
@@ -289,12 +304,27 @@ endfunction
 let s:test = 'http://日本語.jp/日本語.html?abc=いろは&def=にほへ#あいうえお'
 " let s:test = iconv(s:test, 'utf-8', 'utf-16')
 
-echo s:parse(s:test)
-echo s:encodeURIComponent(s:test)
-echo s:encodeURI(s:test)
+" echo s:parse(s:test)
+" echo s:encodeURIComponent(s:test)
+" echo s:encodeURI(s:test)
 
-echo printf('%x', char2nr('𠮷'))
-echo s:encodeURI('𠮷')
+" echo printf('%x', char2nr('𠮷'))
+" echo s:encodeURI('𠮷')
 
-echo s:decodeURIComponent(s:encodeURIComponent(s:test))
-echo s:decodeURI(s:encodeURI(s:test))
+" echo s:decodeURIComponent(s:encodeURIComponent(s:test))
+" echo s:decodeURI(s:encodeURI(s:test))
+let s:url = "http://%E6%97%A5%E6%9C%AC%E8%AA%9E.jp/%E6%97%A5%E6%9C%AC%E8%AA%9E.html?abc=%E3%81%84%E3%82%8D%E3%81%AF&def=%E3%81%AB%E3%81%BB%E3%81%B8#%E3%81%82%E3%81%84%E3%81%86%E3%81%88%E3%81%8A"
+
+" echo s:Decode('%61', '')
+echo printf('%b', 0xf0a0aeb7)
+echo s:Decode('%F0%A0%AE%B7', '')
+echo s:UTF16EncodeCodePoint(0x20bb7)
+" echo s:decodeURI(s:url)
+" echo s:Decode(s:url, '')
+
+1111 0000
+1010 0000
+1010 1110
+1011 0111
+
+00010 0000 1011 1011 0111
