@@ -88,34 +88,6 @@ function s:fspath(uri)
     return l:result
 endfunction
 
-" const s:exclude_chars = '^[a-zA-Z0-9_.~/-]$'
-
-" function util#encode_uri(uri)
-" 	let l:result = ''
-"     for l:index in range(len(a:uri))
-" 		let l:char = a:uri[l:index]
-" 		if match(l:char, s:exclude_chars) == -1
-" 			let l:result = l:result . util#encode_uri_char(l:char)
-"         else
-"             let l:result = l:result . l:char
-"         endif
-"     endfor
-"     return l:result
-" endfunction
-
-" function util#decode_uri(uri)
-"     return substitute(a:uri, '%\(\x\x\)', {m -> util#decode_uri_char(m[1])}, 'g')
-" endfunction
-
-" function util#encode_uri_char(char)
-" 	let l:code = char2nr(a:char)
-"     return printf('%%%02X', l:code)
-" endfunction
-
-" function util#decode_uri_char(code)
-" 	let l:hex = str2nr(a:code, 16)
-" 	return printf('%c', l:hex)
-" endfunction
 
 const s:uriAlpha="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const s:DecimalDigit = "0123456789"
@@ -142,7 +114,7 @@ function s:encodeURI(uri)
 endfunction
 
 function s:encodeURIComponent(component)
-    let l:componentString = string(a:component)
+    let l:componentString = a:component
     let l:unescapedURIComponentSet = s:uriUnescaped
     return s:Encode(l:componentString, l:unescapedURIComponentSet)
 endfunction
@@ -225,15 +197,10 @@ function s:Decode(string, reservedSet)
                 throw 'URIError'
             endif
             let l:B = str2nr(a:string[l:k + 1] . a:string[l:k + 2], 16)
-            " echo a:string[l:k + 1] . a:string[l:k + 2]
-            " echo printf('%02x', l:B)
-            " echo printf('%08b', l:B)
             let l:k = l:k + 2
             let l:n = s:numberOfLeading1bits(l:B)
-            " echo l:n
             if l:n == 0
                 let l:C = nr2char(l:B)
-                " echo l:C
                 if stridx(a:reservedSet, l:C) == -1
                     let l:S = l:C
                 else
@@ -261,29 +228,29 @@ function s:Decode(string, reservedSet)
                     let l:Octets = l:Octets + [l:B]
                     let l:j = l:j + 1
                 endwhile
-                " echo l:Octets
-                " for l:o in l:Octets
-                "     echo printf('%#x', l:o)
-                "     " echo nr2char(l:o)
-                " endfor
-                if empty(l:Octets)
+                if !(len(l:Octets) > 1)
                     throw 'URIError'
                 endif
-                let l:V = 0
-                for l:octet in l:Octets
-                    " echo l:V
-                    let l:V = (l:V * 0x100) + l:octet
-                    " echo printf('%032b', l:V)
-                endfor
-                " echo printf('%04x', l:V)
-                let l:S = s:UTF16EncodeCodePoint(l:V)
-                " echo l:S
+                let l:V = s:UTF8EncodeCodePoint(l:Octets)
+                let l:S = nr2char(l:V)
             endif
         endif
-        " echo l:S
         let l:R = l:R . l:S
         let l:k = l:k + 1
     endwhile
+endfunction
+
+function s:UTF8EncodeCodePoint(octets)
+    let l:len = len(a:octets)
+    let l:i = 1
+    let l:mask = 0xFF / float2nr(pow(0x2, l:len + 1))
+    let l:cp = and(a:octets[0], l:mask)
+    while l:i < l:len
+        let l:cp = l:cp * 0x40
+        let l:cp = l:cp + and(a:octets[l:i], 0x3F)
+        let l:i = l:i + 1
+    endwhile
+    return l:cp
 endfunction
 
 function s:numberOfLeading1bits(bit)
@@ -299,32 +266,3 @@ function s:numberOfLeading1bits(bit)
         endif
     endwhile
 endfunction
-" echo s:numberOfLeading1bits(0xff)
-
-let s:test = 'http://日本語.jp/日本語.html?abc=いろは&def=にほへ#あいうえお'
-" let s:test = iconv(s:test, 'utf-8', 'utf-16')
-
-" echo s:parse(s:test)
-" echo s:encodeURIComponent(s:test)
-" echo s:encodeURI(s:test)
-
-" echo printf('%x', char2nr('𠮷'))
-" echo s:encodeURI('𠮷')
-
-" echo s:decodeURIComponent(s:encodeURIComponent(s:test))
-" echo s:decodeURI(s:encodeURI(s:test))
-let s:url = "http://%E6%97%A5%E6%9C%AC%E8%AA%9E.jp/%E6%97%A5%E6%9C%AC%E8%AA%9E.html?abc=%E3%81%84%E3%82%8D%E3%81%AF&def=%E3%81%AB%E3%81%BB%E3%81%B8#%E3%81%82%E3%81%84%E3%81%86%E3%81%88%E3%81%8A"
-
-" echo s:Decode('%61', '')
-echo printf('%b', 0xf0a0aeb7)
-echo s:Decode('%F0%A0%AE%B7', '')
-echo s:UTF16EncodeCodePoint(0x20bb7)
-" echo s:decodeURI(s:url)
-" echo s:Decode(s:url, '')
-
-1111 0000
-1010 0000
-1010 1110
-1011 0111
-
-00010 0000 1011 1011 0111
