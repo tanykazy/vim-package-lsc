@@ -1,16 +1,16 @@
-function lib#URIHandling#decodeURI(encodedURI)
+function lib#urihandling#decodeURI(encodedURI)
     return s:decodeURI(a:encodedURI)
 endfunction
 
-function lib#URIHandling#decodeURIComponent(encodedURIComponent)
+function lib#urihandling#decodeURIComponent(encodedURIComponent)
     return s:decodeURIComponent(a:encodedURIComponent)
 endfunction
 
-function lib#URIHandling#encodedURI(uri)
+function lib#urihandling#encodedURI(uri)
     return s:encodedURI(a:uri)
 endfunction
 
-function lib#URIHandling#encodeURIComponent(component)
+function lib#urihandling#encodeURIComponent(component)
     return s:encodeURIComponent(a:component)
 endfunction
 
