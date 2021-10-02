@@ -21,6 +21,14 @@ let s:uri_component['path'] = ''
 let s:uri_component['query'] = ''
 let s:uri_component['fragment'] = ''
 
+function s:format() dict
+    return s:asFormatted(self)
+endfunction
+
+function s:fspath() dict
+    return s:uriToFsPath(self)
+endfunction
+
 function s:URI(scheme, authority, path, query, fragment)
 	let l:uri = deepcopy(s:uri_component)
     let l:uri['scheme'] = a:scheme
@@ -28,15 +36,8 @@ function s:URI(scheme, authority, path, query, fragment)
     let l:uri['path'] = a:path
     let l:uri['query'] = a:query
     let l:uri['fragment'] = a:fragment
-
-    function l:uri.format() dict
-        return s:format(self)
-    endfunction
-
-    function l:uri.fspath() dict
-        return s:fspath(self)
-    endfunction
-
+    let l:uri['format'] = funcref('s:format', l:uri)
+    let l:uri['fspath'] = funcref('s:fspath', l:uri)
     return l:uri
 endfunction
 
@@ -50,28 +51,6 @@ function s:parse(value)
     else
         return s:URI(l:matched[2], l:matched[4], l:matched[5], l:matched[7], l:matched[9])
     endif
-endfunction
-
-function s:format(uri)
-    let l:result = ''
-    if !empty(a:uri.scheme)
-        let l:result .= a:uri.scheme
-        let l:result .= ':'
-    endif
-    let l:result .= '//'
-    if !empty(a:uri.authority)
-        let l:result .= a:uri.authority
-    endif
-    let l:result .= a:uri.path
-    if !empty(a:uri.query)
-        let l:result .= '?'
-        let l:result .= a:uri.query
-    endif
-    if !empty(a:uri.fragment)
-        let l:result .= '#'
-        let l:result .= a:uri.fragment
-    endif
-    return l:result
 endfunction
 
 function s:file(path)
@@ -90,12 +69,67 @@ function s:file(path)
     return s:URI('file', l:authority, l:path, '', '')
 endfunction
 
-function s:fspath(uri)
-    let l:result = ''
+function s:uriToFsPath(uri)
+    let l:value = ''
     if !empty(a:uri.authority) && !empty(a:uri.path) && a:uri.scheme == 'file'
-        let l:result = '//' . a:uri.authority . a:uri.path
+        let l:value = '//' . a:uri.authority . a:uri.path
+    elseif a:uri.path[0] == '/' && a:uri.path[1] =~ '\a' && a:uri.path[2] == ':'
+        let l:value = slice(a:uri.path, 1)
     else
-        let l:result = a:uri.path
+        let l:value = a:uri.path
+    endif
+    return l:value
+endfunction
+
+function s:asFormatted(uri)
+    let l:result = ''
+    if !empty(a:uri.scheme)
+        let l:result = l:result . a:uri.scheme
+        let l:result = l:result . ':'
+    endif
+    if !empty(a:uri.authority) || a:uri.scheme == 'file'
+        let l:result = l:result . '//'
+    endif
+    if !empty(a:uri.authority)
+        let l:idx = stridx(a:uri.authority, '@')
+        if l:idx != -1
+            let l:userinfo = slice(a:uri.authority, 0, l:idx)
+            let a:uri.authority = slice(a:uri.authority, l:idx + 1)
+            let l:idx = stridx(l:userinfo, ':')
+            if l:idx == -1
+                let l:result = l:result . lib#urihandling#encodeURIComponent(l:userinfo)
+            else
+                let l:result = l:result . lib#urihandling#encodeURIComponent(slice(l:userinfo, 0, l:idx))
+                let l:result = l:result . ':'
+                let l:result = l:result . lib#urihandling#encodeURIComponent(slice(l:userinfo, l:idx + 1))
+            endif
+            let l:result = l:result . '@'
+        endif
+        let a:uri.authority = tolower(a:uri.authority)
+        let l:idx = stridx(a:uri.authority, ':')
+        if l:idx == -1
+            let l:result = l:result . lib#urihandling#encodeURIComponent(a:uri.authority)
+        else
+            let l:result = l:result . lib#urihandling#encodeURIComponent(slice(a:uri.authority, 0, l:idx))
+            let l:result = l:result . slice(a:uri.authority, l:idx)
+        endif
+    endif
+    if !empty(a:uri.path)
+        let l:result = l:result . lib#urihandling#encodeURI(a:uri.path)
+    endif
+    if !empty(a:uri.query)
+        let l:result .= '?'
+        let l:result .= a:uri.query
+    endif
+    if !empty(a:uri.fragment)
+        let l:result .= '#'
+        let l:result .= a:uri.fragment
     endif
     return l:result
 endfunction
+
+let s:url = 'https://user:password@www.example.com:123/forum/questions/?tag=networking&order=newest#top'
+" let s:u = s:file('/home/tanykazy/repos/vim-package-lsc/README.md')
+let s:u = s:parse(s:url)
+echo s:u
+echo s:u.format()

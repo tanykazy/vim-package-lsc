@@ -6,8 +6,8 @@ function lib#urihandling#decodeURIComponent(encodedURIComponent)
     return s:decodeURIComponent(a:encodedURIComponent)
 endfunction
 
-function lib#urihandling#encodedURI(uri)
-    return s:encodedURI(a:uri)
+function lib#urihandling#encodeURI(uri)
+    return s:encodeURI(a:uri)
 endfunction
 
 function lib#urihandling#encodeURIComponent(component)
