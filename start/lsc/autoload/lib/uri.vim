@@ -14,29 +14,29 @@ function lib#uri#file(path)
     return s:file(a:path)
 endfunction
 
-let s:uri = {}
-
-let s:uri['scheme'] = ''
-let s:uri['authority'] = ''
-let s:uri['path'] = ''
-let s:uri['query'] = ''
-let s:uri['fragment'] = ''
-
-function s:uri.format() dict
-    return s:format(self)
-endfunction
-
-function s:uri.fspath() dict
-    return s:fspath(self)
-endfunction
+let s:uri_component = {}
+let s:uri_component['scheme'] = ''
+let s:uri_component['authority'] = ''
+let s:uri_component['path'] = ''
+let s:uri_component['query'] = ''
+let s:uri_component['fragment'] = ''
 
 function s:URI(scheme, authority, path, query, fragment)
-	let l:uri = deepcopy(s:uri)
+	let l:uri = deepcopy(s:uri_component)
     let l:uri['scheme'] = a:scheme
     let l:uri['authority'] = a:authority
     let l:uri['path'] = a:path
     let l:uri['query'] = a:query
     let l:uri['fragment'] = a:fragment
+
+    function l:uri.format() dict
+        return s:format(self)
+    endfunction
+
+    function l:uri.fspath() dict
+        return s:fspath(self)
+    endfunction
+
     return l:uri
 endfunction
 
@@ -75,7 +75,19 @@ function s:format(uri)
 endfunction
 
 function s:file(path)
-    return s:URI('file', '', a:path, '', '')
+    let l:path = a:path
+    let l:authority = ''
+    if l:path[0] == '/' && l:path[1] == '/'
+        let l:idx = stridx(l:path, '/', 2)
+        if l:idx == -1
+            let l:authority = slice(l:path, 2)
+            let l:path = '/'
+        else
+            let l:authority = slice(l:path, 2, l:idx)
+            let l:path = slice(l:path, l:idx) ?? '/'
+        endif
+    endif
+    return s:URI('file', l:authority, l:path, '', '')
 endfunction
 
 function s:fspath(uri)
