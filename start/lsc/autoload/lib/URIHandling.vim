@@ -1,3 +1,20 @@
+function lib#URIHandling#decodeURI(encodedURI)
+    return s:decodeURI(a:encodedURI)
+endfunction
+
+function lib#URIHandling#decodeURIComponent(encodedURIComponent)
+    return s:decodeURIComponent(a:encodedURIComponent)
+endfunction
+
+function lib#URIHandling#encodedURI(uri)
+    return s:encodedURI(a:uri)
+endfunction
+
+function lib#URIHandling#encodeURIComponent(component)
+    return s:encodeURIComponent(a:component)
+endfunction
+
+
 " https://tc39.es/ecma262/#sec-uri-handling-functions
 
 const s:uriAlpha="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
