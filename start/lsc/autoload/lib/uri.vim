@@ -14,6 +14,14 @@ function lib#uri#file(path)
     return s:file(a:path)
 endfunction
 
+function s:encodeURIComponent(component)
+    return lib#urihandling#encodeURIComponent(a:component)
+endfunction
+
+function s:decodeURIComponent(component)
+    return lib#urihandling#decodeURIComponent(a:component)
+endfunction
+
 function s:URI(scheme, authority, path, query, fragment)
 	let l:uri = {}
     let l:uri['scheme'] = a:scheme
@@ -81,7 +89,7 @@ function s:parse(value)
     if empty(l:matched)
         return s:URI('', '', '', '', '')
     else
-        return s:URI(l:matched[2], lib#urihandling#decodeURIComponent(l:matched[4]), lib#urihandling#decodeURIComponent(l:matched[5]), lib#urihandling#decodeURIComponent(l:matched[7]), lib#urihandling#decodeURIComponent(l:matched[9]))
+        return s:URI(l:matched[2], s:decodeURIComponent(l:matched[4]), s:decodeURIComponent(l:matched[5]), s:decodeURIComponent(l:matched[7]), s:decodeURIComponent(l:matched[9]))
     endif
 endfunction
 
@@ -137,33 +145,33 @@ function s:asFormatted(uri)
             let l:authority = slice(l:authority, l:idx + 1)
             let l:idx = stridx(l:userinfo, ':')
             if l:idx == -1
-                let l:result = l:result . lib#urihandling#encodeURIComponent(l:userinfo)
+                let l:result = l:result . s:encodeURIComponent(l:userinfo)
             else
-                let l:result = l:result . lib#urihandling#encodeURIComponent(slice(l:userinfo, 0, l:idx))
+                let l:result = l:result . s:encodeURIComponent(slice(l:userinfo, 0, l:idx))
                 let l:result = l:result . ':'
-                let l:result = l:result . lib#urihandling#encodeURIComponent(slice(l:userinfo, l:idx + 1))
+                let l:result = l:result . s:encodeURIComponent(slice(l:userinfo, l:idx + 1))
             endif
             let l:result = l:result . '@'
         endif
         let l:authority = tolower(l:authority)
         let l:idx = stridx(l:authority, ':')
         if l:idx == -1
-            let l:result = l:result . lib#urihandling#encodeURIComponent(l:authority)
+            let l:result = l:result . s:encodeURIComponent(l:authority)
         else
-            let l:result = l:result . lib#urihandling#encodeURIComponent(slice(l:authority, 0, l:idx))
+            let l:result = l:result . s:encodeURIComponent(slice(l:authority, 0, l:idx))
             let l:result = l:result . slice(l:authority, l:idx)
         endif
     endif
     if !empty(l:path)
-        let l:result = l:result . lib#urihandling#encodeURI(l:path)
+        let l:result = l:result . s:encodeURIComponent(l:path)
     endif
     if !empty(l:query)
         let l:result = l:result . '?'
-        let l:result = l:result . lib#urihandling#encodeURI(l:query)
+        let l:result = l:result . s:encodeURIComponent(l:query)
     endif
     if !empty(l:fragment)
         let l:result = l:result . '#'
-        let l:result = l:result . lib#urihandling#encodeURIComponent(l:fragment)
+        let l:result = l:result . s:encodeURIComponent(l:fragment)
     endif
     return l:result
 endfunction
@@ -180,9 +188,15 @@ function s:referenceResolution(scheme, path)
     return l:path
 endfunction
 
+function s:encodeURIComponentFast(uriComponent, allowSlash)
+    let l:result = ''
+    let l:nativeEncodePos = -1
+    for l:pos in range(strlen(a:uriComponent))
+    endfor
+endfunction
 
-" let s:url = 'https://user:password@www.example.com:123/𠮷forum/questions/?𠮷tag=𠮷networking&𠮷order=𠮷newest#𠮷top'
-" " let s:u = s:file('/home/tanykazy/repos/vim-package-lsc/README.md')
-" let s:u = s:parse(s:url)
-" echo s:u
-" echo s:u.format()
+let s:url = 'https://user:password@www.example.com:123/𠮷forum/questions/?𠮷tag=𠮷networking&𠮷order=𠮷newest#𠮷top'
+" let s:u = s:file('/home/tanykazy/repos/vim-package-lsc/README.md')
+let s:u = s:parse(s:url)
+echo s:u
+echo s:u.format()
