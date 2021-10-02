@@ -28,7 +28,7 @@ function lsp#base#Message()
 endfunction
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#requestMessage
-function lsp#base#RequestMessage(id, method, params)
+function lsp#base#RequestMessage(id, method, params = v:none)
 	let l:message = lsp#base#Message()
 	" The request id.
 	let l:message['id'] = a:id
@@ -42,7 +42,7 @@ function lsp#base#RequestMessage(id, method, params)
 endfunction
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#responseMessage
-function lsp#base#ResponseMessage(id, result, error)
+function lsp#base#ResponseMessage(id, result = v:none, error = v:none)
 	let l:message = lsp#base#Message()
 	" The request id.
 	let l:message['id'] = a:id
@@ -59,7 +59,7 @@ function lsp#base#ResponseMessage(id, result, error)
 endfunction
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#responseError
-function lsp#base#ResponseError(code, message, data)
+function lsp#base#ResponseError(code, message, data = v:none)
 	let l:error = {}
 	" A number indicating the error type that occurred.
 	let l:error['code'] = a:code
@@ -105,7 +105,7 @@ let lsp#base#ErrorCodes['RequestCancelled'] = -32800
 let lsp#base#ErrorCodes['lspReservedErrorRangeEnd'] = -32800
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#notificationMessage
-function lsp#base#NotificationMessage(method, params)
+function lsp#base#NotificationMessage(method, params = v:none)
 	let l:message = lsp#base#Message()
 	" The method to be invoked.
 	let l:message['method'] = a:method
