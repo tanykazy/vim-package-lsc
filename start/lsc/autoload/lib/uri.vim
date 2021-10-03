@@ -192,6 +192,23 @@ function s:encodeURIComponentFast(uriComponent, allowSlash)
     let l:result = ''
     let l:nativeEncodePos = -1
     for l:pos in range(strlen(a:uriComponent))
+        let l:code = a:uriComponent[l:pos]
+        if l:code =~ '\d' || l:code =~ '\a' || l:code == '-' || l:code == '.' || l:code == '_' || l:code == '~' || (a:allowSlash && l:code == '/')
+            if l:nativeEncodePos != -1
+                let l:result = l:result . s:encodeURIComponent(slice(a:uriComponent, l:nativeEncodePos, l:pos))
+                let l:nativeEncodePos = -1
+            endif
+            if !empty(l:result)
+                let l:result = l:result . a:uriComponent[l:pos]
+            endif
+        else
+            if empty(l:result)
+                let l:result = slice(a:uriComponent, 0, l:pos)
+            endif
+
+            " need escape ?
+
+        endif
     endfor
 endfunction
 
