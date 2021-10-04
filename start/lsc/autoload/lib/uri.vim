@@ -22,6 +22,19 @@ function s:decodeURIComponent(component)
     return lib#urihandling#decodeURIComponent(a:component)
 endfunction
 
+" https://datatracker.ietf.org/doc/html/rfc3986#section-2.2
+const s:gen_delims = ":/?#[]@"
+const s:sub_delims = "!$&'()*+,;="
+const s:reserved = s:gen_delims . s:sub_delims
+
+" https://datatracker.ietf.org/doc/html/rfc3986#section-2.3 
+const s:ALPHA = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+const s:DIGIT = '0123456789'
+const s:unreserved = s:ALPHA . s:DIGIT . "-._~"
+
+" https://datatracker.ietf.org/doc/html/rfc3986#appendix-B
+const s:regexp = '^\(\([^:/?#]\+\):\)\?\(//\([^/?#]*\)\)\?\([^?#]*\)\(?\([^#]*\)\)\?\(#\(.*\)\)\?'
+
 function s:URI(scheme, authority, path, query, fragment)
 	let l:uri = {}
     let l:uri['scheme'] = a:scheme
@@ -80,9 +93,6 @@ function s:URI(scheme, authority, path, query, fragment)
 
     return l:uri
 endfunction
-
-" https://datatracker.ietf.org/doc/html/rfc3986#appendix-B
-const s:regexp = '^\(\([^:/?#]\+\):\)\?\(//\([^/?#]*\)\)\?\([^?#]*\)\(?\([^#]*\)\)\?\(#\(.*\)\)\?'
 
 function s:parse(value)
     let l:matched = matchlist(a:value, s:regexp)
@@ -145,33 +155,33 @@ function s:asFormatted(uri)
             let l:authority = slice(l:authority, l:idx + 1)
             let l:idx = stridx(l:userinfo, ':')
             if l:idx == -1
-                let l:result = l:result . s:encodeURIComponent(l:userinfo)
+                let l:result = l:result . s:encodeURIComponentFast(l:userinfo, v:false)
             else
-                let l:result = l:result . s:encodeURIComponent(slice(l:userinfo, 0, l:idx))
+                let l:result = l:result . s:encodeURIComponentFast(slice(l:userinfo, 0, l:idx), v:false)
                 let l:result = l:result . ':'
-                let l:result = l:result . s:encodeURIComponent(slice(l:userinfo, l:idx + 1))
+                let l:result = l:result . s:encodeURIComponentFast(slice(l:userinfo, l:idx + 1), v:false)
             endif
             let l:result = l:result . '@'
         endif
         let l:authority = tolower(l:authority)
         let l:idx = stridx(l:authority, ':')
         if l:idx == -1
-            let l:result = l:result . s:encodeURIComponent(l:authority)
+            let l:result = l:result . s:encodeURIComponentFast(l:authority, v:false)
         else
-            let l:result = l:result . s:encodeURIComponent(slice(l:authority, 0, l:idx))
+            let l:result = l:result . s:encodeURIComponentFast(slice(l:authority, 0, l:idx), v:false)
             let l:result = l:result . slice(l:authority, l:idx)
         endif
     endif
     if !empty(l:path)
-        let l:result = l:result . s:encodeURIComponent(l:path)
+        let l:result = l:result . s:encodeURIComponentFast(l:path, v:true)
     endif
     if !empty(l:query)
         let l:result = l:result . '?'
-        let l:result = l:result . s:encodeURIComponent(l:query)
+        let l:result = l:result . s:encodeURIComponentFast(l:query, v:false)
     endif
     if !empty(l:fragment)
         let l:result = l:result . '#'
-        let l:result = l:result . s:encodeURIComponent(l:fragment)
+        let l:result = l:result . s:encodeURIComponentFast(l:fragment, v:false)
     endif
     return l:result
 endfunction
@@ -191,29 +201,45 @@ endfunction
 function s:encodeURIComponentFast(uriComponent, allowSlash)
     let l:result = ''
     let l:nativeEncodePos = -1
-    for l:pos in range(strlen(a:uriComponent))
-        let l:code = a:uriComponent[l:pos]
-        if l:code =~ '\d' || l:code =~ '\a' || l:code == '-' || l:code == '.' || l:code == '_' || l:code == '~' || (a:allowSlash && l:code == '/')
+    for l:pos in range(strchars(a:uriComponent))
+        let l:code = strcharpart(a:uriComponent, l:pos, 1)
+        if stridx(s:unreserved, l:code) != -1 || (a:allowSlash && l:code == '/')
             if l:nativeEncodePos != -1
                 let l:result = l:result . s:encodeURIComponent(slice(a:uriComponent, l:nativeEncodePos, l:pos))
                 let l:nativeEncodePos = -1
             endif
             if !empty(l:result)
-                let l:result = l:result . a:uriComponent[l:pos]
+                " let l:result = l:result . a:uriComponent[l:pos]
+                let l:result = l:result . slice(a:uriComponent, l:pos, l:pos + 1)
             endif
         else
             if empty(l:result)
                 let l:result = slice(a:uriComponent, 0, l:pos)
             endif
-
-            " need escape ?
-
+            if stridx(s:reserved, l:code) != -1
+                if l:nativeEncodePos != -1
+                    let l:result = l:result . s:encodeURIComponent(slice(a:uriComponent, l:nativeEncodePos, l:pos))
+                    let l:nativeEncodePos = -1
+                endif
+                let l:result = l:result . s:encodeURIComponent(l:code)
+            elseif l:nativeEncodePos == -1
+                let l:nativeEncodePos = l:pos
+            endif
         endif
     endfor
+    if l:nativeEncodePos != -1
+        let l:result = l:result . s:encodeURIComponent(slice(a:uriComponent, l:nativeEncodePos))
+    endif
+    if empty(l:result)
+        return a:uriComponent
+    else
+        return l:result
+    endif
 endfunction
 
 let s:url = 'https://user:password@www.example.com:123/𠮷forum/questions/?𠮷tag=𠮷networking&𠮷order=𠮷newest#𠮷top'
-" let s:u = s:file('/home/tanykazy/repos/vim-package-lsc/README.md')
+" let s:url = 'https://𠮷top.com'
+" let s:u = s:file('/home/tanykazy/repos/vim-package-lsc/𠮷README.md')
 let s:u = s:parse(s:url)
 echo s:u
 echo s:u.format()
