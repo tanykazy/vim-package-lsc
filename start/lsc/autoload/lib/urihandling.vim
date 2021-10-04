@@ -16,7 +16,6 @@ endfunction
 
 
 " https://tc39.es/ecma262/#sec-uri-handling-functions
-
 const s:uriAlpha = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const s:DecimalDigit = '0123456789'
 const s:uriMark = "-_.!~*'()"

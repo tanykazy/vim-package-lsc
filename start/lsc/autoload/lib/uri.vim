@@ -14,13 +14,6 @@ function lib#uri#file(path)
     return s:file(a:path)
 endfunction
 
-function s:encodeURIComponent(component)
-    return lib#urihandling#encodeURIComponent(a:component)
-endfunction
-
-function s:decodeURIComponent(component)
-    return lib#urihandling#decodeURIComponent(a:component)
-endfunction
 
 " https://datatracker.ietf.org/doc/html/rfc3986#section-2.2
 const s:gen_delims = ":/?#[]@"
@@ -236,6 +229,15 @@ function s:encodeURIComponentFast(uriComponent, allowSlash)
         return l:result
     endif
 endfunction
+
+function s:encodeURIComponent(component)
+    return lib#urihandling#encodeURIComponent(a:component)
+endfunction
+
+function s:decodeURIComponent(component)
+    return lib#urihandling#decodeURIComponent(a:component)
+endfunction
+
 
 let s:url = 'https://user:password@www.example.com:123/𠮷forum/questions/?𠮷tag=𠮷networking&𠮷order=𠮷newest#𠮷top'
 " let s:url = 'https://𠮷top.com'
