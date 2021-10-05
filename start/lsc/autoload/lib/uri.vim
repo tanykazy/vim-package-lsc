@@ -231,11 +231,11 @@ function s:encodeURIComponentFast(uriComponent, allowSlash)
 endfunction
 
 function s:encodeURIComponent(component)
-    return lib#urihandling#encodeURIComponent(a:component)
+    return lib#UriHandling#encodeURIComponent(a:component)
 endfunction
 
 function s:decodeURIComponent(component)
-    return lib#urihandling#decodeURIComponent(a:component)
+    return lib#UriHandling#decodeURIComponent(a:component)
 endfunction
 
 
