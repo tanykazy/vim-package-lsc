@@ -135,13 +135,6 @@ function lsp#base#ProgressParams(token, value)
 endfunction
 
 
-" Basic Structures
-function lsp#base#DocumentUri()
-	" return lib#uri#
-endfunction
-
-
-
 function s:serialize_content(content)
 	return json_encode(a:content)
 endfunction

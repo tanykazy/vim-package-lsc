@@ -80,7 +80,7 @@ function s:URI(scheme, authority, path, query, fragment)
         return s:URI(l:scheme, l:authority, l:path, l:query, l:fragment)
     endfunction
 
-    function l:uri.format() dict
+    function l:uri.toString() dict
         return s:asFormatted(self)
     endfunction
 
@@ -239,9 +239,9 @@ function s:decodeURIComponent(component)
 endfunction
 
 
-let s:url = 'https://user:password@www.example.com:123/𠮷forum/questions/?𠮷tag=𠮷networking&𠮷order=𠮷newest#𠮷top'
-" let s:url = 'https://𠮷top.com'
-" let s:u = s:file('/home/tanykazy/repos/vim-package-lsc/𠮷README.md')
-let s:u = s:parse(s:url)
-echo s:u
-echo s:u.format()
+" let s:url = 'https://user:password@www.example.com:123/𠮷forum/questions/?𠮷tag=𠮷networking&𠮷order=𠮷newest#𠮷top'
+" " let s:url = 'https://𠮷top.com'
+" " let s:u = s:file('/home/tanykazy/repos/vim-package-lsc/𠮷README.md')
+" let s:u = s:parse(s:url)
+" echo s:u
+" echo s:u.toString()
