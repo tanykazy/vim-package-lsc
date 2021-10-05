@@ -1,15 +1,15 @@
 " Basic Structures
 
-function lsp#base#DocumentUri(string)
+function lsp#structures#DocumentUri(string)
 	return a:string
 endfunction
 
-function lsp#base#URI(string)
+function lsp#structures#URI(string)
 	return a:string
 endfunction
 
 " Client capabilities specific to regular expressions.
-function lsp#base#RegularExpressionsClientCapabilities(engine, version = v:none)
+function lsp#structures#RegularExpressionsClientCapabilities(engine, version = v:none)
 	let l:capabilities = {}
 	" The engine's name.
 	let l:capabilities['engine'] = a:engine
@@ -20,9 +20,9 @@ function lsp#base#RegularExpressionsClientCapabilities(engine, version = v:none)
 	return l:capabilities
 endfunction
 
-const lsp#base#EOL = ['\n', '\r\n', '\r']
+const lsp#structures#EOL = ['\n', '\r\n', '\r']
 
-function lsp#base#Position(line, character)
+function lsp#structures#Position(line, character)
 	let l:position = {}
 	" Line position in a document (zero-based).
 	let l:position['line'] = a:line
@@ -32,7 +32,7 @@ function lsp#base#Position(line, character)
 	return l:position
 endfunction
 
-function lsp#base#Range(start, end)
+function lsp#structures#Range(start, end)
 	let l:range = {}
 	" The range's start position.
 	let l:range['start'] = a:start
@@ -41,14 +41,14 @@ function lsp#base#Range(start, end)
 	return l:range
 endfunction
 
-function lsp#base#Location(uri, range)
+function lsp#structures#Location(uri, range)
 	let l:location = {}
 	let l:location['uri'] = a:uri
 	let l:location['range'] = a:range
 	return l:location
 endfunction
 
-function lsp#base#LocationLink(originSelectionRange, targetUri, targetRange, targetSelectionRange)
+function lsp#structures#LocationLink(originSelectionRange, targetUri, targetRange, targetSelectionRange)
 	let l:locationlink = {}
 	" Span of the origin of this link.
 	" Used as the underlined span for mouse interaction. Defaults to the word range at the mouse position.
@@ -61,3 +61,4 @@ function lsp#base#LocationLink(originSelectionRange, targetUri, targetRange, tar
 	let l:locationlink['targetSelectionRange'] = a:targetSelectionRange
 	return l:locationlink
 endfunction
+
