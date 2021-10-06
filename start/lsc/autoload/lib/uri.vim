@@ -192,6 +192,8 @@ function s:referenceResolution(scheme, path)
 endfunction
 
 function s:encodeURIComponentFast(uriComponent, allowSlash)
+    return s:encode_uri(a:uriComponent)
+
     let l:result = ''
     let l:nativeEncodePos = -1
     for l:pos in range(strchars(a:uriComponent))
@@ -202,7 +204,6 @@ function s:encodeURIComponentFast(uriComponent, allowSlash)
                 let l:nativeEncodePos = -1
             endif
             if !empty(l:result)
-                " let l:result = l:result . a:uriComponent[l:pos]
                 let l:result = l:result . slice(a:uriComponent, l:pos, l:pos + 1)
             endif
         else
@@ -232,16 +233,48 @@ endfunction
 
 function s:encodeURIComponent(component)
     return lib#UriHandling#encodeURIComponent(a:component)
+    " return s:encode_uri(a:component)
 endfunction
 
 function s:decodeURIComponent(component)
     return lib#UriHandling#decodeURIComponent(a:component)
+    " return s:decode_uri(a:component)
+endfunction
+
+const s:exclude_chars = '^[a-zA-Z0-9_.~/-]$'
+
+function s:encode_uri(uri)
+	let l:result = ''
+    for l:index in range(len(a:uri))
+		let l:char = a:uri[l:index]
+		if match(l:char, s:exclude_chars) == -1
+			let l:result = l:result . s:encode_char(l:char)
+        else
+            let l:result = l:result . l:char
+        endif
+    endfor
+    return l:result
+endfunction
+
+function s:decode_uri(uri)
+    return substitute(a:uri, '%\(\x\x\)', {m -> s:decode_char(m[1])}, 'g')
+endfunction
+
+function s:encode_char(char)
+	let l:code = char2nr(a:char)
+    return printf('%%%02X', l:code)
+endfunction
+
+function s:decode_char(code)
+	let l:hex = str2nr(a:code, 16)
+	return nr2char(l:hex)
 endfunction
 
 
-" let s:url = 'https://user:password@www.example.com:123/𠮷forum/questions/?𠮷tag=𠮷networking&𠮷order=𠮷newest#𠮷top'
-" " let s:url = 'https://𠮷top.com'
-" " let s:u = s:file('/home/tanykazy/repos/vim-package-lsc/𠮷README.md')
-" let s:u = s:parse(s:url)
-" echo s:u
-" echo s:u.toString()
+let s:url = 'https://user:password@www.example.com:123/𠮷forum/questions/?𠮷tag=𠮷networking&𠮷order=𠮷newest#𠮷top'
+" let s:url = 'https://𠮷top.com'
+" let s:u = s:file('/home/tanykazy/repos/vim-package-lsc/𠮷README.md')
+let s:u = s:parse(s:url)
+echo s:u
+echo s:u.toString()
+echo s:decodeURIComponent(s:u.toString())
