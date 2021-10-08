@@ -92,7 +92,7 @@ function s:parse(value)
     if empty(l:matched)
         return s:URI('', '', '', '', '')
     else
-        return s:URI(l:matched[2], s:decodeURIComponent(l:matched[4]), s:decodeURIComponent(l:matched[5]), s:decodeURIComponent(l:matched[7]), s:decodeURIComponent(l:matched[9]))
+        return s:URI(l:matched[2], s:percentDecode(l:matched[4]), s:percentDecode(l:matched[5]), s:percentDecode(l:matched[7]), s:percentDecode(l:matched[9]))
     endif
 endfunction
 
@@ -231,9 +231,9 @@ endfunction
 
 function s:decodeURIComponentGraceful(str)
     try
-        return decodeURIComponent(a:str)
+        return s:decodeURIComponent(a:str)
     catch
-        if strlen(a:str) > 3
+        if strchars(a:str) > 3
             return slice(a:str, 0, 3) . s:decodeURIComponentGraceful(slice(a:str, 3))
         else
             return a:str
@@ -241,10 +241,13 @@ function s:decodeURIComponentGraceful(str)
     endtry
 endfunction
 
-const s:encodedAsHex = ''
+const s:encodedAsHex = '\(%[0-9A-Fa-f][0-9A-Fa-f]\)\+'
 
 function s:percentDecode(str)
-    " if 
+    if match(a:str, s:encodedAsHex) == -1
+        return a:str
+    endif
+    return substitute(a:str, s:encodedAsHex, {m -> s:decodeURIComponentGraceful(m[0])}, 'g')
 endfunction
 
 
@@ -290,6 +293,7 @@ endfunction
 let s:url = 'https://user:password@www.example.com:123/𠮷forum/questions/?𠮷tag=𠮷networking&𠮷order=𠮷newest#𠮷top'
 " let s:url = 'https://𠮷top.com'
 " let s:u = s:file('/home/tanykazy/repos/vim-package-lsc/𠮷README.md')
+echo s:parse('%f0%a0%ae%b7').toString()
 let s:u = s:parse(s:url)
 echo s:url
 echo s:u
