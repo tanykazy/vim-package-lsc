@@ -80,8 +80,12 @@ function s:URI(scheme, authority, path, query, fragment)
         return s:URI(l:scheme, l:authority, l:path, l:query, l:fragment)
     endfunction
 
-    function l:uri.toString() dict
-        return s:asFormatted(self)
+    function l:uri.toString(skipEncoding = v:false) dict
+        if !a:skipEncoding
+            return s:asFormatted(self, v:false)
+        else
+            return s:asFormatted(self, v:true)
+        endif
     endfunction
 
     return l:uri
@@ -127,7 +131,7 @@ function s:uriToFsPath(uri)
     return l:value
 endfunction
 
-function s:asFormatted(uri)
+function s:asFormatted(uri, skipEncoding)
     let l:result = ''
     let l:scheme = a:uri.scheme
     let l:authority = a:uri.authority
@@ -293,10 +297,11 @@ endfunction
 let s:url = 'https://user:password@www.example.com:123/𠮷forum/questions/?𠮷tag=𠮷networking&𠮷order=𠮷newest#𠮷top'
 " let s:url = 'https://𠮷top.com'
 " let s:u = s:file('/home/tanykazy/repos/vim-package-lsc/𠮷README.md')
-echo s:parse('%f0%a0%ae%b7').toString()
-let s:u = s:parse(s:url)
-echo s:url
-echo s:u
-echo s:u.toString()
-echo s:decodeURIComponent(s:u.toString())
-echo s:url == s:decodeURIComponent(s:u.toString())
+echo s:parse('%f0%a0%ae%b7')
+
+" let s:u = s:parse(s:url)
+" echo s:url
+" echo s:u
+" echo s:u.toString()
+" echo s:decodeURIComponent(s:u.toString())
+" echo s:url == s:decodeURIComponent(s:u.toString())
