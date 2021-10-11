@@ -181,14 +181,33 @@ function s:encodeURIComponentFast(uriComponent, allowSlash)
     endif
 endfunction
 
+function s:encodeURIComponentMinimal(path, ...)
+    let l:result = ''
+    for l:pos in range(strchars(a:path))
+        let l:code = strcharpart(a:path, l:pos, 1)
+        if l:code == '#' || l:code == '?'
+            if empty(l:result)
+                let l:result = slice(a:path, 0, l:pos)
+            endif
+            let l:result = l:result . s:encodeURIComponent(l:code)
+        else
+            if !empty(l:result)
+                let l:result = l:result . strcharpart(a:path, l:pos, 1)
+            endif
+        endif
+    endfor
+    if empty(l:result)
+        return a:path
+    else
+        return l:result
+    endif
+endfunction
+
 function s:asFormatted(uri, skipEncoding)
     if !a:skipEncoding
-        " echo 'encoding'
-        const l:encoder = s:encodeURIComponentFast
-        " const l:encoder = funcref(s:encodeURIComponentFast)
+        let s:encoder = funcref('s:encodeURIComponentFast')
     else
-        " echo 'skip encoding'
-        " const l:encoder = 
+        let s:encoder = funcref('s:encodeURIComponentMinimal')
     endif
     let l:result = ''
     let l:scheme = a:uri.scheme
@@ -210,29 +229,29 @@ function s:asFormatted(uri, skipEncoding)
             let l:authority = slice(l:authority, l:idx + 1)
             let l:idx = stridx(l:userinfo, ':')
             if l:idx == -1
-                let l:result = l:result . l:encoder(l:userinfo, v:false)
+                let l:result = l:result . s:encoder(l:userinfo, v:false)
             else
-                let l:result = l:result . l:encoder(slice(l:userinfo, 0, l:idx), v:false)
+                let l:result = l:result . s:encoder(slice(l:userinfo, 0, l:idx), v:false)
                 let l:result = l:result . ':'
-                let l:result = l:result . l:encoder(slice(l:userinfo, l:idx + 1), v:false)
+                let l:result = l:result . s:encoder(slice(l:userinfo, l:idx + 1), v:false)
             endif
             let l:result = l:result . '@'
         endif
         let l:authority = tolower(l:authority)
         let l:idx = stridx(l:authority, ':')
         if l:idx == -1
-            let l:result = l:result . l:encoder(l:authority, v:false)
+            let l:result = l:result . s:encoder(l:authority, v:false)
         else
-            let l:result = l:result . l:encoder(slice(l:authority, 0, l:idx), v:false)
+            let l:result = l:result . s:encoder(slice(l:authority, 0, l:idx), v:false)
             let l:result = l:result . slice(l:authority, l:idx)
         endif
     endif
     if !empty(l:path)
-        let l:result = l:result . l:encoder(l:path, v:true)
+        let l:result = l:result . s:encoder(l:path, v:true)
     endif
     if !empty(l:query)
         let l:result = l:result . '?'
-        let l:result = l:result . l:encoder(l:query, v:false)
+        let l:result = l:result . s:encoder(l:query, v:false)
     endif
     if !empty(l:fragment)
         let l:result = l:result . '#'
@@ -274,45 +293,3 @@ endfunction
 function s:decodeURIComponent(component)
     return lib#UriHandling#decodeURIComponent(a:component)
 endfunction
-
-" const s:exclude_chars = '^[a-zA-Z0-9_.~/-]$'
-
-" function s:encode_uri(uri)
-" 	let l:result = ''
-"     for l:index in range(len(a:uri))
-" 		let l:char = a:uri[l:index]
-" 		if match(l:char, s:exclude_chars) == -1
-" 			let l:result = l:result . s:encode_char(l:char)
-"         else
-"             let l:result = l:result . l:char
-"         endif
-"     endfor
-"     return l:result
-" endfunction
-
-" function s:decode_uri(uri)
-"     return substitute(a:uri, '%\(\x\x\)', {m -> s:decode_char(m[1])}, 'g')
-" endfunction
-
-" function s:encode_char(char)
-" 	let l:code = char2nr(a:char)
-"     return printf('%%%02X', l:code)
-" endfunction
-
-" function s:decode_char(code)
-" 	let l:hex = str2nr(a:code, 16)
-" 	return nr2char(l:hex)
-" endfunction
-
-
-let s:url = 'https://user:password@www.example.com:123/𠮷forum/questions/?𠮷tag=𠮷networking&𠮷order=𠮷newest#𠮷top'
-" let s:url = 'https://𠮷top.com'
-" let s:u = s:file('/home/tanykazy/repos/vim-package-lsc/𠮷README.md')
-" echo s:parse('%f0%a0%ae%b7')
-
-let s:u = s:parse(s:url)
-echo s:url
-echo s:u
-echo s:u.toString()
-echo s:decodeURIComponent(s:u.toString())
-echo s:url == s:decodeURIComponent(s:u.toString())
