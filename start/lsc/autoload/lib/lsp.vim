@@ -199,6 +199,127 @@ function lib#lsp#LocationLink(originSelectionRange, targetUri, targetRange, targ
 	return l:locationlink
 endfunction
 
+let lib#lsp#DiagnosticSeverity = {}
+" Reports an error.
+let lib#lsp#DiagnosticSeverity['Error'] = 1
+" Reports a warning.
+let lib#lsp#DiagnosticSeverity['Warning'] = 2
+" Reports an information.
+let lib#lsp#DiagnosticSeverity['Information'] = 3
+" Reports a hint.
+let lib#lsp#DiagnosticSeverity['Hint'] = 4
+
+" The diagnostic tags.
+let lib#lsp#DiagnosticTag = {}
+" Unused or unnecessary code.
+" Clients are allowed to render diagnostics with this tag faded out instead of having an error squiggle.
+let lib#lsp#DiagnosticTag['Unnecessary'] = 1
+" Deprecated or obsolete code.
+" Clients are allowed to rendered diagnostics with this tag strike through.
+let lib#lsp#DiagnosticTag['Deprecated'] = 2
+
+function lib#lsp#Command(title, command, arguments = v:none)
+	let l:command = {}
+	" Title of the command, like `save`.
+	let l:command['title'] = a:title
+	" The identifier of the actual command handler.
+	let l:command['command'] = a:command
+	" Arguments that the command handler should be invoked with.
+	if a:arguments != v:none
+		let l:command['arguments'] = a:arguments
+	endif
+	return l:command
+endfunction
+
+function lib#lsp#TextEdit(range, newText)
+	let l:textedit = {}
+	" The range of the text document to be manipulated. To insert text into a document create a range where start === end.
+	let l:textedit['range'] = a:range
+	" The string to be inserted. For delete operations use an empty string.
+	let l:textedit['newText'] = a:newText
+	return l:textedit
+endfunction
+
+function lib#lsp#InitializeParams(processId, capabilities, clientInfo = v:none, locale = v:none, initializationOptions = v:none, trace = v:none, workspaceFolders = v:none, workDoneToken = v:none)
+	let l:params = {}
+	let l:params = extend(l:params, lib#lsp#WorkDoneProgressParams(a:workDoneToken))
+	" The process Id of the parent process that started the server. Is null if the process has not been started by another process. If the parent process is not alive then the server should exit (see exit notification) its process.
+	let l:params['processId'] = a:processId
+	" Information about the client
+	if a:clientInfo != v:none
+		let l:params['clientInfo'] = {}
+		" The name of the client as defined by the client.
+		let l:params['clientInfo']['name'] = a:clientInfo['name']
+		" The client's version as defined by the client.
+		if has_key(a:clientInfo, 'version')
+			let l:params['clientInfo']['version'] = a:clientInfo['version']
+		endif
+	endif
+	" The locale the client is currently showing the user interface in. This must not necessarily be the locale of the operating system.
+	" Uses IETF language tags as the value's syntax
+	" (See https://en.wikipedia.org/wiki/IETF_language_tag)
+	if a:locale != v:none
+		let l:params['locale'] = a:locale
+	endif
+	" The rootPath of the workspace. Is null if no folder is open.
+	" @deprecated in favour of `rootUri`.
+	" rootPath?: string | null;
+
+	" The rootUri of the workspace. Is null if no folder is open. If both `rootPath` and `rootUri` are set `rootUri` wins.
+	" @deprecated in favour of `workspaceFolders`
+	" rootUri: DocumentUri | null;
+
+	" User provided initialization options.
+	if a:initializationOptions != v:none
+		let l:params['initializationOptions'] = a:initializationOptions
+	endif
+	" The capabilities provided by the client (editor or tool)
+	let l:params['capabilities'] = a:capabilities
+	" The initial trace setting. If omitted trace is disabled ('off').
+	if a:trace != v:none
+		let l:params['trace'] = a:trace
+	endif
+	" The workspace folders configured in the client when the server starts.
+	" This property is only available if the client supports workspace folders.
+	" It can be `null` if the client supports workspace folders but none are configured.
+	if a:workspaceFolders != v:none
+		let l:params['workspaceFolders'] = a:workspaceFolders
+	endif
+	return l:params
+endfunction
+
+
+let lib#lsp#TraceValue = {}
+let lib#lsp#TraceValue['off'] = 'off'
+let lib#lsp#TraceValue['messages'] = 'messages'
+let lib#lsp#TraceValue['verbose'] = 'verbose'
+
+function lib#lsp#WorkspaceFolder(uri, name)
+	let l:workspaceFolder = {}
+	" The associated URI for this workspace folder.
+	let l:workspaceFolder['uri'] = a:uri
+	" The name of the workspace folder. Used to refer to this workspace folder in the user interface.
+	let l:workspaceFolder['name'] = a:name
+	return l:workspaceFolder
+endfunction
+
+function lib#lsp#WorkDoneProgressParams(workDoneToken = v:none)
+	let l:params = {}
+	" An optional token that a server can use to report work done progress.
+	if a:workDoneToken != v:none
+		let l:params['workDoneToken'] = a:workDoneToken
+	endif
+	return l:params
+endfunction
+
+
+
+
+
+
+
+
+
 
 
 function s:serialize_content(content)
