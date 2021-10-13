@@ -24,13 +24,13 @@ function lib#channel#open(cmd, cwd, cb)
 	let l:opt.close_cb = funcref('l:ch.close_cb', l:ch)
 	let l:opt.exit_cb = funcref('l:ch.exit_cb', l:ch)
 
-	let l:ch.job = s:job_start(a:cmd, l:opt)
+	let l:ch.job = job_start(a:cmd, l:opt)
 	call log#log_debug('Job start: ' . string(l:ch.job))
 
-	let l:ch.handle = s:job_getchannel(l:ch.job)
+	let l:ch.handle = job_getchannel(l:ch.job)
 	call log#log_debug('Open channel: ' . string(l:ch.handle))
 
-	let l:ch.id = s:ch_info(l:ch.handle).id
+	let l:ch.id = ch_info(l:ch.handle).id
 	let l:ch.callback = a:cb
 	let l:ch.buffer = ''
 
@@ -45,9 +45,9 @@ endfunction
 
 function s:channel.close() dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	call s:job_stop(self.job, 'term')
+	call job_stop(self.job, 'term')
 	call log#log_debug('Job stop: ' . string(self.job))
-	call s:ch_close(self.handle)
+	call ch_close(self.handle)
 	call log#log_debug('Close channel: ' . string(self))
 endfunction
 
@@ -55,7 +55,7 @@ function s:channel.send(data) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:payload = jsonrpc#build_payload(a:data)
 	call log#log_trace('Send data to[' . self.id . ']:' . l:payload)
-	call s:ch_sendraw(self.handle, l:payload, {})
+	call ch_sendraw(self.handle, l:payload, {})
 endfunction
 
 function s:channel.out_cb(ch, msg) dict
@@ -89,40 +89,4 @@ endfunction
 function s:channel.exit_cb(job, status) dict
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	call log#log_debug('exit callback ' . a:job . a:status)
-endfunction
-
-function s:ch_close(...)
-	if s:has_channel
-		return call('ch_close', a:000)
-	endif
-endfunction
-
-function s:ch_sendraw(...)
-	if s:has_channel
-		return call('ch_sendraw', a:000)
-	endif
-endfunction
-
-function s:ch_info(...)
-	if s:has_channel
-		return call('ch_info', a:000)
-	endif
-endfunction
-
-function s:job_start(...)
-	if s:has_job
-		return call('job_start', a:000)
-	endif
-endfunction
-
-function s:job_stop(...)
-	if s:has_job
-		return call('job_stop', a:000)
-	endif
-endfunction
-
-function s:job_getchannel(...)
-	if s:has_job
-		return call('job_getchannel', a:000)
-	endif
 endfunction
