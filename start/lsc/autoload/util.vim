@@ -70,6 +70,13 @@ function util#build_path(...)
 	return simplify(join(a:000, '/'))
 endfunction
 
+function util#toDocumentUriString(path)
+	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
+	let l:uri = lib#uri#file(a:path)
+	let l:uriString = l:uri.toString(v:false)
+	return l:uriString
+endfunction
+
 function util#uri2path(uri)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
 	let l:component = util#uri2components(a:uri)
@@ -81,16 +88,17 @@ const s:exclude_chars = '^[a-zA-Z0-9_.~/-]$'
 
 function util#encode_uri(uri)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	let l:result = ''
-    for l:index in range(len(a:uri))
-		let l:char = a:uri[l:index]
-		if match(l:char, s:exclude_chars) == -1
-			let l:result = l:result . util#encode_uri_char(l:char)
-        else
-            let l:result = l:result . l:char
-        endif
-    endfor
-    return l:result
+	return util#toDocumentUriString(a:uri)
+	" let l:result = ''
+    " for l:index in range(len(a:uri))
+	" 	let l:char = a:uri[l:index]
+	" 	if match(l:char, s:exclude_chars) == -1
+	" 		let l:result = l:result . util#encode_uri_char(l:char)
+    "     else
+    "         let l:result = l:result . l:char
+    "     endif
+    " endfor
+    " return l:result
 endfunction
 
 function util#decode_uri(uri)

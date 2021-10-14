@@ -310,6 +310,7 @@ function s:fn.textDocument_publishDiagnostics(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:location = []
     let l:file = util#uri2path(a:message['params']['uri'])
+    " call log#log_debug('file: ' . l:file)
     let l:buf = util#path2buf(l:file)
     " let l:winid = bufwinid(l:buf)
     call textprop#clear(l:buf)

@@ -263,7 +263,8 @@ function lsp#TextDocumentItem(path, languageId, version, text)
 endfunction
 
 function lsp#DocumentUri(scheme, authority, path, query, fragment)
-	return lsp#Uri(a:scheme, a:authority, a:path, a:query, a:fragment)
+	return a:path
+	" return lsp#Uri(a:scheme, a:authority, a:path, a:query, a:fragment)
 endfunction
 
 function lsp#Uri(scheme, authority, path, query, fragment)
