@@ -291,7 +291,7 @@ function lsp#lsp#InitializeParams(processId, capabilities, clientInfo = v:none, 
 endfunction
 
 " Text document specific client capabilities.
-function TextDocumentClientCapabilities(synchronization = v:none, completion = v:none, hover = v:none, signatureHelp = v:none, declaration = v:none, definition = v:none, typeDefinition = v:none, implementation = v:none, references = v:none, documentHighlight = v:none, documentSymbol = v:none, codeAction = v:none, codeLens = v:none, documentLink = v:none, colorProvider = v:none, formatting = v:none, rangeFormatting = v:none, onTypeFormatting = v:none, rename = v:none, publishDiagnostics = v:none, foldingRange = v:none, selectionRange = v:none, linkedEditingRange = v:none, callHierarchy = v:none, semanticTokens = v:none, moniker = v:none)
+function lsp#lsp#TextDocumentClientCapabilities(synchronization = v:none, completion = v:none, hover = v:none, signatureHelp = v:none, declaration = v:none, definition = v:none, typeDefinition = v:none, implementation = v:none, references = v:none, documentHighlight = v:none, documentSymbol = v:none, codeAction = v:none, codeLens = v:none, documentLink = v:none, colorProvider = v:none, formatting = v:none, rangeFormatting = v:none, onTypeFormatting = v:none, rename = v:none, publishDiagnostics = v:none, foldingRange = v:none, selectionRange = v:none, linkedEditingRange = v:none, callHierarchy = v:none, semanticTokens = v:none, moniker = v:none)
 	let l:capabilities = {}
 	let l:capabilities['synchronization'] = a:synchronization
 	" Capabilities specific to the `textDocument/completion` request.
@@ -836,36 +836,36 @@ function lsp#lsp#CodeLensWorkspaceClientCapabilities()
 	return l:params
 endfunction
 
-function lsp#lsp#TextDocumentClientCapabilities()
-	let l:params = {}
-	let l:params['synchronization'] = lsp#lsp#TextDocumentSyncClientCapabilities()
-	let l:params['completion'] = lsp#lsp#CompletionClientCapabilities()
-	let l:params['hover'] = lsp#lsp#HoverClientCapabilities()
-	let l:params['signatureHelp'] = lsp#lsp#SignatureHelpClientCapabilities()
-	let l:params['declaration'] = lsp#lsp#DeclarationClientCapabilities()
-	let l:params['definition'] = lsp#lsp#DefinitionClientCapabilities()
-	let l:params['typeDefinition'] = lsp#lsp#TypeDefinitionClientCapabilities()
-	let l:params['implementation'] = lsp#lsp#ImplementationClientCapabilities()
-	let l:params['references'] = lsp#lsp#ReferenceClientCapabilities()
-	let l:params['documentHighlight'] = lsp#lsp#DocumentHighlightClientCapabilities()
-	let l:params['documentSymbol'] = lsp#lsp#DocumentSymbolClientCapabilities()
-	let l:params['codeAction'] = lsp#lsp#CodeActionClientCapabilities()
-	let l:params['codeLens'] = lsp#lsp#CodeLensClientCapabilities()
-	let l:params['documentLink'] = lsp#lsp#DocumentLinkClientCapabilities()
-	let l:params['colorProvider'] = lsp#lsp#DocumentColorClientCapabilities()
-	let l:params['formatting'] = lsp#lsp#DocumentFormattingClientCapabilities()
-	let l:params['rangeFormatting'] = lsp#lsp#DocumentRangeFormattingClientCapabilities()
-	let l:params['onTypeFormatting'] = lsp#lsp#DocumentOnTypeFormattingClientCapabilities()
-	let l:params['rename'] = lsp#lsp#RenameClientCapabilities()
-	let l:params['publishDiagnostics'] = lsp#lsp#PublishDiagnosticsClientCapabilities()
-	let l:params['foldingRange'] = lsp#lsp#FoldingRangeClientCapabilities()
-	let l:params['selectionRange'] = lsp#lsp#SelectionRangeClientCapabilities()
-	let l:params['linkedEditingRange'] = lsp#lsp#LinkedEditingRangeClientCapabilities()
-	let l:params['callHierarchy'] = lsp#lsp#CallHierarchyClientCapabilities()
-	let l:params['semanticTokens'] = lsp#lsp#SemanticTokensClientCapabilities()
-	let l:params['moniker'] = lsp#lsp#MonikerClientCapabilities()
-	return l:params
-endfunction
+" function lsp#lsp#TextDocumentClientCapabilities()
+" 	let l:params = {}
+" 	let l:params['synchronization'] = lsp#lsp#TextDocumentSyncClientCapabilities()
+" 	let l:params['completion'] = lsp#lsp#CompletionClientCapabilities()
+" 	let l:params['hover'] = lsp#lsp#HoverClientCapabilities()
+" 	let l:params['signatureHelp'] = lsp#lsp#SignatureHelpClientCapabilities()
+" 	let l:params['declaration'] = lsp#lsp#DeclarationClientCapabilities()
+" 	let l:params['definition'] = lsp#lsp#DefinitionClientCapabilities()
+" 	let l:params['typeDefinition'] = lsp#lsp#TypeDefinitionClientCapabilities()
+" 	let l:params['implementation'] = lsp#lsp#ImplementationClientCapabilities()
+" 	let l:params['references'] = lsp#lsp#ReferenceClientCapabilities()
+" 	let l:params['documentHighlight'] = lsp#lsp#DocumentHighlightClientCapabilities()
+" 	let l:params['documentSymbol'] = lsp#lsp#DocumentSymbolClientCapabilities()
+" 	let l:params['codeAction'] = lsp#lsp#CodeActionClientCapabilities()
+" 	let l:params['codeLens'] = lsp#lsp#CodeLensClientCapabilities()
+" 	let l:params['documentLink'] = lsp#lsp#DocumentLinkClientCapabilities()
+" 	let l:params['colorProvider'] = lsp#lsp#DocumentColorClientCapabilities()
+" 	let l:params['formatting'] = lsp#lsp#DocumentFormattingClientCapabilities()
+" 	let l:params['rangeFormatting'] = lsp#lsp#DocumentRangeFormattingClientCapabilities()
+" 	let l:params['onTypeFormatting'] = lsp#lsp#DocumentOnTypeFormattingClientCapabilities()
+" 	let l:params['rename'] = lsp#lsp#RenameClientCapabilities()
+" 	let l:params['publishDiagnostics'] = lsp#lsp#PublishDiagnosticsClientCapabilities()
+" 	let l:params['foldingRange'] = lsp#lsp#FoldingRangeClientCapabilities()
+" 	let l:params['selectionRange'] = lsp#lsp#SelectionRangeClientCapabilities()
+" 	let l:params['linkedEditingRange'] = lsp#lsp#LinkedEditingRangeClientCapabilities()
+" 	let l:params['callHierarchy'] = lsp#lsp#CallHierarchyClientCapabilities()
+" 	let l:params['semanticTokens'] = lsp#lsp#SemanticTokensClientCapabilities()
+" 	let l:params['moniker'] = lsp#lsp#MonikerClientCapabilities()
+" 	return l:params
+" endfunction
 
 function lsp#lsp#ShowMessageRequestClientCapabilities()
 	let l:params = {}
