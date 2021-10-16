@@ -56,7 +56,7 @@ endfunction
 
 " function util#pos2position(pos)
 " 	let l:charpos = util#bytepos2charpos(a:pos)
-" 	let l:position = lsp#Position()
+" 	let l:position = lsp#lsp#Position()
 " 	return [a:buf, a:position.line + 1, a:position.character + 1]
 " endfunction
 
@@ -88,7 +88,6 @@ const s:exclude_chars = '^[a-zA-Z0-9_.~/-]$'
 
 function util#encode_uri(uri)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-	return util#toDocumentUriString(a:uri)
 	" let l:result = ''
     " for l:index in range(len(a:uri))
 	" 	let l:char = a:uri[l:index]
@@ -99,6 +98,7 @@ function util#encode_uri(uri)
     "     endif
     " endfor
     " return l:result
+	return util#toDocumentUriString(a:uri)
 endfunction
 
 function util#decode_uri(uri)

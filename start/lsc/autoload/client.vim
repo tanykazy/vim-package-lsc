@@ -16,8 +16,8 @@ function client#start(lang, buf)
     endif
     let l:server = s:start_server(a:lang)
     let l:cwd = util#getcwd(a:buf)
-    let l:workspaceFolder = lsp#WorkspaceFolder(l:cwd, l:cwd)
-    let l:params = lsp#InitializeParams(l:server['options'], [l:workspaceFolder], v:none)
+    let l:workspaceFolder = lsp#lsp#WorkspaceFolder(l:cwd, l:cwd)
+    let l:params = lsp#lsp#InitializeParams(l:server['options'], [l:workspaceFolder], v:none)
     call s:send_request(l:server, 'initialize', l:params)
 endfunction
 
@@ -49,7 +49,7 @@ function client#document_open(buf, path)
     endif
     let l:text = util#getbuftext(a:buf)
     let l:changedtick = util#getchangedtick(a:buf)
-    let l:params = lsp#DidOpenTextDocumentParams(util#encode_uri(a:path), util#getfiletype(a:buf), l:changedtick, l:text)
+    let l:params = lsp#lsp#DidOpenTextDocumentParams(util#encode_uri(a:path), util#getfiletype(a:buf), l:changedtick, l:text)
     call add(l:server['files'], a:path)
     call s:send_notification(l:server, 'textDocument/didOpen', l:params)
 
@@ -68,7 +68,7 @@ function client#document_close(buf, path)
     if !util#isContain(l:server['files'], a:path)
         return
     endif
-    let l:params = lsp#DidCloseTextDocumentParams(util#encode_uri(a:path))
+    let l:params = lsp#lsp#DidCloseTextDocumentParams(util#encode_uri(a:path))
     call s:send_notification(l:server, 'textDocument/didClose', l:params)
     call filter(l:server['files'], {idx, val -> val != a:path})
 endfunction
@@ -84,16 +84,16 @@ function client#document_change(buf, path, pos, char)
         return
     endif
     if !empty(a:char)
-        let l:start_position = lsp#Position(a:pos[1] - 1, a:pos[2] - 1)
-        let l:end_position = lsp#Position(a:pos[1] - 1, a:pos[2] - 1)
-        let l:range = lsp#Range(l:start_position, l:end_position)
-        let l:change = lsp#TextDocumentContentChangeEvent(l:range, a:char)
+        let l:start_position = lsp#lsp#Position(a:pos[1] - 1, a:pos[2] - 1)
+        let l:end_position = lsp#lsp#Position(a:pos[1] - 1, a:pos[2] - 1)
+        let l:range = lsp#lsp#Range(l:start_position, l:end_position)
+        let l:change = lsp#lsp#TextDocumentContentChangeEvent(l:range, a:char)
     else
         let l:text = util#getbuftext(a:buf)
-        let l:change = lsp#TextDocumentContentChangeEvent(v:none, l:text)
+        let l:change = lsp#lsp#TextDocumentContentChangeEvent(v:none, l:text)
     endif
     let l:version = util#getchangedtick(a:buf)
-    let l:params = lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
+    let l:params = lsp#lsp#DidChangeTextDocumentParams(util#encode_uri(a:path), l:version, [l:change])
     call s:send_notification(l:server, 'textDocument/didChange', l:params)
 endfunction
 
@@ -108,7 +108,7 @@ function client#document_save(buf, path)
         return
     endif
     let l:text = util#getbuftext(a:buf)
-    let l:params = lsp#DidSaveTextDocumentParams(util#encode_uri(a:path), l:text)
+    let l:params = lsp#lsp#DidSaveTextDocumentParams(util#encode_uri(a:path), l:text)
     call s:send_notification(l:server, 'textDocument/didSave', l:params)
 endfunction
 
@@ -125,8 +125,8 @@ function client#document_hover(buf, pos)
     endif
     let l:lnum = a:pos[1]
     let l:col = a:pos[2]
-    let l:position = lsp#Position(l:lnum - 1, l:col - 1)
-    let l:params = lsp#HoverParams(util#encode_uri(l:path), l:position, v:none)
+    let l:position = lsp#lsp#Position(l:lnum - 1, l:col - 1)
+    let l:params = lsp#lsp#HoverParams(util#encode_uri(l:path), l:position, v:none)
     call s:send_request(l:server, 'textDocument/hover', l:params)
 endfunction
 
@@ -143,8 +143,8 @@ function client#goto_definition(buf, pos)
     endif
     let l:lnum = a:pos[1]
     let l:col = a:pos[2]
-    let l:position = lsp#Position(l:lnum - 1, l:col - 1)
-    let l:params = lsp#DefinitionParams(util#encode_uri(l:path), l:position, v:none, v:none)
+    let l:position = lsp#lsp#Position(l:lnum - 1, l:col - 1)
+    let l:params = lsp#lsp#DefinitionParams(util#encode_uri(l:path), l:position, v:none, v:none)
     call s:send_request(l:server, 'textDocument/definition', l:params)
 endfunction
 
@@ -161,9 +161,9 @@ function client#find_references(buf, pos)
     endif
     let l:lnum = a:pos[1]
     let l:col = a:pos[2]
-    let l:position = lsp#Position(l:lnum - 1, l:col - 1)
-    let l:context = lsp#ReferenceContext(v:false)
-    let l:params = lsp#ReferenceParams(util#encode_uri(l:path), l:position, l:context, v:none, v:none)
+    let l:position = lsp#lsp#Position(l:lnum - 1, l:col - 1)
+    let l:context = lsp#lsp#ReferenceContext(v:false)
+    let l:params = lsp#lsp#ReferenceParams(util#encode_uri(l:path), l:position, l:context, v:none, v:none)
     call s:send_request(l:server, 'textDocument/references', l:params)
 endfunction
 
@@ -180,8 +180,8 @@ function client#goto_implementation(buf, pos)
     endif
     let l:lnum = a:pos[1]
     let l:col = a:pos[2]
-    let l:position = lsp#Position(l:lnum - 1, l:col - 1)
-    let l:params = lsp#ImplementationParams(util#encode_uri(l:path), l:position, v:none, v:none)
+    let l:position = lsp#lsp#Position(l:lnum - 1, l:col - 1)
+    let l:params = lsp#lsp#ImplementationParams(util#encode_uri(l:path), l:position, v:none, v:none)
     call s:send_request(l:server, 'textDocument/implementation', l:params)
 endfunction
 
@@ -196,7 +196,7 @@ function client#code_lens(buf)
     if !util#isContain(l:server['files'], l:path)
         return
     endif
-    let l:params = lsp#CodeLensParams(util#encode_uri(l:path), v:none, v:none)
+    let l:params = lsp#lsp#CodeLensParams(util#encode_uri(l:path), v:none, v:none)
     call s:send_request(l:server, 'textDocument/codeLens', l:params)
 endfunction
 
@@ -208,20 +208,20 @@ function client#document_completion(buf, path, pos, char)
     endif
     let l:server = s:server_list[l:filetype]
     if util#isContain(l:server['capabilities']['completionProvider']['triggerCharacters'], a:char)
-        let l:kind = lsp#CompletionTriggerKind().TriggerCharacter
+        let l:kind = lsp#lsp#CompletionTriggerKind().TriggerCharacter
     else
-        let l:kind = lsp#CompletionTriggerKind().Invoked
+        let l:kind = lsp#lsp#CompletionTriggerKind().Invoked
     endif
-    if l:kind != lsp#CompletionTriggerKind().TriggerCharacter
+    if l:kind != lsp#lsp#CompletionTriggerKind().TriggerCharacter
         if !util#isNone(a:char)
             return v:false
         endif
     endif
     let l:line = a:pos[1] - 1
     let l:character = a:pos[2] - 1
-    let l:position = lsp#Position(l:line, l:character)
-    let l:context = lsp#CompletionContext(l:kind, a:char)
-    let l:params = lsp#CompletionParams(l:context, util#encode_uri(a:path), l:position, v:none, v:none)
+    let l:position = lsp#lsp#Position(l:line, l:character)
+    let l:context = lsp#lsp#CompletionContext(l:kind, a:char)
+    let l:params = lsp#lsp#CompletionParams(l:context, util#encode_uri(a:path), l:position, v:none, v:none)
     call s:send_request(l:server, 'textDocument/completion', l:params)
     return v:true
 endfunction
@@ -237,14 +237,14 @@ function client#code_action(buf, start, end, kind)
     if !util#isContain(l:server['files'], l:path)
         return
     endif
-    let l:start = lsp#Position(a:start - 1, 0)
-    let l:end = lsp#Position(a:end - 1, util#getlinelength(a:end) - 1)
-    let l:range = lsp#Range(l:start, l:end)
+    let l:start = lsp#lsp#Position(a:start - 1, 0)
+    let l:end = lsp#lsp#Position(a:end - 1, util#getlinelength(a:end) - 1)
+    let l:range = lsp#lsp#Range(l:start, l:end)
     let l:diagnostics = get(b:, 'diagnostics', [])
-    " let l:kind = lsp#CodeActionKind()[a:kind]
-    let l:kind = get(lsp#CodeActionKind(), a:kind, v:none)
-    let l:context = lsp#CodeActionContext(l:diagnostics, l:kind)
-    let l:params = lsp#CodeActionParams(util#encode_uri(l:path), l:range, l:context, v:none, v:none)
+    " let l:kind = lsp#lsp#CodeActionKind()[a:kind]
+    let l:kind = get(lsp#lsp#CodeActionKind(), a:kind, v:none)
+    let l:context = lsp#lsp#CodeActionContext(l:diagnostics, l:kind)
+    let l:params = lsp#lsp#CodeActionParams(util#encode_uri(l:path), l:range, l:context, v:none, v:none)
     call s:send_request(l:server, 'textDocument/codeAction', l:params)
 endfunction
 
@@ -259,7 +259,7 @@ function client#document_symbol(buf)
     " if !util#isContain(l:server['files'], l:path)
     "     return
     " endif
-    let l:params = lsp#DocumentSymbolParams(util#encode_uri(l:path), v:none, v:none)
+    let l:params = lsp#lsp#DocumentSymbolParams(util#encode_uri(l:path), v:none, v:none)
     call s:send_request(l:server, 'textDocument/documentSymbol', l:params)
 endfunction
 
@@ -285,7 +285,7 @@ function s:fn.initialize(server, message, ...)
     let a:server['serverInfo'] = get(a:message['result'], 'serverInfo', {})
     call log#log_debug('Update server info ' . string(a:server))
 
-    let l:params = lsp#InitializedParams()
+    let l:params = lsp#lsp#InitializedParams()
     call s:send_notification(a:server, 'initialized', l:params)
 
     let l:bufinfolist = util#loadedbufinfolist()

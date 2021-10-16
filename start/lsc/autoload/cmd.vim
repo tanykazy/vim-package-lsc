@@ -33,7 +33,7 @@ endfunction
 
 function cmd#completion_code_action_kind(arglead, cmdline, cursorpos)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    let l:list = keys(lsp#CodeActionKind())
+    let l:list = keys(lsp#lsp#CodeActionKind())
     return join(l:list, "\n")
 endfunction
 
