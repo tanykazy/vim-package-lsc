@@ -472,6 +472,12 @@ function lsp#lsp#ClientCapabilities(workspace = v:none, textDocument = v:none, w
 	return l:capabilities
 endfunction
 
+" Notification:
+" method: ‘initialized’
+function lsp#lsp#InitializedParams()
+	return {}
+endfunction
+
 let lsp#lsp#TraceValue = {}
 let lsp#lsp#TraceValue['off'] = 'off'
 let lsp#lsp#TraceValue['messages'] = 'messages'
@@ -518,11 +524,6 @@ endfunction
 " 	endif
 " 	return l:params
 " endfunction
-
-function lsp#lsp#InitializedParams()
-	let l:params = {}
-	return l:params
-endfunction
 
 function lsp#lsp#DidOpenTextDocumentParams(path, languageId, version, text)
 	let l:params = {}
