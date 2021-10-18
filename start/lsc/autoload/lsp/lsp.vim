@@ -478,6 +478,14 @@ function lsp#lsp#InitializedParams()
 	return {}
 endfunction
 
+" Request:
+" method: ‘shutdown’
+" params: void
+
+" Notification:
+" method: ‘exit’
+" params: void
+
 let lsp#lsp#TraceValue = {}
 let lsp#lsp#TraceValue['off'] = 'off'
 let lsp#lsp#TraceValue['messages'] = 'messages'
