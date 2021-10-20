@@ -14,7 +14,7 @@ endfunction
 
 " https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#contentPart
 function lsp#lsp#Content(content, encoding = 'utf-8')
-	return iconv(s:serialize_content(a:content), &encoding, a:encoding)
+	return iconv(json_encode(a:content), &encoding, a:encoding)
 endfunction
 
 " The language server protocol always uses “2.0” as the jsonrpc version.
@@ -1164,15 +1164,4 @@ function lsp#lsp#CodeActionKind()
 	let l:CodeActionKind['Source'] = 'source'
 	let l:CodeActionKind['SourceOrganizeImports'] = 'source.organizeImports'
 	return l:CodeActionKind
-endfunction
-
-
-
-
-
-
-
-
-function s:serialize_content(content)
-	return json_encode(a:content)
 endfunction
