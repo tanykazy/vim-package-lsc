@@ -518,9 +518,6 @@ function lsp#lsp#WorkDoneProgressParams(workDoneToken = v:none)
 	return l:params
 endfunction
 
-
-
-
 " function lsp#lsp#InitializeParams(initializationOptions, workspaceFolders, token)
 " 	let l:params = {}
 " 	call extend(l:params, lsp#lsp#WorkDoneProgressParams(a:token))
@@ -912,6 +909,55 @@ function lsp#lsp#MarkdownClientCapabilities()
 	return l:params
 endfunction
 
+" Describes the content type that a client supports in various result literals like `Hover`, `ParameterInfo` or `CompletionItem`.
+" Please note that `MarkupKinds` must not start with a `$`. This kinds are reserved for internal usage.
+const lsp#lsp#MarkupKind = {}
+" Plain text is supported as a content format
+const lsp#lsp#MarkupKind['plaintext'] = 'plaintext'
+" Markdown is supported as a content format
+const lsp#lsp#MarkupKind['markdown'] = 'markdown'
+
+" Completion item tags are extra annotations that tweak the rendering of a completion item.
+const lsp#lsp#CompletionItemTag = {}
+" Render a completion as obsolete, usually using a strike-out.
+const lsp#lsp#CompletionItemTag['Deprecated'] = 1
+
+" How whitespace and indentation is handled during completion item insertion.
+const lsp#lsp#InsertTextMode = {}
+" The insertion or replace strings is taken as it is. If the value is multi line the lines below the cursor will be inserted using the indentation defined in the string value. The client will not apply any kind of adjustments to the string.
+const lsp#lsp#InsertTextMode['asIs'] = 1
+" The editor adjusts leading whitespace of new lines so that they match the indentation up to the cursor of the line for which the item is accepted.
+" Consider a line like this: <2tabs><cursor><3tabs>foo. Accepting a multi line completion item is indented using 2 tabs and all following lines inserted will be indented using 2 tabs as well.
+const lsp#lsp#InsertTextMode['adjustIndentation'] = 2
+
+" The kind of a completion entry.
+const lsp#lsp#CompletionItemKind = {}
+const lsp#lsp#CompletionItemKind['Text'] = 1
+const lsp#lsp#CompletionItemKind['Method'] = 2
+const lsp#lsp#CompletionItemKind['Function'] = 3
+const lsp#lsp#CompletionItemKind['Constructor'] = 4
+const lsp#lsp#CompletionItemKind['Field'] = 5
+const lsp#lsp#CompletionItemKind['Variable'] = 6
+const lsp#lsp#CompletionItemKind['Class'] = 7
+const lsp#lsp#CompletionItemKind['Interface'] = 8
+const lsp#lsp#CompletionItemKind['Module'] = 9
+const lsp#lsp#CompletionItemKind['Property'] = 10
+const lsp#lsp#CompletionItemKind['Unit'] = 11
+const lsp#lsp#CompletionItemKind['Value'] = 12
+const lsp#lsp#CompletionItemKind['Enum'] = 13
+const lsp#lsp#CompletionItemKind['Keyword'] = 14
+const lsp#lsp#CompletionItemKind['Snippet'] = 15
+const lsp#lsp#CompletionItemKind['Color'] = 16
+const lsp#lsp#CompletionItemKind['File'] = 17
+const lsp#lsp#CompletionItemKind['Reference'] = 18
+const lsp#lsp#CompletionItemKind['Folder'] = 19
+const lsp#lsp#CompletionItemKind['EnumMember'] = 20
+const lsp#lsp#CompletionItemKind['Constant'] = 21
+const lsp#lsp#CompletionItemKind['Struct'] = 22
+const lsp#lsp#CompletionItemKind['Event'] = 23
+const lsp#lsp#CompletionItemKind['Operator'] = 24
+const lsp#lsp#CompletionItemKind['TypeParameter'] = 25
+
 function lsp#lsp#TextDocumentSyncClientCapabilities(dynamicRegistration = v:none, willSave = v:none, willSaveWaitUntil = v:none, didSave = v:none)
 	let l:capabilities = {}
 	" Whether text document synchronization supports dynamic registration.
@@ -926,34 +972,56 @@ function lsp#lsp#TextDocumentSyncClientCapabilities(dynamicRegistration = v:none
 endfunction
 
 function lsp#lsp#CompletionClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	let l:params['completionItem'] = {}
-	let l:params['completionItem']['snippetSupport'] = v:true
-	let l:params['completionItem']['commitCharactersSupport'] = v:true
-	let l:params['completionItem']['documentationFormat'] = ['plaintext']
-	let l:params['completionItem']['deprecatedSupport'] = v:false
-	let l:params['completionItem']['preselectSupport'] = v:false
-	let l:params['completionItem']['tagSupport'] = {}
-	let l:params['completionItem']['tagSupport']['valueSet'] = [1]
-	let l:params['completionItem']['insertReplaceSupport'] = v:false
-	let l:params['completionItem']['resolveSupport'] = {}
-	let l:params['completionItem']['resolveSupport']['properties'] = ['']
-	let l:params['completionItem']['insertTextModeSupport'] = {}
-	let l:params['completionItem']['insertTextModeSupport']['valueSet'] = [1]
-	let l:params['completionItem']['labelDetailsSupport'] = v:true
-	let l:params['completionItemKind'] = {}
-	let l:params['completionItemKind']['valueSet'] = []
-	let l:params['contextSupport'] = v:true
-	let l:params['insertTextMode'] = 1
-	return l:params
+	let l:capabilities = {}
+	" Whether completion supports dynamic registration.
+	let l:capabilities['dynamicRegistration'] = v:false
+	" The client supports the following `CompletionItem` specific capabilities.
+	let l:capabilities['completionItem'] = {}
+	" Client supports snippets as insert text.
+	" A snippet can define tab stops and placeholders with `$1`, `$2` and `${3:foo}`. `$0` defines the final tab stop, it defaults to the end of the snippet. Placeholders with equal identifiers are linked, that is typing in one will update others too.
+	let l:capabilities['completionItem']['snippetSupport'] = v:true
+	" Client supports commit characters on a completion item.
+	let l:capabilities['completionItem']['commitCharactersSupport'] = v:true
+	" Client supports the follow content formats for the documentation property. The order describes the preferred format of the client.
+	let l:capabilities['completionItem']['documentationFormat'] = ['plaintext']
+	" Client supports the deprecated property on a completion item.
+	let l:capabilities['completionItem']['deprecatedSupport'] = v:false
+	" Client supports the preselect property on a completion item.
+	let l:capabilities['completionItem']['preselectSupport'] = v:false
+	" Client supports the tag property on a completion item. Clients supporting tags have to handle unknown tags gracefully. Clients especially need to preserve unknown tags when sending a completion item back to the server in a resolve call.
+	let l:capabilities['completionItem']['tagSupport'] = {}
+	" The tags supported by the client.
+	let l:capabilities['completionItem']['tagSupport']['valueSet'] = [1]
+	" Client supports insert replace edit to control different behavior if a completion item is inserted in the text or should replace text.
+	let l:capabilities['completionItem']['insertReplaceSupport'] = v:false
+	" Indicates which properties a client can resolve lazily on a completion item. Before version 3.16.0 only the predefined properties `documentation` and `detail` could be resolved lazily.
+	let l:capabilities['completionItem']['resolveSupport'] = {}
+	" The properties that a client can resolve lazily.
+	let l:capabilities['completionItem']['resolveSupport']['properties'] = ['']
+	" The client supports the `insertTextMode` property on a completion item to override the whitespace handling mode as defined by the client (see `insertTextMode`).
+	let l:capabilities['completionItem']['insertTextModeSupport'] = {}
+	let l:capabilities['completionItem']['insertTextModeSupport']['valueSet'] = [1]
+	" The client has support for completion item label details (see also `CompletionItemLabelDetails`).
+	let l:capabilities['completionItem']['labelDetailsSupport'] = v:true
+	let l:capabilities['completionItemKind'] = {}
+	" The completion item kind values the client supports. When this property exists the client also guarantees that it will handle values outside its set gracefully and falls back to a default value when unknown.
+	" If this property is not present the client only supports the completion items kinds from `Text` to `Reference` as defined in the initial version of the protocol.
+	let l:capabilities['completionItemKind']['valueSet'] = []
+	" The client supports to send additional context information for a `textDocument/completion` request.
+	let l:capabilities['contextSupport'] = v:true
+	" The client's default when the completion item doesn't provide a `insertTextMode` property.
+	let l:capabilities['insertTextMode'] = 1
+	return filter(l:capabilities, {key, val -> val != v:none})
 endfunction
 
-function lsp#lsp#HoverClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:true
-	let l:params['contentFormat'] = ['plaintext']
-	return l:params
+function lsp#lsp#HoverClientCapabilities(dynamicRegistration, contentFormat)
+	let l:capabilities = {}
+	" Whether hover supports dynamic registration.
+	let l:capabilities['dynamicRegistration'] = a:dynamicRegistration
+	" Client supports the follow content formats if the content property refers to a `literal of type MarkupContent`.
+	" The order describes the preferred format of the client.
+	let l:capabilities['contentFormat'] = a:contentFormat
+	return filter(l:capabilities, {key, val -> val != v:none})
 endfunction
 
 function lsp#lsp#SignatureHelpClientCapabilities()
@@ -1143,7 +1211,6 @@ function lsp#lsp#PrepareSupportDefaultBehavior()
 	let l:params['Identifier'] = 1
 	return l:params
 endfunction
-
 
 function lsp#lsp#CompletionTriggerKind()
 	let l:CompletionTriggerKind = {}
