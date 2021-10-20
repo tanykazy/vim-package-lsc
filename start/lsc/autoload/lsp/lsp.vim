@@ -486,6 +486,15 @@ endfunction
 " method: ‘exit’
 " params: void
 
+" Notification:
+" method: ‘$/setTrace’
+function lsp#lsp#SetTraceParams(value)
+	let l:params = {}
+	" The new value that should be assigned to the trace setting.
+	let l:params['value'] = a:value
+	return l:params
+endfunction
+
 let lsp#lsp#TraceValue = {}
 let lsp#lsp#TraceValue['off'] = 'off'
 let lsp#lsp#TraceValue['messages'] = 'messages'
