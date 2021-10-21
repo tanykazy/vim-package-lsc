@@ -1025,185 +1025,185 @@ function lsp#lsp#HoverClientCapabilities(dynamicRegistration, contentFormat)
 endfunction
 
 function lsp#lsp#SignatureHelpClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	let l:params['signatureInformation'] = {}
-	let l:params['signatureInformation']['documentationFormat'] = ['plaintext']
-	let l:params['signatureInformation']['parameterInformation'] = {}
-	let l:params['signatureInformation']['parameterInformation']['labelOffsetSupport'] = v:false
-	let l:params['signatureInformation']['activeParameterSupport'] = v:false
-	let l:params['contextSupport'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	let l:capabilities['signatureInformation'] = {}
+	let l:capabilities['signatureInformation']['documentationFormat'] = ['plaintext']
+	let l:capabilities['signatureInformation']['parameterInformation'] = {}
+	let l:capabilities['signatureInformation']['parameterInformation']['labelOffsetSupport'] = v:false
+	let l:capabilities['signatureInformation']['activeParameterSupport'] = v:false
+	let l:capabilities['contextSupport'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#DeclarationClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	let l:params['linkSupport'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	let l:capabilities['linkSupport'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#DefinitionClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	let l:params['linkSupport'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	let l:capabilities['linkSupport'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#TypeDefinitionClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	let l:params['linkSupport'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	let l:capabilities['linkSupport'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#ImplementationClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	let l:params['linkSupport'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	let l:capabilities['linkSupport'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#ReferenceClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#DocumentHighlightClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#DocumentSymbolClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	let l:params['symbolKind'] = {}
-	let l:params['symbolKind']['valueSet'] = []
-	let l:params['hierarchicalDocumentSymbolSupport'] = v:false
-	let l:params['tagSupport'] = {}
-	let l:params['tagSupport']['valueSet'] = [1]
-	let l:params['labelSupport'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	let l:capabilities['symbolKind'] = {}
+	let l:capabilities['symbolKind']['valueSet'] = []
+	let l:capabilities['hierarchicalDocumentSymbolSupport'] = v:false
+	let l:capabilities['tagSupport'] = {}
+	let l:capabilities['tagSupport']['valueSet'] = [1]
+	let l:capabilities['labelSupport'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#CodeActionClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	let l:params['codeActionLiteralSupport'] = {}
-	let l:params['codeActionLiteralSupport']['codeActionKind'] = {}
-	let l:params['codeActionLiteralSupport']['codeActionKind']['valueSet'] = ['']
-	let l:params['isPreferredSupport'] = v:false
-	let l:params['disabledSupport'] = v:false
-	let l:params['dataSupport'] = v:false
-	let l:params['resolveSupport'] = {}
-	let l:params['resolveSupport']['properties'] = ['']
-	let l:params['honorsChangeAnnotations'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	let l:capabilities['codeActionLiteralSupport'] = {}
+	let l:capabilities['codeActionLiteralSupport']['codeActionKind'] = {}
+	let l:capabilities['codeActionLiteralSupport']['codeActionKind']['valueSet'] = ['']
+	let l:capabilities['isPreferredSupport'] = v:false
+	let l:capabilities['disabledSupport'] = v:false
+	let l:capabilities['dataSupport'] = v:false
+	let l:capabilities['resolveSupport'] = {}
+	let l:capabilities['resolveSupport']['properties'] = ['']
+	let l:capabilities['honorsChangeAnnotations'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#CodeLensClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#DocumentLinkClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	let l:params['tooltipSupport'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	let l:capabilities['tooltipSupport'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#DocumentColorClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#DocumentFormattingClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#DocumentRangeFormattingClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#DocumentOnTypeFormattingClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#RenameClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	let l:params['prepareSupport'] = v:false
-	let l:params['prepareSupportDefaultBehavior'] = 1
-	let l:params['honorsChangeAnnotations'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	let l:capabilities['prepareSupport'] = v:false
+	let l:capabilities['prepareSupportDefaultBehavior'] = 1
+	let l:capabilities['honorsChangeAnnotations'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#PublishDiagnosticsClientCapabilities()
-	let l:params = {}
-	let l:params['relatedInformation'] = v:false
-	let l:params['tagSupport'] = {}
-	let l:params['tagSupport']['valueSet'] = [1]
-	let l:params['versionSupport'] = v:false
-	let l:params['codeDescriptionSupport'] = v:false
-	let l:params['dataSupport'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['relatedInformation'] = v:false
+	let l:capabilities['tagSupport'] = {}
+	let l:capabilities['tagSupport']['valueSet'] = [1]
+	let l:capabilities['versionSupport'] = v:false
+	let l:capabilities['codeDescriptionSupport'] = v:false
+	let l:capabilities['dataSupport'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#FoldingRangeClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	let l:params['rangeLimit'] = 0
-	let l:params['lineFoldingOnly'] = v:true
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	let l:capabilities['rangeLimit'] = 0
+	let l:capabilities['lineFoldingOnly'] = v:true
+	return l:capabilities
 endfunction
 
 function lsp#lsp#SelectionRangeClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#LinkedEditingRangeClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#CallHierarchyClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#SemanticTokensClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	let l:params['requests'] = {}
-	let l:params['requests']['range'] = v:false
-	let l:params['requests']['full'] = v:false
-	let l:params['tokenTypes'] = ['']
-	let l:params['tokenModifiers'] = ['']
-	let l:params['formats'] = ['relative']
-	let l:params['overlappingTokenSupport'] = v:false
-	let l:params['multilineTokenSupport'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	let l:capabilities['requests'] = {}
+	let l:capabilities['requests']['range'] = v:false
+	let l:capabilities['requests']['full'] = v:false
+	let l:capabilities['tokenTypes'] = ['']
+	let l:capabilities['tokenModifiers'] = ['']
+	let l:capabilities['formats'] = ['relative']
+	let l:capabilities['overlappingTokenSupport'] = v:false
+	let l:capabilities['multilineTokenSupport'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#MonikerClientCapabilities()
-	let l:params = {}
-	let l:params['dynamicRegistration'] = v:false
-	return l:params
+	let l:capabilities = {}
+	let l:capabilities['dynamicRegistration'] = v:false
+	return l:capabilities
 endfunction
 
 function lsp#lsp#PrepareSupportDefaultBehavior()
