@@ -911,52 +911,52 @@ endfunction
 
 " Describes the content type that a client supports in various result literals like `Hover`, `ParameterInfo` or `CompletionItem`.
 " Please note that `MarkupKinds` must not start with a `$`. This kinds are reserved for internal usage.
-const lsp#lsp#MarkupKind = {}
+let lsp#lsp#MarkupKind = {}
 " Plain text is supported as a content format
-const lsp#lsp#MarkupKind['plaintext'] = 'plaintext'
+let lsp#lsp#MarkupKind['plaintext'] = 'plaintext'
 " Markdown is supported as a content format
-const lsp#lsp#MarkupKind['markdown'] = 'markdown'
+let lsp#lsp#MarkupKind['markdown'] = 'markdown'
 
 " Completion item tags are extra annotations that tweak the rendering of a completion item.
-const lsp#lsp#CompletionItemTag = {}
+let lsp#lsp#CompletionItemTag = {}
 " Render a completion as obsolete, usually using a strike-out.
-const lsp#lsp#CompletionItemTag['Deprecated'] = 1
+let lsp#lsp#CompletionItemTag['Deprecated'] = 1
 
 " How whitespace and indentation is handled during completion item insertion.
-const lsp#lsp#InsertTextMode = {}
+let lsp#lsp#InsertTextMode = {}
 " The insertion or replace strings is taken as it is. If the value is multi line the lines below the cursor will be inserted using the indentation defined in the string value. The client will not apply any kind of adjustments to the string.
-const lsp#lsp#InsertTextMode['asIs'] = 1
+let lsp#lsp#InsertTextMode['asIs'] = 1
 " The editor adjusts leading whitespace of new lines so that they match the indentation up to the cursor of the line for which the item is accepted.
 " Consider a line like this: <2tabs><cursor><3tabs>foo. Accepting a multi line completion item is indented using 2 tabs and all following lines inserted will be indented using 2 tabs as well.
-const lsp#lsp#InsertTextMode['adjustIndentation'] = 2
+let lsp#lsp#InsertTextMode['adjustIndentation'] = 2
 
 " The kind of a completion entry.
-const lsp#lsp#CompletionItemKind = {}
-const lsp#lsp#CompletionItemKind['Text'] = 1
-const lsp#lsp#CompletionItemKind['Method'] = 2
-const lsp#lsp#CompletionItemKind['Function'] = 3
-const lsp#lsp#CompletionItemKind['Constructor'] = 4
-const lsp#lsp#CompletionItemKind['Field'] = 5
-const lsp#lsp#CompletionItemKind['Variable'] = 6
-const lsp#lsp#CompletionItemKind['Class'] = 7
-const lsp#lsp#CompletionItemKind['Interface'] = 8
-const lsp#lsp#CompletionItemKind['Module'] = 9
-const lsp#lsp#CompletionItemKind['Property'] = 10
-const lsp#lsp#CompletionItemKind['Unit'] = 11
-const lsp#lsp#CompletionItemKind['Value'] = 12
-const lsp#lsp#CompletionItemKind['Enum'] = 13
-const lsp#lsp#CompletionItemKind['Keyword'] = 14
-const lsp#lsp#CompletionItemKind['Snippet'] = 15
-const lsp#lsp#CompletionItemKind['Color'] = 16
-const lsp#lsp#CompletionItemKind['File'] = 17
-const lsp#lsp#CompletionItemKind['Reference'] = 18
-const lsp#lsp#CompletionItemKind['Folder'] = 19
-const lsp#lsp#CompletionItemKind['EnumMember'] = 20
-const lsp#lsp#CompletionItemKind['Constant'] = 21
-const lsp#lsp#CompletionItemKind['Struct'] = 22
-const lsp#lsp#CompletionItemKind['Event'] = 23
-const lsp#lsp#CompletionItemKind['Operator'] = 24
-const lsp#lsp#CompletionItemKind['TypeParameter'] = 25
+let lsp#lsp#CompletionItemKind = {}
+let lsp#lsp#CompletionItemKind['Text'] = 1
+let lsp#lsp#CompletionItemKind['Method'] = 2
+let lsp#lsp#CompletionItemKind['Function'] = 3
+let lsp#lsp#CompletionItemKind['Constructor'] = 4
+let lsp#lsp#CompletionItemKind['Field'] = 5
+let lsp#lsp#CompletionItemKind['Variable'] = 6
+let lsp#lsp#CompletionItemKind['Class'] = 7
+let lsp#lsp#CompletionItemKind['Interface'] = 8
+let lsp#lsp#CompletionItemKind['Module'] = 9
+let lsp#lsp#CompletionItemKind['Property'] = 10
+let lsp#lsp#CompletionItemKind['Unit'] = 11
+let lsp#lsp#CompletionItemKind['Value'] = 12
+let lsp#lsp#CompletionItemKind['Enum'] = 13
+let lsp#lsp#CompletionItemKind['Keyword'] = 14
+let lsp#lsp#CompletionItemKind['Snippet'] = 15
+let lsp#lsp#CompletionItemKind['Color'] = 16
+let lsp#lsp#CompletionItemKind['File'] = 17
+let lsp#lsp#CompletionItemKind['Reference'] = 18
+let lsp#lsp#CompletionItemKind['Folder'] = 19
+let lsp#lsp#CompletionItemKind['EnumMember'] = 20
+let lsp#lsp#CompletionItemKind['Constant'] = 21
+let lsp#lsp#CompletionItemKind['Struct'] = 22
+let lsp#lsp#CompletionItemKind['Event'] = 23
+let lsp#lsp#CompletionItemKind['Operator'] = 24
+let lsp#lsp#CompletionItemKind['TypeParameter'] = 25
 
 function lsp#lsp#TextDocumentSyncClientCapabilities(dynamicRegistration = v:none, willSave = v:none, willSaveWaitUntil = v:none, didSave = v:none)
 	let l:capabilities = {}

@@ -7,9 +7,10 @@
                     "--stdio",
                     "--tsserver-path ./tsserver"
                 ],
-                "install": "npm install typescript-language-server",
+                "install": "npm install -D typescript-language-server",
                 "dependents": [
-                    "npm install typescript"
+                    "npm init",
+                    "npm install -D typescript"
                 ]
             },
             "path": "node_modules/.bin"
@@ -23,6 +24,7 @@
                 ],
                 "install": "npm install typescript-language-server",
                 "dependents": [
+                    "npm init",
                     "npm install typescript"
                 ]
             },

@@ -110,7 +110,9 @@ function s:file(path)
             let l:path = '/'
         else
             let l:authority = slice(l:path, 2, l:idx)
-            let l:path = slice(l:path, l:idx) ?? '/'
+            "  let l:path = slice(l:path, l:idx) ?? '/'
+            let l:tmp = slice(l:path, l:idx)
+            let l:path = l:tmp ? l:tmp : '/'
         endif
     endif
     return s:URI('file', l:authority, l:path, '', '')

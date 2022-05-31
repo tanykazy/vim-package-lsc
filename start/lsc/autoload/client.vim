@@ -27,12 +27,12 @@ function client#stop(filetype)
         for l:server in values(s:server_list)
             call s:send_request(l:server, 'shutdown', v:none)
         endfor
-        call util#wait({-> empty(client#get_running_server())})
+        call util#wait({-> empty(client#get_running_server())}, 1000)
     else
         if has_key(s:server_list, a:filetype)
             let l:server = s:server_list[a:filetype]
             call s:send_request(l:server, 'shutdown', v:none)
-            call util#wait({-> !util#isContain(client#get_running_server(), a:filetype)})
+            call util#wait({-> !util#isContain(client#get_running_server(), a:filetype)}, 1000)
         endif
     endif
 endfunction
