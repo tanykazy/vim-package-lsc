@@ -39,7 +39,10 @@ endfunction
 
 function util#charpos2bytepos(pos)
 	let l:line = getbufline(a:pos[0], a:pos[1])[0]
+	"  let l:line = getbufline(a:pos[0], a:pos[1])
+    "  call log#log_debug(string(l:line))
 	let l:col = byteidx(l:line, a:pos[2])
+	"  let l:col = byteidx(l:line[0], a:pos[2])
 	" let a:pos[2] = l:col == -1 ? strlen(l:line) : l:col
 	let a:pos[2] = l:col
 	return a:pos

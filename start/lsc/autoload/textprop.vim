@@ -38,8 +38,8 @@ endfunction
 
 function textprop#add(buf, startpos, endpos, severity)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
-    " call log#log_debug(string(a:startpos))
-    " call log#log_debug(string(a:endpos))
+    "  call log#log_debug(string(a:startpos))
+    "  call log#log_debug(string(a:endpos))
     let l:startpos = util#charpos2bytepos(a:startpos)
     let l:endpos = util#charpos2bytepos(a:endpos)
     " call log#log_debug(string(l:startpos))
