@@ -74,6 +74,7 @@ function s:server.recv(data) dict
         if jsonrpc#isResponseError(l:content)
             call log#log_error('Request fails: ' . string(l:content))
             " call dialog#error(l:content.error.message)
+			return
         endif
     elseif jsonrpc#isNotification(l:content)
         let l:event = l:content.method

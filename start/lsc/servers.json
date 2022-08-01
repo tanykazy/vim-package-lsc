@@ -40,6 +40,16 @@
             },
             "path": "node_modules/.bin"
         },
+        "html": {
+            "command": {
+                "name": "html-languageserver",
+                "options": [
+                    "--stdio"
+                ],
+                "install": "npm install vscode-html-languageserver-bin"
+            },
+            "path": "node_modules/.bin"
+        },
         "sh": {
             "command": {
                 "name": "bash-language-server",
