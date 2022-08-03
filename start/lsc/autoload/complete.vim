@@ -83,6 +83,8 @@ endfunction
 function complete#onCompleteChanged(buf, item)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     if !empty(a:item)
+        call log#log_debug('onCompleteChanged!!!')
+        call log#log_debug(string(a:item))
         " call client#completion_resolve(a:buf, a:item)
     endif
 endfunction

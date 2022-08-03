@@ -43,7 +43,8 @@ function textprop#add(buf, startpos, endpos, severity)
     let l:startpos = util#charpos2bytepos(a:startpos)
     let l:endpos = util#charpos2bytepos(a:endpos)
     " call log#log_debug(string(l:startpos))
-    " call log#log_debug(string(l:endpos))
+    "  call log#log_debug('endpos!!!')
+    "  call log#log_debug(string(l:endpos))
     let l:props = {}
     " let l:props['length']
     let l:props['end_lnum'] = l:endpos[1]
@@ -59,7 +60,14 @@ function textprop#add(buf, startpos, endpos, severity)
     elseif a:severity == 4
         let l:props['type'] = 'Hint'
     endif
-    return s:prop_add(l:startpos[1], l:startpos[2], l:props)
+    try
+        return s:prop_add(l:startpos[1], l:startpos[2], l:props)
+    catch /.*/
+        call log#log_error('textprop#add()')
+        call log#log_error('l:startpos: ' . string(l:startpos))
+        call log#log_error('l:props: ' . string(l:props))
+    "  finally
+    endtry
 endfunction
 
 function textprop#clear(buf)
@@ -75,7 +83,7 @@ function s:type_add(buf, name, props)
     if empty(s:prop_type_get(a:name, a:props))
         return s:prop_type_add(a:name, a:props)
     else
-        call log#log_error('Property type ' . a:name . ' already defined')
+        call log#log_trace('Property type ' . a:name . ' already defined')
     endif
 endfunction
 
