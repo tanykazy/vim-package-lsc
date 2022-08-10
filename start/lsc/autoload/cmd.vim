@@ -198,11 +198,18 @@ function cmd#code_lens(...) abort
     call client#code_lens(l:buffer)
 endfunction
 
-function cmd#code_action(...) range abort
+"  function cmd#code_action(...) range abort
+function cmd#code_action(...) abort
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     let l:kind = get(a:, 1, v:none)
     let l:buffer = bufnr('%')
-    call client#code_action(l:buffer, a:firstline, a:lastline, l:kind)
+    let l:pos = util#getcursorcharpos()
+
+    "  call log#log_debug('firstline: ' . string(a:firstline))
+    "  call log#log_debug('lastline: ' . string(a:lastline))
+
+    "  call client#code_action(l:buffer, a:firstline, a:lastline, l:kind)
+    call client#code_action(l:buffer, l:pos, v:none, l:kind)
 endfunction
 
 function cmd#goto_definition() abort

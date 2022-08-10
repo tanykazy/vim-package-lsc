@@ -9,44 +9,16 @@ function popup#hover(title, text, options)
     if !util#isNone(b:hover_id)
         call s:popup_close(b:hover_id, -1)
     endif
-    let l:maxheight = len(a:text)
-    let l:winwidth = winwidth(0)
-    let l:winheight = winheight(0)
-    let l:maxwidth = 0
-    for l:line in a:text
-        let l:width = strdisplaywidth(l:line)
-        if l:maxwidth < l:width
-            let l:maxwidth = l:width
-        endif
-    endfor
-    let l:opt = {}
-    let l:opt.maxheight = l:winheight / 2
-    if l:opt.maxheight > l:maxheight
-        let l:opt.minheight = l:maxheight
-    else
-        let l:opt.minheight = l:opt.maxheight
-    endif
-    let l:opt.maxwidth = l:winwidth / 2
-    if l:opt.maxwidth > l:maxwidth
-        let l:opt.minwidth = l:maxwidth
-    else
-        let l:opt.minwidth = l:opt.maxwidth
-    endif
-    let l:opt.fixed = v:false
-    let l:opt.mapping = v:false
-    let l:opt.scrollbar = v:true
+    let l:opt = s:calculation_options(a:text, a:options)
     let l:opt.filter = funcref('s:hover_filter')
     let l:opt.callback = funcref('s:hover_close')
     if !util#isNone(a:title)
         let l:opt.title = a:title
     endif
-    if !util#isNone(a:options)
-        call extend(l:opt, a:options)
-    endif
-    if l:winwidth - l:opt.col < l:opt.minwidth
-        let l:opt.col = l:winwidth - l:opt.minwidth
-    endif
+    "  let l:opt.highlight = 'markdown'
     let l:id = popup#atcursor(a:text, l:opt)
+    let l:buf = winbufnr(l:id)
+    call textprop#setup_proptypes(l:buf)
     let b:hover_id = l:id
     let b:hover_text = a:text
 endfunction
@@ -56,6 +28,49 @@ function popup#close_hover()
     if !util#isNone(b:hover_id)
         call s:popup_close(b:hover_id)
     endif
+endfunction
+
+function popup#menu(what, options)
+    let l:opt = s:calculation_options(a:what, a:options)
+    call popup_menu(a:what, l:opt)
+endfunction
+
+function s:calculation_options(lines, options)
+    let l:maxheight = len(a:lines)
+    let l:winwidth = winwidth(0)
+    let l:winheight = winheight(0)
+    let l:maxwidth = 0
+    for l:line in a:lines
+        let l:width = strdisplaywidth(l:line)
+        if l:maxwidth < l:width
+            let l:maxwidth = l:width
+        endif
+    endfor
+    let l:opt = {}
+    let l:opt.maxheight = float2nr(l:winheight * 0.8)
+    if l:opt.maxheight > l:maxheight
+        let l:opt.minheight = l:maxheight
+    else
+        let l:opt.minheight = l:opt.maxheight
+    endif
+    let l:opt.maxwidth = float2nr(l:winwidth * 0.8)
+    if l:opt.maxwidth > l:maxwidth
+        let l:opt.minwidth = l:maxwidth
+    else
+        let l:opt.minwidth = l:opt.maxwidth
+    endif
+    let l:opt.fixed = v:false
+    let l:opt.mapping = v:false
+    let l:opt.scrollbar = v:true
+    let l:opt.padding = [0, 1, 0, 1]
+    let l:opt.border = []
+    if !util#isNone(a:options)
+        call extend(l:opt, a:options)
+    endif
+    if l:winwidth - l:opt.col < l:opt.minwidth
+        let l:opt.col = l:winwidth - l:opt.minwidth
+    endif
+    return l:opt
 endfunction
 
 function s:hover_filter(winid, key)

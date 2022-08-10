@@ -28,12 +28,37 @@ let s:hint['combine'] = v:true
 let s:hint['start_incl'] = v:true
 let s:hint['end_incl'] = v:true
 
+let s:emphasis = {}
+let s:emphasis['highlight'] = 'Emphasis'
+let s:emphasis['priority'] = 1
+let s:emphasis['combine'] = v:true
+let s:emphasis['start_incl'] = v:true
+let s:emphasis['end_incl'] = v:true
+
+let s:strong = {}
+let s:strong['highlight'] = 'Strong'
+let s:strong['priority'] = 1
+let s:strong['combine'] = v:true
+let s:strong['start_incl'] = v:true
+let s:strong['end_incl'] = v:true
+
+let s:code = {}
+let s:code['highlight'] = 'Code'
+let s:code['priority'] = 1
+let s:code['combine'] = v:true
+let s:code['start_incl'] = v:true
+let s:code['end_incl'] = v:true
+
+
 function textprop#setup_proptypes(buf)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call s:type_add(a:buf, 'Error', s:error)
     call s:type_add(a:buf, 'Warning', s:warning)
     call s:type_add(a:buf, 'Information', s:information)
     call s:type_add(a:buf, 'Hint', s:hint)
+    call s:type_add(a:buf, 'Emphasis', s:emphasis)
+    call s:type_add(a:buf, 'Strong', s:strong)
+    call s:type_add(a:buf, 'Code', s:code)
 endfunction
 
 function textprop#add(buf, startpos, endpos, severity)

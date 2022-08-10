@@ -237,15 +237,29 @@ function client#code_action(buf, start, end, kind)
     if !util#isContain(l:server['files'], l:path)
         return
     endif
-    let l:start = lsp#lsp#Position(a:start - 1, 0)
-    let l:end = lsp#lsp#Position(a:end - 1, util#getlinelength(a:end) - 1)
-    let l:range = lsp#lsp#Range(l:start, l:end)
     let l:diagnostics = get(b:, 'diagnostics', [])
-    " let l:kind = lsp#lsp#CodeActionKind()[a:kind]
-    let l:kind = get(lsp#lsp#CodeActionKind(), a:kind, v:none)
-    let l:context = lsp#lsp#CodeActionContext(l:diagnostics, l:kind)
-    let l:params = lsp#lsp#CodeActionParams(util#encode_uri(l:path), l:range, l:context, v:none, v:none)
-    call s:send_request(l:server, 'textDocument/codeAction', l:params)
+    call log#log_debug('diagnostics: ' . string(l:diagnostics))
+    for l:diagnostic in l:diagnostics
+        if l:diagnostic['range']['start']['line'] <= a:start[1] - 1
+            if l:diagnostic['range']['end']['line'] >= a:start[1] - 1
+                if l:diagnostic['range']['start']['character'] <= a:start[2] - 1
+                    if l:diagnostic['range']['end']['character'] >= a:start[2] - 1
+                        "  let l:start = lsp#lsp#Position(a:start - 1, 0)
+                        "  let l:end = lsp#lsp#Position(a:end - 1, util#getlinelength(a:end) - 1)
+                        "  call log#log_debug('start: ' . string(l:start))
+                        "  call log#log_debug('end: ' . string(l:end))
+                        "  let l:range = lsp#lsp#Range(l:start, l:end)
+                        let l:range = l:diagnostic['range']
+                        " let l:kind = lsp#lsp#CodeActionKind()[a:kind]
+                        let l:kind = get(lsp#lsp#CodeActionKind(), a:kind, v:none)
+                        let l:context = lsp#lsp#CodeActionContext(l:diagnostics, l:kind)
+                        let l:params = lsp#lsp#CodeActionParams(util#encode_uri(l:path), l:range, l:context, v:none, v:none)
+                        call s:send_request(l:server, 'textDocument/codeAction', l:params)
+                    endif
+                endif
+            endif
+        endif
+    endfor
 endfunction
 
 function client#document_symbol(buf)
@@ -390,6 +404,7 @@ function s:fn.textDocument_hover(server, message, ...)
     let l:lines = []
     for l:value in l:values
         let l:line = substitute(l:value, '\(\r\n\)', '\n', 'g')
+        "  let l:line = l:value
         let l:lines += util#split(l:line, '\n', 0)
     endfor
     call popup#hover(l:title, l:lines, l:opt)
@@ -506,9 +521,33 @@ endfunction
 function s:fn.textDocument_codeAction(server, message, ...)
 	call log#log_trace(expand('<sfile>') . ':' . expand('<sflnum>'))
     call log#log_debug(string(a:message))
-    for l:result in a:message.result
-        call log#log_debug(string(l:result))
+    if type(a:message.result) == v:t_list
+        let l:results = a:message.result
+    elseif type(a:message.result) == v:t_dict
+        let l:results = [a:message.result]
+    endif
+    let l:actions = {}
+    let l:actions.titles = []
+    let l:actions.commands = []
+    let l:actions.action = v:none
+    let l:actions.server = a:server
+    function l:actions.callback(id, result) dict
+        if a:result != -1
+            call log#log_debug(string(self.commands[a:result - 1]))
+            call s:send_request(self.server, 'codeAction/resolve', self.action)
+        endif
+    endfunction
+    for l:result in l:results
+        let l:actions.titles += [l:result.title]
+        let l:actions.commands += [l:result.command]
+        let l:actions.action = l:result
     endfor
+    let l:options = {}
+    let l:options.callback = l:actions.callback
+    let l:options.pos = 'botleft'
+    let l:options.line = 'cursor-1'
+    let l:options.col = 'cursor'
+    call popup#menu(l:actions.titles, l:options)
 endfunction
 
 function s:fn.textDocument_documentSymbol(server, message, ...)
