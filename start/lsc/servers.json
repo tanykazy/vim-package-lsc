@@ -1,5 +1,19 @@
 {
     "language": {
+        "angular": {
+            "command": {
+                "name": "@angular/language-service",
+                "options": [
+                    "--stdio",
+                    "--tsserver-path ./tsserver"
+                ],
+                "install": "npm install --save-dev @angular/language-service",
+                "dependents": [
+                    "npm install --save-dev typescript"
+                ]
+            },
+            "path": "node_modules/.bin"
+        },
         "typescript": {
             "command": {
                 "name": "typescript-language-server",
